@@ -25,7 +25,7 @@ undo:
 README:
 	cp -f $(DOC) README
 
-changes.vba:
+NrrwRgn.vba:
 	rm -f $(PLUGIN).vba
 	vim -N -c 'ru! vimballPlugin.vim' -c ':call append("0", [ "plugin/NrrwRgn.vim"])' -c '$$d' -c ':%MkVimball ${PLUGIN} .' -c':q!'
      

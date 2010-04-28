@@ -1,8 +1,8 @@
 " NrrwRgn.vim - Narrow Region plugin for Vim
 " -------------------------------------------------------------
-" Version:	   0.2
+" Version:	   0.3
 " Maintainer:  Christian Brabandt <cb@256bit.org>
-" Last Change: 2010, Apr 28
+" Last Change: Wed, 28 Apr 2010 12:58:13 +0200
 "
 " Script: not yet
 " Copyright:   (c) 2009, 2010 by Christian Brabandt
