@@ -11,14 +11,8 @@
 "			   instead of "Vim".
 "			   No warranty, express or implied.
 "	 *** ***   Use At-Your-Own-Risk!   *** ***
+" GetLatestVimScripts: 3075 3 :AutoInstall: NrrwRgn.vim
 "
-" TODO: - currently this works only linewise. 
-"         [ should work now with arbitrary selections! ]
-"       - make it work with arbitrary selections.
-"         (need to find out, how to select/copy arbitrary selections)
-"       - mark the narrowed region (using signs?) in the orig buffer
-"         (Done)
-
 " Init:
 let s:cpo= &cpo
 set cpo&vim
