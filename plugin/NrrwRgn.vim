@@ -4,7 +4,7 @@
 " Maintainer:  Christian Brabandt <cb@256bit.org>
 " Last Change: Wed, 28 Apr 2010 12:58:13 +0200
 "
-" Script: not yet
+" Script: http://www.vim.org/scripts/script.php?script_id=3075 
 " Copyright:   (c) 2009, 2010 by Christian Brabandt
 "			   The VIM LICENSE applies to histwin.vim 
 "			   (see |copyright|) except use "NrrwRgn.vim" 
@@ -57,7 +57,8 @@ fun! s:NrwRgnWin() "{{{1
 endfu
 
 fun! s:NrrwRgn() range  "{{{1
-	let o_lz=&lz
+	let o_lz = &lz
+	let s:o_s  = @/
 	set lz
 	" Protect the original buffer,
 	" so you won't accidentally modify those lines,
@@ -115,11 +116,14 @@ fu! s:WidenRegion(vmode) "{{{1
 	    exe "keepj" b:endline[0]
 	    exe "keepj norm!" b:endline[1] . '|'
 	    norm! "aP
+		let [ b:startline, b:endline ] = <sid>RetVisRegionPos()
 	else "linewise selection because we started the NarrowRegion with the command NarrowRegion(0)
 	    exe ':silent :'.b:startline[0].','.b:endline[0].'d _'
 	    call append((b:startline[0]-1),cont)
+		let  b:endline[0] = b:startline[0] + len(cont) -1
 	endif
 	call s:SaveRestoreRegister(0)
+	let  @/=s:o_s
 	"exe ':silent :bd!' nrw_buf
 endfu
 
@@ -135,7 +139,8 @@ endfu!
 fu! <sid>VisualNrrwRgn(mode) "{{{1
 	exe "norm! \<ESC>"
 	" stop visualmode
-	let o_lz=&lz
+	let o_lz = &lz
+	let s:o_s  = @/
 	set lz
 	let b:vmode=a:mode
 	" Protect the original buffer,
@@ -147,8 +152,9 @@ fu! <sid>VisualNrrwRgn(mode) "{{{1
 
 	call s:Init()
 	let ft=&l:ft
-	let b:startline = [ getpos("'<")[1], virtcol("'<") ]
-	let b:endline   = [ getpos("'>")[1], virtcol("'>") ]
+	let [ b:startline, b:endline ] = <sid>RetVisRegionPos()
+	"let b:startline = [ getpos("'<")[1], virtcol("'<") ]
+	"let b:endline   = [ getpos("'>")[1], virtcol("'>") ]
 	norm gv"ay
 	let win=s:NrwRgnWin()
 	exe ':noa ' win 'wincmd w'
@@ -172,6 +178,12 @@ fu! s:NrrwRgnAuCmd() "{{{1
 	    au BufWipeout,BufDelete <buffer> :call s:WriteNrrwRgn()
     aug end
 endfun
+
+fu! <sid>RetVisRegionPos() "{{{1
+	let startline = [ getpos("'<")[1], virtcol("'<") ]
+	let endline   = [ getpos("'>")[1], virtcol("'>") ]
+	return [ startline, endline ]
+endfu
 
 "Mappings "{{{1
 " Delete old mappings
