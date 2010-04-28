@@ -24,11 +24,11 @@ let g:loaded_nrrw_rgn = 1
 " ------------------------------------------------------------------------------
 " Public Interface: {{{1
 
-" Define the Shortcuts:
-com! NR	 NarrowRegion
-
 " Define the Command:
 com! -range NarrowRegion :exe ":" . <line1> . ',' . <line2> . "call nrrwrgn#NrrwRgn()"
+com! -range NR	 :exe ":" . <line1> . ',' . <line2> . "call nrrwrgn#NrrwRgn()"
+com! NW	 :exe ":" . line('w0') . ',' . line('w$') . "call nrrwrgn#NrrwRgn()"
+com! NarrowWindow :exe ":" . line('w0') . ',' . line('w$') . "call nrrwrgn#NrrwRgn()"
 
 " Define the Mapping:
 if !hasmapto('<Plug>NrrwrgnDo')
