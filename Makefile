@@ -3,7 +3,7 @@ AUTOL =$(wildcard autoload/*.vim)
 #DOC=doc/ChangesPlugin.txt
 #PLUGIN=${basename "$$PWD"}
 PLUGIN=$(shell basename "$$PWD")
-VERSION:=$(shell sed -n '/Version:/{s/^.*\(\S\.\S\+\)$$/\1/;p}' $(SCRIPT))
+VERSION=$(shell sed -n '/Version:/{s/^.*\(\S\.\S\+\)$$/\1/;p}' $(SCRIPT))
 
 .PHONY: $(PLUGIN).vba README
 
@@ -40,4 +40,4 @@ version:
 	#perl -i -pne 'if (/Last Change:/) {s/\d+\.\d+\.\d\+$$/sprintf("%s", `date -R`)/e}' ${SCRIPT}
 	perl -i -pne 'if (/Last Change:/) {s/(:\s+).*\n/sprintf(": %s", `date -R`)/e}' ${SCRIPT}
 	#perl -i.orig -pne 'if (/Version:/) {s/\.(\d)+.*\n/sprintf(".%d %s", 1+$$1, `date -R`)/e}' ${DOC}
-	VERSION=`sed -n '/Version:/{s/^.*\(\S\.\S\+\)$$/\1/;p}'` ${SCRIPT}
+	VERSION=$(shell sed -n '/Version:/{s/^.*\(\S\.\S\+\)$$/\1/;p}' $(SCRIPT))
