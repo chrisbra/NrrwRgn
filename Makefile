@@ -1,6 +1,9 @@
-SCRIPT=plugin/NrrwRgn.vim
+SCRIPT=$(wildcard plugin/*.vim)
+AUTOL =$(wildcard autoload/*.vim)
 #DOC=doc/ChangesPlugin.txt
-PLUGIN=NrrwRgn
+#PLUGIN=${basename "$$PWD"}
+PLUGIN=$(shell basename "$$PWD")
+VERSION:=$(shell sed -n '/Version:/{s/^.*\(\S\.\S\+\)$$/\1/;p}' $(SCRIPT))
 
 .PHONY: $(PLUGIN).vba README
 
@@ -14,10 +17,10 @@ clean:
 dist-clean: clean
 
 install:
-	vim -N -c':so %' -c':q!' ${PLUGIN}.vba
+	vim -N -c':so %' -c':q!' $(PLUGIN).vba
 
 uninstall:
-	vim -N -c':RmVimball' -c':q!' ${PLUGIN}.vba
+	vim -N -c':RmVimball' -c':q!' $(PLUGIN).vba
 
 undo:
 	for i in */*.orig; do mv -f "$$i" "$${i%.*}"; done
@@ -25,9 +28,9 @@ undo:
 README:
 	cp -f $(DOC) README
 
-NrrwRgn.vba:
+$(PLUGIN).vba:
 	rm -f $(PLUGIN).vba
-	vim -N -c 'ru! vimballPlugin.vim' -c ':call append("0", [ "plugin/NrrwRgn.vim"])' -c '$$d' -c ':%MkVimball ${PLUGIN} .' -c':q!'
+	vim -N -c 'ru! vimballPlugin.vim' -c ':call append("0", [ "plugin/NrrwRgn.vim"])' -c '$$d' -c ":%MkVimball $(PLUGIN)-$(VERSION)  ." -c':q!'
      
 release: version all
 
@@ -37,3 +40,4 @@ version:
 	#perl -i -pne 'if (/Last Change:/) {s/\d+\.\d+\.\d\+$$/sprintf("%s", `date -R`)/e}' ${SCRIPT}
 	perl -i -pne 'if (/Last Change:/) {s/(:\s+).*\n/sprintf(": %s", `date -R`)/e}' ${SCRIPT}
 	#perl -i.orig -pne 'if (/Version:/) {s/\.(\d)+.*\n/sprintf(".%d %s", 1+$$1, `date -R`)/e}' ${DOC}
+	VERSION=`sed -n '/Version:/{s/^.*\(\S\.\S\+\)$$/\1/;p}'` ${SCRIPT}
