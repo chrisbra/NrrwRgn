@@ -13,201 +13,30 @@
 "	 *** ***   Use At-Your-Own-Risk!   *** ***
 " GetLatestVimScripts: 3075 3 :AutoInstall: NrrwRgn.vim
 "
-" Init:
+" Init: {{{1
 let s:cpo= &cpo
-set cpo&vim
 if exists("g:loaded_nrrw_rgn") || &cp
   finish
 endif
-
+set cpo&vim
 let g:loaded_nrrw_rgn = 1
 
-" Functions:
-fun! s:Init()"{{{1
-		if !exists("s:nrrw_winname")
-				let s:nrrw_winname='Narrow_Region'
-		endif
-		if bufname('') != s:nrrw_winname
-				let s:orig_buffer = bufnr('')
-		endif
+" ------------------------------------------------------------------------------
+" Public Interface: {{{1
 
-		" Customization
-		let s:nrrw_rgn_vert = (exists("g:nrrw_rgn_vert") ? g:nrrw_rgn_vert : 0)
-		let s:nrrw_rgn_wdth = (exists("g:nrrw_rgn_wdth") ? g:nrrw_rgn_wdth : 20)
-		let s:nrrw_rgn_hl   = (exists("g:nrrw_rgn_hl")   ? g:nrrw_rgn_hl   : "WildMenu")
-		
-endfun 
+" Define the Shortcuts:
+com! NR	 NarrowRegion
 
-fun! s:NrwRgnWin() "{{{1
-		let nrrw_win = bufwinnr('^'.s:nrrw_winname.'$')
-		if nrrw_win != -1
-			exe ":noa " . nrrw_win . 'wincmd w'
-			silent %d_
-			noa wincmd p
-		else
-			execute s:nrrw_rgn_wdth . (s:nrrw_rgn_vert?'v':'') . "sp " . s:nrrw_winname
-			setl noswapfile buftype=acwrite bufhidden=wipe foldcolumn=0 nobuflisted winfixwidth
-			let nrrw_win = bufwinnr("")
-		endif
-		return nrrw_win
-endfu
+" Define the Command:
+com! -range NarrowRegion :exe ":" . <line1> . ',' . <line2> . "call nrrwrgn#NrrwRgn()"
 
-fun! s:NrrwRgn() range  "{{{1
-	let o_lz = &lz
-	let s:o_s  = @/
-	set lz
-	" Protect the original buffer,
-	" so you won't accidentally modify those lines,
-	" that will later be overwritten
-	setl noma
-	let orig_buf=bufnr('')
-
-	" initialize Variables
-	call s:Init()
-	let ft=&l:ft
-	let b:startline = [ a:firstline, 0 ]
-	let b:endline   = [ a:lastline, 0 ]
-	let s:matchid =  matchadd(s:nrrw_rgn_hl, <sid>GeneratePattern(b:startline, b:endline, 'V')) "set the highlighting
-	let a=getline(b:startline[0], b:endline[0])
-	let win=s:NrwRgnWin()
-	exe ':noa ' win 'wincmd w'
-	let b:orig_buf = orig_buf
-	call setline(1, a)
-	setl nomod
-	com! -buffer WidenRegion :call s:WidenRegion(0)
-	call s:NrrwRgnAuCmd()
-
-	" restore settings
-	let &l:ft = ft
-	let &lz   = o_lz
-endfun
-
-fu! s:WriteNrrwRgn(...)
-    if &l:mod && exists("a:1") && a:1
-		setl nomod
-		exe ":WidenRegion"
-    else
-		call setbufvar(b:orig_buf, '&ma', 1)
-		"close!
-		exe ':noa' . bufwinnr(b:orig_buf) . 'wincmd w'
-		if exists("s:matchid")
-			call matchdelete(s:matchid)
-			unlet s:matchid
-		endif
-    endif
-endfun
-
-fu! s:WidenRegion(vmode) "{{{1
-	let nrw_buf  = bufnr('')
-	let orig_win = bufwinnr(b:orig_buf)
-	let cont     = getline(1,'$')
-	call s:SaveRestoreRegister(1)
-	exe ':noa' . orig_win . 'wincmd w'
-	if !(&l:ma)
-		setl ma
-	endif
-	if a:vmode "charwise, linewise or blockwise selection 
-	    call setreg('a', join(cont, "\n") . "\n", b:vmode)
-		if b:vmode == 'v'
-		   " in characterwise selection, remove trailing \n
-		   call setreg('a', substitute(@a, '\n$', '', ''), b:vmode)
-		endif
-	    exe "keepj" b:startline[0]
-	    exe "keepj norm!" b:startline[1] . '|'
-	    exe "keepj norm!" b:vmode
-	    exe "keepj" b:endline[0]
-	    exe "keepj norm!" b:endline[1] . '|'
-	    norm! "aP
-		let [ b:startline, b:endline ] = <sid>RetVisRegionPos()
-	else "linewise selection because we started the NarrowRegion with the command NarrowRegion(0)
-	    exe ':silent :'.b:startline[0].','.b:endline[0].'d _'
-	    call append((b:startline[0]-1),cont)
-		let  b:endline[0] = b:startline[0] + len(cont) -1
-	endif
-	call s:SaveRestoreRegister(0)
-	let  @/=s:o_s
-	"exe ':silent :bd!' nrw_buf
-endfu
-
-fu! s:SaveRestoreRegister(mode) "{{{1
-	if a:mode
-		let s:savereg  = getreg('a')
-		let s:saveregt = getregtype('a')
-	else
-		call setreg('a', s:savereg, s:saveregt)
-	endif
-endfu!
-
-fu! <sid>VisualNrrwRgn(mode) "{{{1
-	exe "norm! \<ESC>"
-	" stop visualmode
-	let o_lz = &lz
-	let s:o_s  = @/
-	set lz
-	let b:vmode=a:mode
-	" Protect the original buffer,
-	" so you won't accidentally modify those lines,
-	" that will later be overwritten
-	setl noma
-	let orig_buf=bufnr('')
-	call s:SaveRestoreRegister(1)
-
-	call s:Init()
-	let ft=&l:ft
-	let [ b:startline, b:endline ] = <sid>RetVisRegionPos()
-	let s:matchid =  matchadd(s:nrrw_rgn_hl, <sid>GeneratePattern(b:startline, b:endline, b:vmode))
-	"let b:startline = [ getpos("'<")[1], virtcol("'<") ]
-	"let b:endline   = [ getpos("'>")[1], virtcol("'>") ]
-	norm gv"ay
-	let win=s:NrwRgnWin()
-	exe ':noa ' win 'wincmd w'
-	let b:orig_buf = orig_buf
-	silent put a
-	silent 0d _
-	setl nomod
-	com! -buffer WidenRegion :call s:WidenRegion(1)
-	call s:NrrwRgnAuCmd()
-	call s:SaveRestoreRegister(0)
-
-	" restore settings
-	let &l:ft = ft
-	let &lz   = o_lz
-endfu
-
-fu! s:NrrwRgnAuCmd() "{{{1
-    aug NrrwRgn
-	    au!
-	    au BufWriteCmd <buffer> :call s:WriteNrrwRgn(1)
-	    au BufWipeout,BufDelete <buffer> :call s:WriteNrrwRgn()
-    aug end
-endfun
-
-fu! <sid>RetVisRegionPos() "{{{1
-	let startline = [ getpos("'<")[1], virtcol("'<") ]
-	let endline   = [ getpos("'>")[1], virtcol("'>") ]
-	return [ startline, endline ]
-endfu
-
-fun! <sid>GeneratePattern(startl, endl, mode) "{{{1
-	if a:mode ==# ''
-		return '\%>' . (a:startl[0]-1) . 'l\&\%>' . (a:startl[1]-1) . 'v\&\%<' . (a:endl[0]+1) . 'l\&\%<' . (a:endl[1]+1) . 'v'
-	elseif a:mode ==# 'v'
-		return '\%>' . (a:startl[0]-1) . 'l\&\%>' . (a:startl[1]-1) . 'v\_.*\%<' . (a:endl[0]+1) . 'l\&\%<' . (a:endl[1]+1) . 'v'
-	else
-	    return '\%>' . (a:startl[0]-1) . 'l\&\%<' . (a:endl[0]+1) . 'l'
-	endif
-endfun
-
-"Mappings "{{{1
-
-com! -range NarrowRegion :exe ":" . <line1> . ',' . <line2> . "call s:NrrwRgn()"
+" Define the Mapping:
 if !hasmapto('<Plug>NrrwrgnDo')
 	xmap <unique> <Leader>nr <Plug>NrrwrgnDo
 endif
 xnoremap <unique> <script> <Plug>NrrwrgnDo <sid>VisualNrrwRgn
-xnoremap <sid>VisualNrrwRgn :<c-u>call <sid>VisualNrrwRgn(visualmode())<cr>
+xnoremap <sid>VisualNrrwRgn :<c-u>call nrrwrgn#VisualNrrwRgn(visualmode())<cr>
 
-    
 " Restore: "{{{1
 let &cpo=s:cpo
 unlet s:cpo
