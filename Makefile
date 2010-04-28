@@ -30,6 +30,7 @@ README:
 $(PLUGIN).vba:
 	rm -f $(PLUGIN)-$(VERSION).vba
 	vim -N -c 'ru! vimballPlugin.vim' -c ':call append("0", [ "$(SCRIPT)", "$(AUTOL)", "$(DOC)"])' -c '$$d' -c ":%MkVimball $(PLUGIN)-$(VERSION)  ." -c':q!'
+	ln -f $(PLUGIN)-$(VERSION).vba $(PLUGIN).vba
      
 release: version all
 
