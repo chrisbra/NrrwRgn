@@ -16,7 +16,8 @@
 "         [ should work now with arbitrary selections! ]
 "       - make it work with arbitrary selections.
 "         (need to find out, how to select/copy arbitrary selections)
-"       - mark the narrowed region (using signs?) in the orig buffer        
+"       - mark the narrowed region (using signs?) in the orig buffer
+"         (Done)
 
 " Init:
 let s:cpo= &cpo
@@ -38,7 +39,8 @@ fun! s:Init()"{{{1
 
 		" Customization
 		let s:nrrw_rgn_vert = (exists("g:nrrw_rgn_vert") ? g:nrrw_rgn_vert : 0)
-		let s:nrrw_rgn_wdth = (exists("g:nrrw_rgn_wdth") ? g:nrrw_rgn_wdth : 30)
+		let s:nrrw_rgn_wdth = (exists("g:nrrw_rgn_wdth") ? g:nrrw_rgn_wdth : 20)
+		let s:nrrw_rgn_hl   = (exists("g:nrrw_rgn_hl")   ? g:nrrw_rgn_hl   : "WildMenu")
 		
 endfun 
 
@@ -71,6 +73,7 @@ fun! s:NrrwRgn() range  "{{{1
 	let ft=&l:ft
 	let b:startline = [ a:firstline, 0 ]
 	let b:endline   = [ a:lastline, 0 ]
+	let s:matchid =  matchadd(s:nrrw_rgn_hl, <sid>GeneratePattern(b:startline, b:endline, 'V')) "set the highlighting
 	let a=getline(b:startline[0], b:endline[0])
 	let win=s:NrwRgnWin()
 	exe ':noa ' win 'wincmd w'
@@ -92,6 +95,11 @@ fu! s:WriteNrrwRgn(...)
     else
 		call setbufvar(b:orig_buf, '&ma', 1)
 		"close!
+		exe ':noa' . bufwinnr(b:orig_buf) . 'wincmd w'
+		if exists("s:matchid")
+			call matchdelete(s:matchid)
+			unlet s:matchid
+		endif
     endif
 endfun
 
@@ -153,6 +161,7 @@ fu! <sid>VisualNrrwRgn(mode) "{{{1
 	call s:Init()
 	let ft=&l:ft
 	let [ b:startline, b:endline ] = <sid>RetVisRegionPos()
+	let s:matchid =  matchadd(s:nrrw_rgn_hl, <sid>GeneratePattern(b:startline, b:endline, b:vmode))
 	"let b:startline = [ getpos("'<")[1], virtcol("'<") ]
 	"let b:endline   = [ getpos("'>")[1], virtcol("'>") ]
 	norm gv"ay
@@ -185,11 +194,17 @@ fu! <sid>RetVisRegionPos() "{{{1
 	return [ startline, endline ]
 endfu
 
+fun! <sid>GeneratePattern(startl, endl, mode) "{{{1
+	if a:mode ==# ''
+		return '\%>' . (a:startl[0]-1) . 'l\&\%>' . (a:startl[1]-1) . 'v\&\%<' . (a:endl[0]+1) . 'l\&\%<' . (a:endl[1]+1) . 'v'
+	elseif a:mode ==# 'v'
+		return '\%>' . (a:startl[0]-1) . 'l\&\%>' . (a:startl[1]-1) . 'v\_.*\%<' . (a:endl[0]+1) . 'l\&\%<' . (a:endl[1]+1) . 'v'
+	else
+	    return '\%>' . (a:startl[0]-1) . 'l\&\%<' . (a:endl[0]+1) . 'l'
+	endif
+endfun
+
 "Mappings "{{{1
-" Delete old mappings
-"silent! xunmap <Plug>NrrwrgnDo
-"silent! xunmap <sid>VisualNrrwRgn
-"silent! xunmap ,nr
 
 com! -range NarrowRegion :exe ":" . <line1> . ',' . <line2> . "call s:NrrwRgn()"
 if !hasmapto('<Plug>NrrwrgnDo')
