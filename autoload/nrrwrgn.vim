@@ -13,15 +13,6 @@
 "	 *** ***   Use At-Your-Own-Risk!   *** ***
 " GetLatestVimScripts: 3075 3 :AutoInstall: NrrwRgn.vim
 "
-" Init:
-let s:cpo= &cpo
-set cpo&vim
-if exists("g:loaded_nrrw_rgn") || &cp
-  finish
-endif
-
-let g:loaded_nrrw_rgn = 1
-
 " Functions:
 fun! <sid>Init()"{{{1
 		if !exists("s:nrrw_winname")
@@ -74,7 +65,7 @@ fun! nrrwrgn#NrrwRgn() range  "{{{1
 	let b:orig_buf = orig_buf
 	call setline(1, a)
 	setl nomod
-	com! -buffer WidenRegion :call nrrwrg#WidenRegion(0)
+	com! -buffer WidenRegion :call nrrwrgn#WidenRegion(0)
 	call <sid>NrrwRgnAuCmd()
 
 	" restore settings
@@ -97,7 +88,7 @@ fu! s:WriteNrrwRgn(...)
     endif
 endfun
 
-fu! nrrwrg#WidenRegion(vmode) "{{{1
+fu! nrrwrgn#WidenRegion(vmode) "{{{1
 	let nrw_buf  = bufnr('')
 	let orig_win = bufwinnr(b:orig_buf)
 	let cont     = getline(1,'$')
@@ -165,7 +156,7 @@ fu! <sid>VisualNrrwRgn(mode) "{{{1
 	silent put a
 	silent 0d _
 	setl nomod
-	com! -buffer WidenRegion :call nrrwrg#WidenRegion(1)
+	com! -buffer WidenRegion :call nrrwrgn#WidenRegion(1)
 	call <sid>NrrwRgnAuCmd()
 	call <sid>SaveRestoreRegister(0)
 
@@ -198,17 +189,4 @@ fun! <sid>GeneratePattern(startl, endl, mode) "{{{1
 	endif
 endfun
 
-"Mappings "{{{1
-
-"com! -range NarrowRegion :exe ":" . <line1> . ',' . <line2> . "call s:NrrwRgn()"
-"if !hasmapto('<Plug>NrrwrgnDo')
-"	xmap <unique> <Leader>nr <Plug>NrrwrgnDo
-"endif
-"xnoremap <unique> <script> <Plug>NrrwrgnDo <sid>VisualNrrwRgn
-"xnoremap <sid>VisualNrrwRgn :<c-u>call <sid>VisualNrrwRgn(visualmode())<cr>
-
-    
-" Restore: "{{{1
-let &cpo=s:cpo
-unlet s:cpo
 " vim: ts=4 sts=4 fdm=marker com+=l\:\"
