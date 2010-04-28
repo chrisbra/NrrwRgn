@@ -1,6 +1,6 @@
 SCRIPT=plugin/NrrwRgn.vim
 #DOC=doc/ChangesPlugin.txt
-PLUGIN=changes
+PLUGIN=NrrwRgn
 
 .PHONY: $(PLUGIN).vba README
 
