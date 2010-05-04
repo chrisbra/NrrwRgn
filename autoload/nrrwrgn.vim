@@ -1,8 +1,8 @@
 " NrrwRgn.vim - Narrow Region plugin for Vim
 " -------------------------------------------------------------
-" Version:	   0.4
+" Version:	   0.5
 " Maintainer:  Christian Brabandt <cb@256bit.org>
-" Last Change: Wed, 28 Apr 2010 22:13:55 +0200
+" Last Change: Tue, 04 May 2010 12:40:47 +0200
 "
 " Script: http://www.vim.org/scripts/script.php?script_id=3075 
 " Copyright:   (c) 2009, 2010 by Christian Brabandt
@@ -11,7 +11,7 @@
 "			   instead of "Vim".
 "			   No warranty, express or implied.
 "	 *** ***   Use At-Your-Own-Risk!   *** ***
-" GetLatestVimScripts: 3075 4 :AutoInstall: NrrwRgn.vim
+" GetLatestVimScripts: 3075 5 :AutoInstall: NrrwRgn.vim
 "
 " Functions:
 fun! <sid>Init()"{{{1
@@ -65,7 +65,7 @@ fun! nrrwrgn#NrrwRgn() range  "{{{1
 	let b:orig_buf = orig_buf
 	call setline(1, a)
 	setl nomod
-	com! -buffer WidenRegion :call nrrwrgn#WidenRegion(0)
+	com! -buffer WidenRegion :call nrrwrgn#WidenRegion(0) | sil! bd!
 	call <sid>NrrwRgnAuCmd()
 
 	" restore settings
@@ -78,9 +78,11 @@ fu! s:WriteNrrwRgn(...)
 		setl nomod
 		exe ":WidenRegion"
     else
-		call setbufvar(b:orig_buf, '&ma', 1)
-		"close!
-		exe ':noa' . bufwinnr(b:orig_buf) . 'wincmd w'
+		if exists(b:orig_buf)
+			call setbufvar(b:orig_buf, '&ma', 1)
+			"close!
+			exe ':noa' . bufwinnr(b:orig_buf) . 'wincmd w'
+		endif
 		if exists("s:matchid")
 			call matchdelete(s:matchid)
 			unlet s:matchid
@@ -117,6 +119,8 @@ fu! nrrwrgn#WidenRegion(vmode) "{{{1
 	endif
 	call <sid>SaveRestoreRegister(0)
 	let  @/=s:o_s
+	" jump back to narrowed window
+	exe ':noa' . bufwinnr(nrw_buf) . 'wincmd w'
 	"exe ':silent :bd!' nrw_buf
 endfu
 
@@ -129,7 +133,7 @@ fu! <sid>SaveRestoreRegister(mode) "{{{1
 	endif
 endfu!
 
-fu! <sid>VisualNrrwRgn(mode) "{{{1
+fu! nrrwrgn#VisualNrrwRgn(mode) "{{{1
 	exe "norm! \<ESC>"
 	" stop visualmode
 	let o_lz = &lz
@@ -156,7 +160,7 @@ fu! <sid>VisualNrrwRgn(mode) "{{{1
 	silent put a
 	silent 0d _
 	setl nomod
-	com! -buffer WidenRegion :call nrrwrgn#WidenRegion(1)
+	com! -buffer WidenRegion :call nrrwrgn#WidenRegion(1)|sil! bd!
 	call <sid>NrrwRgnAuCmd()
 	call <sid>SaveRestoreRegister(0)
 

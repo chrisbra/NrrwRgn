@@ -5,9 +5,9 @@ plugin/NrrwRgn.vim	[[[1
 43
 " NrrwRgn.vim - Narrow Region plugin for Vim
 " -------------------------------------------------------------
-" Version:	   0.4
+" Version:	   0.5
 " Maintainer:  Christian Brabandt <cb@256bit.org>
-" Last Change: Wed, 28 Apr 2010 22:13:55 +0200
+" Last Change: Tue, 04 May 2010 12:40:47 +0200
 "
 " Script: http://www.vim.org/scripts/script.php?script_id=3075 
 " Copyright:   (c) 2009, 2010 by Christian Brabandt
@@ -16,7 +16,7 @@ plugin/NrrwRgn.vim	[[[1
 "			   instead of "Vim".
 "			   No warranty, express or implied.
 "	 *** ***   Use At-Your-Own-Risk!   *** ***
-" GetLatestVimScripts: 3075 4 :AutoInstall: NrrwRgn.vim
+" GetLatestVimScripts: 3075 5 :AutoInstall: NrrwRgn.vim
 "
 " Init: {{{1
 let s:cpo= &cpo
@@ -47,12 +47,12 @@ let &cpo=s:cpo
 unlet s:cpo
 " vim: ts=4 sts=4 fdm=marker com+=l\:\"
 autoload/nrrwrgn.vim	[[[1
-192
+196
 " NrrwRgn.vim - Narrow Region plugin for Vim
 " -------------------------------------------------------------
-" Version:	   0.4
+" Version:	   0.5
 " Maintainer:  Christian Brabandt <cb@256bit.org>
-" Last Change: Wed, 28 Apr 2010 22:13:55 +0200
+" Last Change: Tue, 04 May 2010 12:40:47 +0200
 "
 " Script: http://www.vim.org/scripts/script.php?script_id=3075 
 " Copyright:   (c) 2009, 2010 by Christian Brabandt
@@ -61,7 +61,7 @@ autoload/nrrwrgn.vim	[[[1
 "			   instead of "Vim".
 "			   No warranty, express or implied.
 "	 *** ***   Use At-Your-Own-Risk!   *** ***
-" GetLatestVimScripts: 3075 4 :AutoInstall: NrrwRgn.vim
+" GetLatestVimScripts: 3075 5 :AutoInstall: NrrwRgn.vim
 "
 " Functions:
 fun! <sid>Init()"{{{1
@@ -115,7 +115,7 @@ fun! nrrwrgn#NrrwRgn() range  "{{{1
 	let b:orig_buf = orig_buf
 	call setline(1, a)
 	setl nomod
-	com! -buffer WidenRegion :call nrrwrgn#WidenRegion(0)
+	com! -buffer WidenRegion :call nrrwrgn#WidenRegion(0) | sil! bd!
 	call <sid>NrrwRgnAuCmd()
 
 	" restore settings
@@ -128,9 +128,11 @@ fu! s:WriteNrrwRgn(...)
 		setl nomod
 		exe ":WidenRegion"
     else
-		call setbufvar(b:orig_buf, '&ma', 1)
-		"close!
-		exe ':noa' . bufwinnr(b:orig_buf) . 'wincmd w'
+		if exists(b:orig_buf)
+			call setbufvar(b:orig_buf, '&ma', 1)
+			"close!
+			exe ':noa' . bufwinnr(b:orig_buf) . 'wincmd w'
+		endif
 		if exists("s:matchid")
 			call matchdelete(s:matchid)
 			unlet s:matchid
@@ -167,6 +169,8 @@ fu! nrrwrgn#WidenRegion(vmode) "{{{1
 	endif
 	call <sid>SaveRestoreRegister(0)
 	let  @/=s:o_s
+	" jump back to narrowed window
+	exe ':noa' . bufwinnr(nrw_buf) . 'wincmd w'
 	"exe ':silent :bd!' nrw_buf
 endfu
 
@@ -179,7 +183,7 @@ fu! <sid>SaveRestoreRegister(mode) "{{{1
 	endif
 endfu!
 
-fu! <sid>VisualNrrwRgn(mode) "{{{1
+fu! nrrwrgn#VisualNrrwRgn(mode) "{{{1
 	exe "norm! \<ESC>"
 	" stop visualmode
 	let o_lz = &lz
@@ -206,7 +210,7 @@ fu! <sid>VisualNrrwRgn(mode) "{{{1
 	silent put a
 	silent 0d _
 	setl nomod
-	com! -buffer WidenRegion :call nrrwrgn#WidenRegion(1)
+	com! -buffer WidenRegion :call nrrwrgn#WidenRegion(1)|sil! bd!
 	call <sid>NrrwRgnAuCmd()
 	call <sid>SaveRestoreRegister(0)
 
@@ -241,29 +245,29 @@ endfun
 
 " vim: ts=4 sts=4 fdm=marker com+=l\:\"
 doc/NarrowRegion.txt	[[[1
-135
-*NrrwRgn.txt*	A Narrow Region Plugin (similar to Emacs)
+140
+*NrrwRgn.txt*   A Narrow Region Plugin (similar to Emacs)
 
 Author:  Christian Brabandt <cb@256bit.org>
-Version: 0.4 Wed, 28 Apr 2010 22:13:55 +0200
+Version: 0.5 Tue, 04 May 2010 12:40:47 +0200
 
-Copyright: (c) 2009, 2010 by Christian Brabandt		
+Copyright: (c) 2009, 2010 by Christian Brabandt         
            The VIM LICENSE applies to NrrwRgnPlugin.vim and NrrwRgnPlugin.txt
            (see |copyright|) except use NrrwRgnPlugin instead of "Vim".
-	   NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
+           NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
 
 
 ==============================================================================
-1. Contents					*NarrowRegion*	*NrrwRgnPlugin*
+1. Contents                                     *NarrowRegion*  *NrrwRgnPlugin*
 
-	1.  Contents.....................................: |NrrwRgnPlugin|
-	2.  NrrwRgn Manual...............................: |NrrwRgn-manual|
-	2.1   NrrwRgn Configuration......................: |NrrwRgn-config|
-	3.  NrrwRgn Feedback.............................: |NrrwRgn-feedback|
-	4.  NrrwRgn History..............................: |NrrwRgn-history|
+        1.  Contents.....................................: |NrrwRgnPlugin|
+        2.  NrrwRgn Manual...............................: |NrrwRgn-manual|
+        2.1   NrrwRgn Configuration......................: |NrrwRgn-config|
+        3.  NrrwRgn Feedback.............................: |NrrwRgn-feedback|
+        4.  NrrwRgn History..............................: |NrrwRgn-history|
 
 ==============================================================================
-2. NrrwRgn Manual					*NrrwRgn-manual*
+2. NrrwRgn Manual                                       *NrrwRgn-manual*
 
 Functionality
 
@@ -282,28 +286,28 @@ NrrwRgn allows you to either select a line based selection using an Ex-command
 or you can simply use any visual selected region and press your prefered key
 combination to open that selection in a new buffer.
 
-							*:NarrowRegion* *:NR*
-:[range]NarrowRegion	    When [range] is omited, select only the current
-			    line, else use the lines in the range given and 
-			    open it in a new Scratch Window. 
-			    Whenever you are finished modifying that region
-			    simply write the buffer.
+                                                        *:NarrowRegion* *:NR*
+:[range]NarrowRegion        When [range] is omited, select only the current
+                            line, else use the lines in the range given and 
+                            open it in a new Scratch Window. 
+                            Whenever you are finished modifying that region
+                            simply write the buffer.
 
 :[range]NR                  This is a shortcut for :NarrowRegion
 
-							*:NarrowWindow* *:NW*
-:NarrowWindow		    Select only the range that is visible the current
-			    window and open it in a new Scratch Window. 
-			    Whenever you are finished modifying that region
-			    simply write the buffer.
+                                                        *:NarrowWindow* *:NW*
+:NarrowWindow               Select only the range that is visible the current
+                            window and open it in a new Scratch Window. 
+                            Whenever you are finished modifying that region
+                            simply write the buffer.
 
-:NW			    This is a shortcut for :NarrowWindow
+:NW                         This is a shortcut for :NarrowWindow
 
-								*:WidenRegion*
+                                                                *:WidenRegion*
 :WidenRegion                This command is only available in the narrowed 
-			    scratch buffer. If the buffer has been modified,
-			    the contents will be put back on the original
-			    buffer.
+                            scratch buffer. If the buffer has been modified,
+                            the contents will be put back on the original
+                            buffer.
 
 You can also start visual mode and have the selected region being narrowed. In
 this mode, NarrowRegion allows you to block select |CTRL-V| , character select
@@ -313,7 +317,7 @@ default is set to '\', unless you have set it to something different (see
 open in a new scratch buffer. This key combination only works in |Visual-mode|
 
 ==============================================================================
-2.1 NrrwRgn Configuration				     *NrrwRgn-config*
+2.1 NrrwRgn Configuration                                    *NrrwRgn-config*
 
 NarrowRegion can be customized by setting some global variables. If you'd
 like to open the narrowed windo as a vertical split buffer, simply set the
@@ -345,7 +349,7 @@ Visual Mode. It doesn't really make sense to map this combination to any other
 mode, unless you want it to Narrow your last visually selected range.
 
 ==============================================================================
-3. NrrwRgn Feedback					    *NrrwRgn-feedback*
+3. NrrwRgn Feedback                                         *NrrwRgn-feedback*
 
 Feedback is always welcome. If you like the plugin, please rate it at the
 vim-page:
@@ -358,21 +362,26 @@ Please don't hesitate to report any bugs to the maintainer, mentioned in the
 third line of this document.
 
 ==============================================================================
-4. NrrwRgn History					    *NrrwRgn-history*
-	0.4: Apr 28, 2010       - Highlight narrowed region in the original
-				  buffer
-				- Save and Restore search-register
-				- Provide shortcut commands |:NR| 
-				- Provide command |:NW| and |:NarrowWindow|
-				- Make plugin autoloadable
-				- Enable GLVS (see |:GLVS|)
-				- Provide Documenation (:h NarrowRegion)
-				- Distribute Plugin as vimball |pi_vimball.txt|
-	0.3: Apr 28, 2010       - Initial upload
-				- development versions are available at the
-				  github repository
-				- put plugin on a public repository 
-				  (http://github.com/chrisbra/NrrwRgn)
+4. NrrwRgn History                                          *NrrwRgn-history*
+        0.5: May 04, 2010       - The mapping that allows for narrowing a
+                                  visually selected range, did not work.
+                                  (Fixed!)
+                                - Make :WidenRegion work as expected (close
+                                  the widened window)
+        0.4: Apr 28, 2010       - Highlight narrowed region in the original
+                                  buffer
+                                - Save and Restore search-register
+                                - Provide shortcut commands |:NR| 
+                                - Provide command |:NW| and |:NarrowWindow|
+                                - Make plugin autoloadable
+                                - Enable GLVS (see |:GLVS|)
+                                - Provide Documenation (:h NarrowRegion)
+                                - Distribute Plugin as vimball |pi_vimball.txt|
+        0.3: Apr 28, 2010       - Initial upload
+                                - development versions are available at the
+                                  github repository
+                                - put plugin on a public repository 
+                                  (http://github.com/chrisbra/NrrwRgn)
 
 ==============================================================================
 Modeline:
