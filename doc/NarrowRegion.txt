@@ -115,16 +115,16 @@ third line of this document.
 
 ==============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
-	0.6: May 04, 2010       - the previous version had problems
-	                          restoring the orig buffer, this version
-				  fixes it (highlighting and setl ma did not
-				  work correctly)
+        0.6: May 04, 2010       - the previous version had problems
+                                  restoring the orig buffer, this version
+                                  fixes it (highlighting and setl ma did not
+                                  work correctly)
         0.5: May 04, 2010       - The mapping that allows for narrowing a
                                   visually selected range, did not work.
                                   (Fixed!)
                                 - Make :WidenRegion work as expected (close
                                   the widened window)
-				  (unreleased)
+                                  (unreleased)
         0.4: Apr 28, 2010       - Highlight narrowed region in the original
                                   buffer
                                 - Save and Restore search-register
@@ -142,4 +142,4 @@ third line of this document.
 
 ==============================================================================
 Modeline:
-vim:tw=78:ts=8:ft=help
+vim:tw=78:ts=8:ft=help:et
