@@ -1,7 +1,7 @@
 *NrrwRgn.txt*   A Narrow Region Plugin (similar to Emacs)
 
 Author:  Christian Brabandt <cb@256bit.org>
-Version: 0.5 Tue, 04 May 2010 12:40:47 +0200
+Version: 0.6 Tue, 04 May 2010 13:00:49 +0200
 
 Copyright: (c) 2009, 2010 by Christian Brabandt         
            The VIM LICENSE applies to NrrwRgnPlugin.vim and NrrwRgnPlugin.txt
@@ -115,11 +115,16 @@ third line of this document.
 
 ==============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
+	0.6: May 04, 2010       - the previous version had problems
+	                          restoring the orig buffer, this version
+				  fixes it (highlighting and setl ma did not
+				  work correctly)
         0.5: May 04, 2010       - The mapping that allows for narrowing a
                                   visually selected range, did not work.
                                   (Fixed!)
                                 - Make :WidenRegion work as expected (close
                                   the widened window)
+				  (unreleased)
         0.4: Apr 28, 2010       - Highlight narrowed region in the original
                                   buffer
                                 - Save and Restore search-register
