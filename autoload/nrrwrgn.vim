@@ -23,13 +23,17 @@ fun! <sid>Init()"{{{1
 		endif
 
 		" Customization
-		let s:nrrw_rgn_vert = (exists("g:nrrw_rgn_vert") ? g:nrrw_rgn_vert : 0)
-		let s:nrrw_rgn_wdth = (exists("g:nrrw_rgn_wdth") ? g:nrrw_rgn_wdth : 20)
-		let s:nrrw_rgn_hl   = (exists("g:nrrw_rgn_hl")   ? g:nrrw_rgn_hl   : "WildMenu")
+		let s:nrrw_rgn_vert = (exists("g:nrrw_rgn_vert")  ? g:nrrw_rgn_vert   : 0)
+		let s:nrrw_rgn_wdth = (exists("g:nrrw_rgn_wdth")  ? g:nrrw_rgn_wdth   : 20)
+		let s:nrrw_rgn_hl   = (exists("g:nrrw_rgn_hl")    ? g:nrrw_rgn_hl     : "WildMenu")
+		let s:nrrw_rgn_win  = (exists("g:nrrw_rgn_sepwin")? g:nrrw_rgn_sepwin : 0)
 		
 endfun 
 
 fun! <sid>NrwRgnWin() "{{{1
+	    if s:nrrw_rgn_win
+			let s:nrrw_winname .= '_' . bufname('')
+		endif
 		let nrrw_win = bufwinnr('^'.s:nrrw_winname.'$')
 		if nrrw_win != -1
 			exe ":noa " . nrrw_win . 'wincmd w'
