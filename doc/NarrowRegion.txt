@@ -82,7 +82,7 @@ set the variable g:nrrw_rgn_wdth in your |.vimrc| . This variable defines the
 width or the nr of columns, if you have also set g:nrrw_rgn_vert. >
 
     let g:nrrw_rgn_wdth = 30
-
+<
 By default, NarrowRegion highlights your the region that has been selected
 using the WildMenu highlighting (see |hl-WildMenu|). If you'd like to use a
 different highlighting, set the variable g:nrrw_rgn_hl to your preferred
@@ -90,12 +90,17 @@ highlighting Group. For example to have the region highlighted like a search
 result, you could put that in your |.vimrc| >
 
     let g:nrrw_rgn_hl = 'Search'
-
+<
+If you want to turn off the highlighting (because this can be disturbing, you
+can set the global variable g:nrrw_rgn_nohl to 1 in your |.vimrc| >
+    
+    let g:nrrw_rgn_nohl = 1
+<
 If you'd like to change the key combination, that starts the Narrowed Window
 for you selected range, you could put this in your |.vimrc| >
 
    xmap <F3> <Plug>NrrwrgnDo
-
+<
 This will let <F3> open the Narrow-Window, but only if you have pressed it in
 Visual Mode. It doesn't really make sense to map this combination to any other
 mode, unless you want it to Narrow your last visually selected range.
@@ -115,6 +120,15 @@ third line of this document.
 
 ==============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
+        0.7: May 17, 2010       - really use the black hole register for
+                                  deleting the old buffer contents in the
+                                  narrowed buffer (suggestion by esquifit in 
+                                  http://groups.google.com/group/comp.editors/msg/3eb3e3a7c68597db)
+                                - make autocommand nesting, so the
+                                  highlighting will be removed when writing
+                                  the buffer contents.
+                                - Use g:nrrw_rgn_nohl variable to disable 
+                                  highlighting (as this can be disturbing).
         0.6: May 04, 2010       - the previous version had problems
                                   restoring the orig buffer, this version
                                   fixes it (highlighting and setl ma did not
