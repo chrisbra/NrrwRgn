@@ -37,7 +37,7 @@ fun! <sid>NrwRgnWin() "{{{1
 		let nrrw_win = bufwinnr('^'.s:nrrw_winname.'$')
 		if nrrw_win != -1
 			exe ":noa " . nrrw_win . 'wincmd w'
-			silent %d_
+			silent %d _
 			noa wincmd p
 		else
 			execute s:nrrw_rgn_wdth . (s:nrrw_rgn_vert?'v':'') . "sp " . s:nrrw_winname
@@ -53,7 +53,7 @@ fun! nrrwrgn#NrrwRgn() range  "{{{1
 	set lz
 	" Protect the original buffer,
 	" so you won't accidentally modify those lines,
-	" that will later be overwritten
+	" that might later be overwritten
 	setl noma
 	let orig_buf=bufnr('')
 
@@ -62,6 +62,12 @@ fun! nrrwrgn#NrrwRgn() range  "{{{1
 	let ft=&l:ft
 	let b:startline = [ a:firstline, 0 ]
 	let b:endline   = [ a:lastline, 0 ]
+	if exists("s:matchid")
+		" if you call :NarrowRegion several times, without widening 
+		" the previous region, s:matchid might already be defined so
+		" make sure, the previous highlighting is removed.
+		call matchdelete(s:matchid)
+	endif
 	let s:matchid =  matchadd(s:nrrw_rgn_hl, <sid>GeneratePattern(b:startline, b:endline, 'V')) "set the highlighting
 	let a=getline(b:startline[0], b:endline[0])
 	let win=<sid>NrwRgnWin()
@@ -152,6 +158,12 @@ fu! nrrwrgn#VisualNrrwRgn(mode) "{{{1
 	call <sid>Init()
 	let ft=&l:ft
 	let [ b:startline, b:endline ] = <sid>RetVisRegionPos()
+	if exists("s:matchid")
+		" if you call :NarrowRegion several times, without widening 
+		" the previous region, s:matchid might already be defined so
+		" make sure, the previous highlighting is removed.
+		call matchdelete(s:matchid)
+	endif
 	let s:matchid =  matchadd(s:nrrw_rgn_hl, <sid>GeneratePattern(b:startline, b:endline, b:vmode))
 	"let b:startline = [ getpos("'<")[1], virtcol("'<") ]
 	"let b:endline   = [ getpos("'>")[1], virtcol("'>") ]
@@ -174,8 +186,8 @@ endfu
 fu! <sid>NrrwRgnAuCmd() "{{{1
     aug NrrwRgn
 	    au!
-	    au BufWriteCmd <buffer> :call s:WriteNrrwRgn(1)
-	    au BufWipeout,BufDelete <buffer> :call s:WriteNrrwRgn()
+	    au BufWriteCmd <buffer> nested :call s:WriteNrrwRgn(1)
+	    au BufWipeout,BufDelete <buffer> nested :call s:WriteNrrwRgn()
     aug end
 endfun
 
