@@ -142,6 +142,9 @@ third line of this document.
 
 ==============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
+        0.8: May .......        - the g:nrrw_rgn_sepwin variable can be
+                                  used to force seperate Narrowed Windows, so
+                                  you could easily diff those windows.
         0.7: May 17, 2010       - really use the black hole register for
                                   deleting the old buffer contents in the
                                   narrowed buffer (suggestion by esquifit in 
