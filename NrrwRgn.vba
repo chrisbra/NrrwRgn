@@ -5,9 +5,9 @@ plugin/NrrwRgn.vim	[[[1
 43
 " NrrwRgn.vim - Narrow Region plugin for Vim
 " -------------------------------------------------------------
-" Version:	   0.6
+" Version:	   0.7
 " Maintainer:  Christian Brabandt <cb@256bit.org>
-" Last Change: Tue, 04 May 2010 13:00:49 +0200
+" Last Change: Mon, 17 May 2010 21:17:57 +0200
 "
 " Script: http://www.vim.org/scripts/script.php?script_id=3075 
 " Copyright:   (c) 2009, 2010 by Christian Brabandt
@@ -16,7 +16,7 @@ plugin/NrrwRgn.vim	[[[1
 "			   instead of "Vim".
 "			   No warranty, express or implied.
 "	 *** ***   Use At-Your-Own-Risk!   *** ***
-" GetLatestVimScripts: 3075 6 :AutoInstall: NrrwRgn.vim
+" GetLatestVimScripts: 3075 7 :AutoInstall: NrrwRgn.vim
 "
 " Init: {{{1
 let s:cpo= &cpo
@@ -47,12 +47,12 @@ let &cpo=s:cpo
 unlet s:cpo
 " vim: ts=4 sts=4 fdm=marker com+=l\:\"
 autoload/nrrwrgn.vim	[[[1
-194
+215
 " NrrwRgn.vim - Narrow Region plugin for Vim
 " -------------------------------------------------------------
-" Version:	   0.6
+" Version:	   0.7
 " Maintainer:  Christian Brabandt <cb@256bit.org>
-" Last Change: Tue, 04 May 2010 13:00:49 +0200
+" Last Change: Mon, 17 May 2010 21:17:57 +0200
 "
 " Script: http://www.vim.org/scripts/script.php?script_id=3075 
 " Copyright:   (c) 2009, 2010 by Christian Brabandt
@@ -61,7 +61,7 @@ autoload/nrrwrgn.vim	[[[1
 "			   instead of "Vim".
 "			   No warranty, express or implied.
 "	 *** ***   Use At-Your-Own-Risk!   *** ***
-" GetLatestVimScripts: 3075 6 :AutoInstall: NrrwRgn.vim
+" GetLatestVimScripts: 3075 7 :AutoInstall: NrrwRgn.vim
 "
 " Functions:
 fun! <sid>Init()"{{{1
@@ -73,17 +73,22 @@ fun! <sid>Init()"{{{1
 		endif
 
 		" Customization
-		let s:nrrw_rgn_vert = (exists("g:nrrw_rgn_vert") ? g:nrrw_rgn_vert : 0)
-		let s:nrrw_rgn_wdth = (exists("g:nrrw_rgn_wdth") ? g:nrrw_rgn_wdth : 20)
-		let s:nrrw_rgn_hl   = (exists("g:nrrw_rgn_hl")   ? g:nrrw_rgn_hl   : "WildMenu")
+		let s:nrrw_rgn_vert = (exists("g:nrrw_rgn_vert")  ? g:nrrw_rgn_vert   : 0)
+		let s:nrrw_rgn_wdth = (exists("g:nrrw_rgn_wdth")  ? g:nrrw_rgn_wdth   : 20)
+		let s:nrrw_rgn_hl   = (exists("g:nrrw_rgn_hl")    ? g:nrrw_rgn_hl     : "WildMenu")
+		let s:nrrw_rgn_nohl = (exists("g:nrrw_rgn_nohl")  ? g:nrrw_rgn_nohl   : 0)
+		let s:nrrw_rgn_win  = (exists("g:nrrw_rgn_sepwin")? g:nrrw_rgn_sepwin : 0)
 		
 endfun 
 
 fun! <sid>NrwRgnWin() "{{{1
+	    if s:nrrw_rgn_win
+			let s:nrrw_winname .= '_' . bufname('')
+		endif
 		let nrrw_win = bufwinnr('^'.s:nrrw_winname.'$')
 		if nrrw_win != -1
 			exe ":noa " . nrrw_win . 'wincmd w'
-			silent %d_
+			silent %d _
 			noa wincmd p
 		else
 			execute s:nrrw_rgn_wdth . (s:nrrw_rgn_vert?'v':'') . "sp " . s:nrrw_winname
@@ -99,7 +104,7 @@ fun! nrrwrgn#NrrwRgn() range  "{{{1
 	set lz
 	" Protect the original buffer,
 	" so you won't accidentally modify those lines,
-	" that will later be overwritten
+	" that might later be overwritten
 	setl noma
 	let orig_buf=bufnr('')
 
@@ -108,7 +113,15 @@ fun! nrrwrgn#NrrwRgn() range  "{{{1
 	let ft=&l:ft
 	let b:startline = [ a:firstline, 0 ]
 	let b:endline   = [ a:lastline, 0 ]
-	let s:matchid =  matchadd(s:nrrw_rgn_hl, <sid>GeneratePattern(b:startline, b:endline, 'V')) "set the highlighting
+	if exists("s:matchid")
+		" if you call :NarrowRegion several times, without widening 
+		" the previous region, s:matchid might already be defined so
+		" make sure, the previous highlighting is removed.
+		call matchdelete(s:matchid)
+	endif
+	if !s:nrrw_rgn_nohl
+		let s:matchid =  matchadd(s:nrrw_rgn_hl, <sid>GeneratePattern(b:startline, b:endline, 'V')) "set the highlighting
+	endif
 	let a=getline(b:startline[0], b:endline[0])
 	let win=<sid>NrwRgnWin()
 	exe ':noa ' win 'wincmd w'
@@ -198,7 +211,15 @@ fu! nrrwrgn#VisualNrrwRgn(mode) "{{{1
 	call <sid>Init()
 	let ft=&l:ft
 	let [ b:startline, b:endline ] = <sid>RetVisRegionPos()
-	let s:matchid =  matchadd(s:nrrw_rgn_hl, <sid>GeneratePattern(b:startline, b:endline, b:vmode))
+	if exists("s:matchid")
+		" if you call :NarrowRegion several times, without widening 
+		" the previous region, s:matchid might already be defined so
+		" make sure, the previous highlighting is removed.
+		call matchdelete(s:matchid)
+	endif
+	if !s:nrrw_rgn_nohl
+		let s:matchid =  matchadd(s:nrrw_rgn_hl, <sid>GeneratePattern(b:startline, b:endline, b:vmode))
+	endif
 	"let b:startline = [ getpos("'<")[1], virtcol("'<") ]
 	"let b:endline   = [ getpos("'>")[1], virtcol("'>") ]
 	norm gv"ay
@@ -220,8 +241,8 @@ endfu
 fu! <sid>NrrwRgnAuCmd() "{{{1
     aug NrrwRgn
 	    au!
-	    au BufWriteCmd <buffer> :call s:WriteNrrwRgn(1)
-	    au BufWipeout,BufDelete <buffer> :call s:WriteNrrwRgn()
+	    au BufWriteCmd <buffer> nested :call s:WriteNrrwRgn(1)
+	    au BufWipeout,BufDelete <buffer> nested :call s:WriteNrrwRgn()
     aug end
 endfun
 
@@ -243,11 +264,11 @@ endfun
 
 " vim: ts=4 sts=4 fdm=marker com+=l\:\"
 doc/NarrowRegion.txt	[[[1
-145
+159
 *NrrwRgn.txt*   A Narrow Region Plugin (similar to Emacs)
 
 Author:  Christian Brabandt <cb@256bit.org>
-Version: 0.6 Tue, 04 May 2010 13:00:49 +0200
+Version: 0.7 Mon, 17 May 2010 21:17:57 +0200
 
 Copyright: (c) 2009, 2010 by Christian Brabandt         
            The VIM LICENSE applies to NrrwRgnPlugin.vim and NrrwRgnPlugin.txt
@@ -328,7 +349,7 @@ set the variable g:nrrw_rgn_wdth in your |.vimrc| . This variable defines the
 width or the nr of columns, if you have also set g:nrrw_rgn_vert. >
 
     let g:nrrw_rgn_wdth = 30
-
+<
 By default, NarrowRegion highlights your the region that has been selected
 using the WildMenu highlighting (see |hl-WildMenu|). If you'd like to use a
 different highlighting, set the variable g:nrrw_rgn_hl to your preferred
@@ -336,12 +357,17 @@ highlighting Group. For example to have the region highlighted like a search
 result, you could put that in your |.vimrc| >
 
     let g:nrrw_rgn_hl = 'Search'
-
+<
+If you want to turn off the highlighting (because this can be disturbing, you
+can set the global variable g:nrrw_rgn_nohl to 1 in your |.vimrc| >
+    
+    let g:nrrw_rgn_nohl = 1
+<
 If you'd like to change the key combination, that starts the Narrowed Window
 for you selected range, you could put this in your |.vimrc| >
 
    xmap <F3> <Plug>NrrwrgnDo
-
+<
 This will let <F3> open the Narrow-Window, but only if you have pressed it in
 Visual Mode. It doesn't really make sense to map this combination to any other
 mode, unless you want it to Narrow your last visually selected range.
@@ -361,16 +387,25 @@ third line of this document.
 
 ==============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
-	0.6: May 04, 2010       - the previous version had problems
-	                          restoring the orig buffer, this version
-				  fixes it (highlighting and setl ma did not
-				  work correctly)
+        0.7: May 17, 2010       - really use the black hole register for
+                                  deleting the old buffer contents in the
+                                  narrowed buffer (suggestion by esquifit in 
+                                  http://groups.google.com/group/comp.editors/msg/3eb3e3a7c68597db)
+                                - make autocommand nesting, so the
+                                  highlighting will be removed when writing
+                                  the buffer contents.
+                                - Use g:nrrw_rgn_nohl variable to disable 
+                                  highlighting (as this can be disturbing).
+        0.6: May 04, 2010       - the previous version had problems
+                                  restoring the orig buffer, this version
+                                  fixes it (highlighting and setl ma did not
+                                  work correctly)
         0.5: May 04, 2010       - The mapping that allows for narrowing a
                                   visually selected range, did not work.
                                   (Fixed!)
                                 - Make :WidenRegion work as expected (close
                                   the widened window)
-				  (unreleased)
+                                  (unreleased)
         0.4: Apr 28, 2010       - Highlight narrowed region in the original
                                   buffer
                                 - Save and Restore search-register
@@ -388,4 +423,4 @@ third line of this document.
 
 ==============================================================================
 Modeline:
-vim:tw=78:ts=8:ft=help
+vim:tw=78:ts=8:ft=help:et

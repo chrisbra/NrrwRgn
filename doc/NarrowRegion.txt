@@ -1,7 +1,7 @@
 *NrrwRgn.txt*   A Narrow Region Plugin (similar to Emacs)
 
 Author:  Christian Brabandt <cb@256bit.org>
-Version: 0.6 Tue, 04 May 2010 13:00:49 +0200
+Version: 0.7 Mon, 17 May 2010 21:17:57 +0200
 
 Copyright: (c) 2009, 2010 by Christian Brabandt         
            The VIM LICENSE applies to NrrwRgnPlugin.vim and NrrwRgnPlugin.txt
