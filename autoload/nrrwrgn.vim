@@ -26,6 +26,7 @@ fun! <sid>Init()"{{{1
 		let s:nrrw_rgn_vert = (exists("g:nrrw_rgn_vert")  ? g:nrrw_rgn_vert   : 0)
 		let s:nrrw_rgn_wdth = (exists("g:nrrw_rgn_wdth")  ? g:nrrw_rgn_wdth   : 20)
 		let s:nrrw_rgn_hl   = (exists("g:nrrw_rgn_hl")    ? g:nrrw_rgn_hl     : "WildMenu")
+		let s:nrrw_rgn_nohl = (exists("g:nrrw_rgn_nohl")  ? g:nrrw_rgn_nohl   : 0)
 		let s:nrrw_rgn_win  = (exists("g:nrrw_rgn_sepwin")? g:nrrw_rgn_sepwin : 0)
 		
 endfun 
@@ -68,7 +69,9 @@ fun! nrrwrgn#NrrwRgn() range  "{{{1
 		" make sure, the previous highlighting is removed.
 		call matchdelete(s:matchid)
 	endif
-	let s:matchid =  matchadd(s:nrrw_rgn_hl, <sid>GeneratePattern(b:startline, b:endline, 'V')) "set the highlighting
+	if !s:nrrw_rgn_nohl
+		let s:matchid =  matchadd(s:nrrw_rgn_hl, <sid>GeneratePattern(b:startline, b:endline, 'V')) "set the highlighting
+	endif
 	let a=getline(b:startline[0], b:endline[0])
 	let win=<sid>NrwRgnWin()
 	exe ':noa ' win 'wincmd w'
@@ -164,7 +167,9 @@ fu! nrrwrgn#VisualNrrwRgn(mode) "{{{1
 		" make sure, the previous highlighting is removed.
 		call matchdelete(s:matchid)
 	endif
-	let s:matchid =  matchadd(s:nrrw_rgn_hl, <sid>GeneratePattern(b:startline, b:endline, b:vmode))
+	if !s:nrrw_rgn_nohl
+		let s:matchid =  matchadd(s:nrrw_rgn_hl, <sid>GeneratePattern(b:startline, b:endline, b:vmode))
+	endif
 	"let b:startline = [ getpos("'<")[1], virtcol("'<") ]
 	"let b:endline   = [ getpos("'>")[1], virtcol("'>") ]
 	norm gv"ay
