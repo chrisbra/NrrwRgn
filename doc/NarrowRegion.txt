@@ -77,12 +77,16 @@ variable g:nrrw_rgn_vert to 1 in your |.vimrc| >
 
     let g:nrrw_rgn_vert = 1
 < 
+------------------------------------------------------------------------------
+
 If you'd like to specify a certain width/height for you scratch buffer, then
 set the variable g:nrrw_rgn_wdth in your |.vimrc| . This variable defines the
 width or the nr of columns, if you have also set g:nrrw_rgn_vert. >
 
     let g:nrrw_rgn_wdth = 30
 <
+------------------------------------------------------------------------------
+
 By default, NarrowRegion highlights your the region that has been selected
 using the WildMenu highlighting (see |hl-WildMenu|). If you'd like to use a
 different highlighting, set the variable g:nrrw_rgn_hl to your preferred
@@ -96,6 +100,8 @@ can set the global variable g:nrrw_rgn_nohl to 1 in your |.vimrc| >
     
     let g:nrrw_rgn_nohl = 1
 <
+------------------------------------------------------------------------------
+
 If you'd like to change the key combination, that starts the Narrowed Window
 for you selected range, you could put this in your |.vimrc| >
 
@@ -105,6 +111,22 @@ This will let <F3> open the Narrow-Window, but only if you have pressed it in
 Visual Mode. It doesn't really make sense to map this combination to any other
 mode, unless you want it to Narrow your last visually selected range.
 
+------------------------------------------------------------------------------
+
+By default the Narrow Region plugin will always use the same window for
+narrowing regions. Now you can force the plugin to create a new window, each
+time you issue :NarrowRegion. To enable this, simple set the g:nrrw_rgn_sepwin
+variable to 1 >
+    
+    let g:nrrw_rgn_sepwin = 1
+<
+This can be usefull, if you have 2 files, in which you want to diff and merge
+only some regions. So in each buffer you run |:NarrowRegion| and the plugin will
+create 2 separate Windows which you can easily diff, using |:diffthis| and you
+can merge the changes using |:diffget| and |:diffput|.
+
+When finished, simply write that Narrowed Region window, from which you want
+to take the modifications in your original file. 
 ==============================================================================
 3. NrrwRgn Feedback                                         *NrrwRgn-feedback*
 
