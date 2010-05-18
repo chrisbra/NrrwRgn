@@ -2,12 +2,12 @@
 UseVimball
 finish
 plugin/NrrwRgn.vim	[[[1
-43
+44
 " NrrwRgn.vim - Narrow Region plugin for Vim
 " -------------------------------------------------------------
-" Version:	   0.7
+" Version:	   0.8
 " Maintainer:  Christian Brabandt <cb@256bit.org>
-" Last Change: Mon, 17 May 2010 21:17:57 +0200
+" Last Change: Tue, 18 May 2010 23:17:35 +0200
 "
 " Script: http://www.vim.org/scripts/script.php?script_id=3075 
 " Copyright:   (c) 2009, 2010 by Christian Brabandt
@@ -16,7 +16,7 @@ plugin/NrrwRgn.vim	[[[1
 "			   instead of "Vim".
 "			   No warranty, express or implied.
 "	 *** ***   Use At-Your-Own-Risk!   *** ***
-" GetLatestVimScripts: 3075 7 :AutoInstall: NrrwRgn.vim
+" GetLatestVimScripts: 3075 8 :AutoInstall: NrrwRgn.vim
 "
 " Init: {{{1
 let s:cpo= &cpo
@@ -32,6 +32,7 @@ let g:loaded_nrrw_rgn = 1
 " Define the Command:
 com! -range NarrowRegion :exe ":" . <line1> . ',' . <line2> . "call nrrwrgn#NrrwRgn()"
 com! -range NR	 :exe ":" . <line1> . ',' . <line2> . "call nrrwrgn#NrrwRgn()"
+com! -range NRV  :call nrrwrgn#VisualNrrwRgn(visualmode())
 com! NW	 :exe ":" . line('w0') . ',' . line('w$') . "call nrrwrgn#NrrwRgn()"
 com! NarrowWindow :exe ":" . line('w0') . ',' . line('w$') . "call nrrwrgn#NrrwRgn()"
 
@@ -47,12 +48,12 @@ let &cpo=s:cpo
 unlet s:cpo
 " vim: ts=4 sts=4 fdm=marker com+=l\:\"
 autoload/nrrwrgn.vim	[[[1
-215
+263
 " NrrwRgn.vim - Narrow Region plugin for Vim
 " -------------------------------------------------------------
-" Version:	   0.7
+" Version:	   0.8
 " Maintainer:  Christian Brabandt <cb@256bit.org>
-" Last Change: Mon, 17 May 2010 21:17:57 +0200
+" Last Change: Tue, 18 May 2010 23:17:35 +0200
 "
 " Script: http://www.vim.org/scripts/script.php?script_id=3075 
 " Copyright:   (c) 2009, 2010 by Christian Brabandt
@@ -61,15 +62,38 @@ autoload/nrrwrgn.vim	[[[1
 "			   instead of "Vim".
 "			   No warranty, express or implied.
 "	 *** ***   Use At-Your-Own-Risk!   *** ***
-" GetLatestVimScripts: 3075 7 :AutoInstall: NrrwRgn.vim
+" GetLatestVimScripts: 3075 8 :AutoInstall: NrrwRgn.vim
 "
 " Functions:
+
+fun! s:WarningMsg(msg)"{{{1
+	echohl WarningMsg
+	let msg = "NarrowRegion: " . a:msg
+	if exists(":unsilent") == 2
+		unsilent echomsg msg
+	else
+		echomsg msg
+	endif
+	echohl Normal
+	let v:errmsg = msg
+endfun "}}}
 fun! <sid>Init()"{{{1
-		if !exists("s:nrrw_winname")
-				let s:nrrw_winname='Narrow_Region'
+	    if !exists("s:instn")
+			let s:instn=1
+		else
+			let s:instn+=1
 		endif
+		"if !exists("s:nrrw_winname")
+		let s:nrrw_winname='Narrow_Region'
+		"endif
 		if bufname('') != s:nrrw_winname
-				let s:orig_buffer = bufnr('')
+			if !exists("s:orig_buffer")
+				let s:orig_buffer={}
+			endif
+			if !get(s:orig_buffer, bufnr(''),0)
+				let s:orig_buffer[s:instn] = bufnr('')
+			endif
+			"let s:orig_buffer = bufnr('')
 		endif
 
 		" Customization
@@ -83,7 +107,7 @@ endfun
 
 fun! <sid>NrwRgnWin() "{{{1
 	    if s:nrrw_rgn_win
-			let s:nrrw_winname .= '_' . bufname('')
+			let s:nrrw_winname .= '_' . empty(bufname('')) ? bufnr('') : bufname('')
 		endif
 		let nrrw_win = bufwinnr('^'.s:nrrw_winname.'$')
 		if nrrw_win != -1
@@ -92,7 +116,7 @@ fun! <sid>NrwRgnWin() "{{{1
 			noa wincmd p
 		else
 			execute s:nrrw_rgn_wdth . (s:nrrw_rgn_vert?'v':'') . "sp " . s:nrrw_winname
-			setl noswapfile buftype=acwrite bufhidden=wipe foldcolumn=0 nobuflisted winfixwidth
+			setl noswapfile buftype=acwrite bufhidden=wipe foldcolumn=0 nobuflisted winfixwidth winfixheight
 			let nrrw_win = bufwinnr("")
 		endif
 		return nrrw_win
@@ -113,14 +137,14 @@ fun! nrrwrgn#NrrwRgn() range  "{{{1
 	let ft=&l:ft
 	let b:startline = [ a:firstline, 0 ]
 	let b:endline   = [ a:lastline, 0 ]
-	if exists("s:matchid")
+	if exists("b:matchid")
 		" if you call :NarrowRegion several times, without widening 
-		" the previous region, s:matchid might already be defined so
+		" the previous region, b:matchid might already be defined so
 		" make sure, the previous highlighting is removed.
-		call matchdelete(s:matchid)
+		call matchdelete(b:matchid)
 	endif
 	if !s:nrrw_rgn_nohl
-		let s:matchid =  matchadd(s:nrrw_rgn_hl, <sid>GeneratePattern(b:startline, b:endline, 'V')) "set the highlighting
+		let b:matchid =  matchadd(s:nrrw_rgn_hl, <sid>GeneratePattern(b:startline, b:endline, 'V')) "set the highlighting
 	endif
 	let a=getline(b:startline[0], b:endline[0])
 	let win=<sid>NrwRgnWin()
@@ -144,9 +168,9 @@ fu! s:WriteNrrwRgn(...)
 		call setbufvar(b:orig_buf, '&ma', 1)
 		"close!
 		exe ':noa' . bufwinnr(b:orig_buf) . 'wincmd w'
-		if exists("s:matchid")
-			call matchdelete(s:matchid)
-			unlet s:matchid
+		if exists("b:matchid")
+			call matchdelete(b:matchid)
+			unlet b:matchid
 		endif
     endif
 endfun
@@ -174,14 +198,25 @@ fu! nrrwrgn#WidenRegion(vmode) "{{{1
 	    norm! "aP
 		let [ b:startline, b:endline ] = <sid>RetVisRegionPos()
 	else "linewise selection because we started the NarrowRegion with the command NarrowRegion(0)
+		if b:endline[0]==line('$')
+			let delete_last_line=1
+		else
+			let delete_last_line=0
+		endif
 	    exe ':silent :'.b:startline[0].','.b:endline[0].'d _'
 	    call append((b:startline[0]-1),cont)
 		let  b:endline[0] = b:startline[0] + len(cont) -1
+		if delete_last_line
+			:$d _
+		endif
 	endif
 	call <sid>SaveRestoreRegister(0)
 	let  @/=s:o_s
 	" jump back to narrowed window
 	exe ':noa' . bufwinnr(nrw_buf) . 'wincmd w'
+	if s:instn>0
+		let s:instn-=1
+	endif
 	"exe ':silent :bd!' nrw_buf
 endfu
 
@@ -195,7 +230,17 @@ fu! <sid>SaveRestoreRegister(mode) "{{{1
 endfu!
 
 fu! nrrwrgn#VisualNrrwRgn(mode) "{{{1
-	exe "norm! \<ESC>"
+	if empty(a:mode)
+		" in case, visual mode wasn't entered, visualmode()
+		" returns an empty string and in that case, we finish
+		" here
+		call s:WarningMsg("There was no region visually selected!")
+		return
+	endif
+	" This beeps, when called from command mode
+	" e.g. by using :NRV, so using :sil!
+	" else exiting visual mode
+	exe "sil! norm! \<ESC>"
 	" stop visualmode
 	let o_lz = &lz
 	let s:o_s  = @/
@@ -211,14 +256,14 @@ fu! nrrwrgn#VisualNrrwRgn(mode) "{{{1
 	call <sid>Init()
 	let ft=&l:ft
 	let [ b:startline, b:endline ] = <sid>RetVisRegionPos()
-	if exists("s:matchid")
+	if exists("b:matchid")
 		" if you call :NarrowRegion several times, without widening 
-		" the previous region, s:matchid might already be defined so
+		" the previous region, b:matchid might already be defined so
 		" make sure, the previous highlighting is removed.
-		call matchdelete(s:matchid)
+		call matchdelete(b:matchid)
 	endif
 	if !s:nrrw_rgn_nohl
-		let s:matchid =  matchadd(s:nrrw_rgn_hl, <sid>GeneratePattern(b:startline, b:endline, b:vmode))
+		let b:matchid =  matchadd(s:nrrw_rgn_hl, <sid>GeneratePattern(b:startline, b:endline, b:vmode))
 	endif
 	"let b:startline = [ getpos("'<")[1], virtcol("'<") ]
 	"let b:endline   = [ getpos("'>")[1], virtcol("'>") ]
@@ -239,7 +284,11 @@ fu! nrrwrgn#VisualNrrwRgn(mode) "{{{1
 endfu
 
 fu! <sid>NrrwRgnAuCmd() "{{{1
-    aug NrrwRgn
+	if s:nrrw_rgn_win
+		exe "aug NrrwRgn" . s:instn
+	else
+		exe "aug NrrwRgn"
+	endif
 	    au!
 	    au BufWriteCmd <buffer> nested :call s:WriteNrrwRgn(1)
 	    au BufWipeout,BufDelete <buffer> nested :call s:WriteNrrwRgn()
@@ -262,13 +311,13 @@ fun! <sid>GeneratePattern(startl, endl, mode) "{{{1
 	endif
 endfun
 
-" vim: ts=4 sts=4 fdm=marker com+=l\:\"
+" vim: ts=4 sts=4 fdm=marker com+=l\:\" fdl=0
 doc/NarrowRegion.txt	[[[1
-159
+204
 *NrrwRgn.txt*   A Narrow Region Plugin (similar to Emacs)
 
 Author:  Christian Brabandt <cb@256bit.org>
-Version: 0.7 Mon, 17 May 2010 21:17:57 +0200
+Version: 0.8 Tue, 18 May 2010 23:17:35 +0200
 
 Copyright: (c) 2009, 2010 by Christian Brabandt         
            The VIM LICENSE applies to NrrwRgnPlugin.vim and NrrwRgnPlugin.txt
@@ -328,6 +377,10 @@ combination to open that selection in a new buffer.
                             the contents will be put back on the original
                             buffer.
 
+                                                                        *:NRV*
+:NRW                        Opened the narrowed window for the region that was
+                            last selected in visual mode
+
 You can also start visual mode and have the selected region being narrowed. In
 this mode, NarrowRegion allows you to block select |CTRL-V| , character select
 |v| or linewise select |V| a region. Then press <Leader>nr where <Leader> by
@@ -343,13 +396,17 @@ like to open the narrowed windo as a vertical split buffer, simply set the
 variable g:nrrw_rgn_vert to 1 in your |.vimrc| >
 
     let g:nrrw_rgn_vert = 1
-< 
+<
+------------------------------------------------------------------------------
+
 If you'd like to specify a certain width/height for you scratch buffer, then
 set the variable g:nrrw_rgn_wdth in your |.vimrc| . This variable defines the
 width or the nr of columns, if you have also set g:nrrw_rgn_vert. >
 
     let g:nrrw_rgn_wdth = 30
 <
+------------------------------------------------------------------------------
+
 By default, NarrowRegion highlights your the region that has been selected
 using the WildMenu highlighting (see |hl-WildMenu|). If you'd like to use a
 different highlighting, set the variable g:nrrw_rgn_hl to your preferred
@@ -360,9 +417,11 @@ result, you could put that in your |.vimrc| >
 <
 If you want to turn off the highlighting (because this can be disturbing, you
 can set the global variable g:nrrw_rgn_nohl to 1 in your |.vimrc| >
-    
+
     let g:nrrw_rgn_nohl = 1
 <
+------------------------------------------------------------------------------
+
 If you'd like to change the key combination, that starts the Narrowed Window
 for you selected range, you could put this in your |.vimrc| >
 
@@ -372,6 +431,24 @@ This will let <F3> open the Narrow-Window, but only if you have pressed it in
 Visual Mode. It doesn't really make sense to map this combination to any other
 mode, unless you want it to Narrow your last visually selected range.
 
+------------------------------------------------------------------------------
+
+By default the Narrow Region plugin will always use the same window for
+narrowing regions. Now you can force the plugin to create a new window, each
+time you issue :NarrowRegion. To enable this, simple set the g:nrrw_rgn_sepwin
+variable to 1 >
+
+    let g:nrrw_rgn_sepwin = 1
+<
+This can be usefull, if you have 2 files, in which you want to diff and merge
+only some regions. So in each buffer you run |:NarrowRegion| and the plugin will
+create 2 separate Windows which you can easily diff, using |:diffthis| and you
+can merge the changes using |:diffget| and |:diffput|.
+Note, this is still an experimenal feature. Please report any bugs (see
+below!)
+
+When finished, simply write that Narrowed Region window, from which you want
+to take the modifications in your original file. 
 ==============================================================================
 3. NrrwRgn Feedback                                         *NrrwRgn-feedback*
 
@@ -387,6 +464,23 @@ third line of this document.
 
 ==============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
+        0.8: May 18, 2010       - the g:nrrw_rgn_sepwin variable can be
+                                  used to force seperate Narrowed Windows, so
+                                  you could easily diff those windows.
+                                - make the separating of several windows a
+                                  little bit safer (look at the bufnr(), so it
+                                  should work without problems for several
+                                  buffers)
+                                - switch from script local variables to 
+                                  buffer local variables, so narrowing for
+                                  several buffers should work.
+                                - set 'winfixheight' for narrowed window 
+                                - Added command :NRV (suggested by Charles
+                                  Campbell, thanks!)
+                                - added error handling, in case :NRV is
+                                  called, without a selected region
+                                - take care of beeps, when calling :NRV
+                                - output WarningMsg
         0.7: May 17, 2010       - really use the black hole register for
                                   deleting the old buffer contents in the
                                   narrowed buffer (suggestion by esquifit in 

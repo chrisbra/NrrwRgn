@@ -1,7 +1,7 @@
 *NrrwRgn.txt*   A Narrow Region Plugin (similar to Emacs)
 
 Author:  Christian Brabandt <cb@256bit.org>
-Version: 0.7 Mon, 17 May 2010 21:17:57 +0200
+Version: 0.8 Tue, 18 May 2010 23:17:35 +0200
 
 Copyright: (c) 2009, 2010 by Christian Brabandt         
            The VIM LICENSE applies to NrrwRgnPlugin.vim and NrrwRgnPlugin.txt
@@ -61,6 +61,10 @@ combination to open that selection in a new buffer.
                             the contents will be put back on the original
                             buffer.
 
+                                                                        *:NRV*
+:NRW                        Opened the narrowed window for the region that was
+                            last selected in visual mode
+
 You can also start visual mode and have the selected region being narrowed. In
 this mode, NarrowRegion allows you to block select |CTRL-V| , character select
 |v| or linewise select |V| a region. Then press <Leader>nr where <Leader> by
@@ -76,13 +80,17 @@ like to open the narrowed windo as a vertical split buffer, simply set the
 variable g:nrrw_rgn_vert to 1 in your |.vimrc| >
 
     let g:nrrw_rgn_vert = 1
-< 
+<
+------------------------------------------------------------------------------
+
 If you'd like to specify a certain width/height for you scratch buffer, then
 set the variable g:nrrw_rgn_wdth in your |.vimrc| . This variable defines the
 width or the nr of columns, if you have also set g:nrrw_rgn_vert. >
 
     let g:nrrw_rgn_wdth = 30
 <
+------------------------------------------------------------------------------
+
 By default, NarrowRegion highlights your the region that has been selected
 using the WildMenu highlighting (see |hl-WildMenu|). If you'd like to use a
 different highlighting, set the variable g:nrrw_rgn_hl to your preferred
@@ -93,9 +101,11 @@ result, you could put that in your |.vimrc| >
 <
 If you want to turn off the highlighting (because this can be disturbing, you
 can set the global variable g:nrrw_rgn_nohl to 1 in your |.vimrc| >
-    
+
     let g:nrrw_rgn_nohl = 1
 <
+------------------------------------------------------------------------------
+
 If you'd like to change the key combination, that starts the Narrowed Window
 for you selected range, you could put this in your |.vimrc| >
 
@@ -105,6 +115,24 @@ This will let <F3> open the Narrow-Window, but only if you have pressed it in
 Visual Mode. It doesn't really make sense to map this combination to any other
 mode, unless you want it to Narrow your last visually selected range.
 
+------------------------------------------------------------------------------
+
+By default the Narrow Region plugin will always use the same window for
+narrowing regions. Now you can force the plugin to create a new window, each
+time you issue :NarrowRegion. To enable this, simple set the g:nrrw_rgn_sepwin
+variable to 1 >
+
+    let g:nrrw_rgn_sepwin = 1
+<
+This can be usefull, if you have 2 files, in which you want to diff and merge
+only some regions. So in each buffer you run |:NarrowRegion| and the plugin will
+create 2 separate Windows which you can easily diff, using |:diffthis| and you
+can merge the changes using |:diffget| and |:diffput|.
+Note, this is still an experimenal feature. Please report any bugs (see
+below!)
+
+When finished, simply write that Narrowed Region window, from which you want
+to take the modifications in your original file. 
 ==============================================================================
 3. NrrwRgn Feedback                                         *NrrwRgn-feedback*
 
@@ -120,6 +148,23 @@ third line of this document.
 
 ==============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
+        0.8: May 18, 2010       - the g:nrrw_rgn_sepwin variable can be
+                                  used to force seperate Narrowed Windows, so
+                                  you could easily diff those windows.
+                                - make the separating of several windows a
+                                  little bit safer (look at the bufnr(), so it
+                                  should work without problems for several
+                                  buffers)
+                                - switch from script local variables to 
+                                  buffer local variables, so narrowing for
+                                  several buffers should work.
+                                - set 'winfixheight' for narrowed window 
+                                - Added command :NRV (suggested by Charles
+                                  Campbell, thanks!)
+                                - added error handling, in case :NRV is
+                                  called, without a selected region
+                                - take care of beeps, when calling :NRV
+                                - output WarningMsg
         0.7: May 17, 2010       - really use the black hole register for
                                   deleting the old buffer contents in the
                                   narrowed buffer (suggestion by esquifit in 
