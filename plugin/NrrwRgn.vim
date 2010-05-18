@@ -27,6 +27,7 @@ let g:loaded_nrrw_rgn = 1
 " Define the Command:
 com! -range NarrowRegion :exe ":" . <line1> . ',' . <line2> . "call nrrwrgn#NrrwRgn()"
 com! -range NR	 :exe ":" . <line1> . ',' . <line2> . "call nrrwrgn#NrrwRgn()"
+com! -range NRV  :call nrrwrgn#VisualNrrwRgn(visualmode())
 com! NW	 :exe ":" . line('w0') . ',' . line('w$') . "call nrrwrgn#NrrwRgn()"
 com! NarrowWindow :exe ":" . line('w0') . ',' . line('w$') . "call nrrwrgn#NrrwRgn()"
 
