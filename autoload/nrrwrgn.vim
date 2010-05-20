@@ -202,7 +202,8 @@ fu! nrrwrgn#VisualNrrwRgn(mode) "{{{1
     let o_lz = &lz
     let s:o_s  = @/
     set lz
-    let s:nrrw_rgn_lines[s:instn].vmode=a:mode
+    call <sid>Init()
+    let s:nrrw_rgn_lines[s:instn]["vmode"]=a:mode
     " Protect the original buffer,
     " so you won't accidentally modify those lines,
     " that will later be overwritten
@@ -210,7 +211,6 @@ fu! nrrwrgn#VisualNrrwRgn(mode) "{{{1
     let orig_buf=bufnr('')
     call <sid>SaveRestoreRegister(1)
 
-    call <sid>Init()
     let ft=&l:ft
     let [ s:nrrw_rgn_lines[s:instn].startline, s:nrrw_rgn_lines[s:instn].endline ] = <sid>RetVisRegionPos()
     if exists("s:nrrw_rgn_lines[s:instn].matchid")
