@@ -1,7 +1,7 @@
 *NrrwRgn.txt*   A Narrow Region Plugin (similar to Emacs)
 
 Author:  Christian Brabandt <cb@256bit.org>
-Version: 0.9 Thu, 20 May 2010 08:08:50 +0200
+Version: 0.10 Thu, 20 May 2010 23:14:49 +0200
 
 Copyright: (c) 2009, 2010 by Christian Brabandt         
            The VIM LICENSE applies to NrrwRgnPlugin.vim and NrrwRgnPlugin.txt
@@ -56,12 +56,12 @@ combination to open that selection in a new buffer.
 :NW                         This is a shortcut for :NarrowWindow
 
                                                                 *:WidenRegion*
-:WidenRegion                This command is only available in the narrowed 
+:WidenRegion[!]             This command is only available in the narrowed 
                             scratch window. If the buffer has been modified,
                             the contents will be put back on the original
-                            buffer. If it isn't modified, closes the scratch
-                            window.
-
+                            buffer. If ! is specified, the window will be
+                            closed, otherwise it will remain open.
+                                                                
                                                                         *:NRV*
 :NRW                        Opened the narrowed window for the region that was
                             last selected in visual mode
@@ -144,6 +144,18 @@ third line of this document.
 
 ==============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
+
+0.10: May 20,2010
+
+- Restore Cursorposition using winrestview() and winsaveview()
+- fix a bug, that prevented the use of visual narrowing
+- Make sure when closing the narrowed buffer, the content will be written to
+  the right original region
+- use topleft for opening the Narrowed window
+- check, that the original buffer is still available
+- If you Narrow the complete buffer using :NRV and write the changes back, an
+  additional trailing line is inserted. Remove that line.
+- When writing the changes back, update the highlighting.
 
 0.9: May 20, 2010
 
