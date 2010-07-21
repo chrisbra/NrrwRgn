@@ -145,6 +145,10 @@ third line of this document.
 ==============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
 
+0.11: <unreleased>
+- Don't use 'winfixwidth' and 'winfixheight' so the user can change
+  the window size.
+
 0.10: May 20,2010
 
 - Restore Cursorposition using winrestview() and winsaveview()
