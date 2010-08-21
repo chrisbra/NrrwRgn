@@ -1,7 +1,7 @@
 *NrrwRgn.txt*   A Narrow Region Plugin (similar to Emacs)
 
 Author:  Christian Brabandt <cb@256bit.org>
-Version: 0.10 Thu, 20 May 2010 23:14:49 +0200
+Version: 0.12 Thu, 29 Jul 2010 00:03:56 +0200
 
 Copyright: (c) 2009, 2010 by Christian Brabandt         
            The VIM LICENSE applies to NrrwRgnPlugin.vim and NrrwRgnPlugin.txt
@@ -145,9 +145,14 @@ third line of this document.
 ==============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
 
-0.11: <unreleased>
-- Don't use 'winfixwidth' and 'winfixheight' so the user can change
-  the window size.
+0.12: July 29, 2010
+
+- Version 0.11, wasn't packaged correctly and the vimball file
+  contained some garbage. (Thanks Dennis Hostetler!)
+
+0.11: July 28, 2010
+
+- Don't set 'winfixwidth' and 'winfixheight' (suggested by Charles Campbell)
 
 0.10: May 20,2010
 

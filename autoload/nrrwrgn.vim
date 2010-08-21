@@ -1,8 +1,8 @@
 " NrrwRgn.vim - Narrow Region plugin for Vim
 " -------------------------------------------------------------
-" Version:	   0.10
+" Version:	   0.12
 " Maintainer:  Christian Brabandt <cb@256bit.org>
-" Last Change: Thu, 20 May 2010 23:14:49 +0200
+" Last Change: Thu, 29 Jul 2010 00:03:56 +0200
 "
 " Script: http://www.vim.org/scripts/script.php?script_id=3075 
 " Copyright:   (c) 2009, 2010 by Christian Brabandt
@@ -11,7 +11,7 @@
 "			   instead of "Vim".
 "			   No warranty, express or implied.
 "	 *** ***   Use At-Your-Own-Risk!   *** ***
-" GetLatestVimScripts: 3075 10 :AutoInstall: NrrwRgn.vim
+" GetLatestVimScripts: 3075 12 :AutoInstall: NrrwRgn.vim
 "
 " Functions:
 
@@ -62,7 +62,7 @@ fun! <sid>NrwRgnWin() "{{{1
 		noa wincmd p
     else
 		exe 'topleft ' . s:nrrw_rgn_wdth . (s:nrrw_rgn_vert?'v':'') . "sp " . s:nrrw_winname
-		setl noswapfile buftype=acwrite bufhidden=wipe foldcolumn=0 nobuflisted 
+		setl noswapfile buftype=acwrite bufhidden=wipe foldcolumn=0 nobuflisted
 		let nrrw_win = bufwinnr("")
     endif
     return nrrw_win
