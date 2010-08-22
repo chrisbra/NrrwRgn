@@ -2,12 +2,12 @@
 UseVimball
 finish
 plugin/NrrwRgn.vim	[[[1
-44
+45
 " NrrwRgn.vim - Narrow Region plugin for Vim
 " -------------------------------------------------------------
-" Version:	   0.10
+" Version:	   0.13
 " Maintainer:  Christian Brabandt <cb@256bit.org>
-" Last Change: Thu, 20 May 2010 23:14:49 +0200
+" Last Change: Sun, 22 Aug 2010 14:59:59 +0200
 "
 " Script: http://www.vim.org/scripts/script.php?script_id=3075 
 " Copyright:   (c) 2009, 2010 by Christian Brabandt
@@ -16,7 +16,7 @@ plugin/NrrwRgn.vim	[[[1
 "			   instead of "Vim".
 "			   No warranty, express or implied.
 "	 *** ***   Use At-Your-Own-Risk!   *** ***
-" GetLatestVimScripts: 3075 10 :AutoInstall: NrrwRgn.vim
+" GetLatestVimScripts: 3075 13 :AutoInstall: NrrwRgn.vim
 "
 " Init: {{{1
 let s:cpo= &cpo
@@ -35,6 +35,7 @@ com! -range NR	 :exe ":" . <line1> . ',' . <line2> . "call nrrwrgn#NrrwRgn()"
 com! -range NRV  :call nrrwrgn#VisualNrrwRgn(visualmode())
 com! NW	 :exe ":" . line('w0') . ',' . line('w$') . "call nrrwrgn#NrrwRgn()"
 com! NarrowWindow :exe ":" . line('w0') . ',' . line('w$') . "call nrrwrgn#NrrwRgn()"
+com! NUD :call nrrwrgn#UnifiedDiff()
 
 " Define the Mapping:
 if !hasmapto('<Plug>NrrwrgnDo')
@@ -48,12 +49,12 @@ let &cpo=s:cpo
 unlet s:cpo
 " vim: ts=4 sts=4 fdm=marker com+=l\:\"
 autoload/nrrwrgn.vim	[[[1
-341
+379
 " NrrwRgn.vim - Narrow Region plugin for Vim
 " -------------------------------------------------------------
-" Version:	   0.10
+" Version:	   0.13
 " Maintainer:  Christian Brabandt <cb@256bit.org>
-" Last Change: Thu, 20 May 2010 23:14:49 +0200
+" Last Change: Sun, 22 Aug 2010 14:59:59 +0200
 "
 " Script: http://www.vim.org/scripts/script.php?script_id=3075 
 " Copyright:   (c) 2009, 2010 by Christian Brabandt
@@ -62,7 +63,7 @@ autoload/nrrwrgn.vim	[[[1
 "			   instead of "Vim".
 "			   No warranty, express or implied.
 "	 *** ***   Use At-Your-Own-Risk!   *** ***
-" GetLatestVimScripts: 3075 10 :AutoInstall: NrrwRgn.vim
+" GetLatestVimScripts: 3075 13 :AutoInstall: NrrwRgn.vim
 "
 " Functions:
 
@@ -113,7 +114,7 @@ fun! <sid>NrwRgnWin() "{{{1
 		noa wincmd p
     else
 		exe 'topleft ' . s:nrrw_rgn_wdth . (s:nrrw_rgn_vert?'v':'') . "sp " . s:nrrw_winname
-		setl noswapfile buftype=acwrite bufhidden=wipe foldcolumn=0 nobuflisted winfixwidth winfixheight
+		setl noswapfile buftype=acwrite bufhidden=wipe foldcolumn=0 nobuflisted
 		let nrrw_win = bufwinnr("")
     endif
     return nrrw_win
@@ -381,21 +382,59 @@ endfu
 
 fun! <sid>GeneratePattern(startl, endl, mode) "{{{1
     if a:mode ==# ''
-	return '\%>' . (a:startl[0]-1) . 'l\&\%>' . (a:startl[1]-1) . 'v\&\%<' . (a:endl[0]+1) . 'l\&\%<' . (a:endl[1]+1) . 'v'
+		return '\%>' . (a:startl[0]-1) . 'l\&\%>' . (a:startl[1]-1) . 'v\&\%<' . (a:endl[0]+1) . 'l\&\%<' . (a:endl[1]+1) . 'v'
     elseif a:mode ==# 'v'
-	return '\%>' . (a:startl[0]-1) . 'l\&\%>' . (a:startl[1]-1) . 'v\_.*\%<' . (a:endl[0]+1) . 'l\&\%<' . (a:endl[1]+1) . 'v'
+		return '\%>' . (a:startl[0]-1) . 'l\&\%>' . (a:startl[1]-1) . 'v\_.*\%<' . (a:endl[0]+1) . 'l\&\%<' . (a:endl[1]+1) . 'v'
     else
-	return '\%>' . (a:startl[0]-1) . 'l\&\%<' . (a:endl[0]+1) . 'l'
+		return '\%>' . (a:startl[0]-1) . 'l\&\%<' . (a:endl[0]+1) . 'l'
     endif
 endfun "}}}
+fun! nrrwrgn#UnifiedDiff() "{{{1
+	let save_winposview=winsaveview()
+	let orig_win = winnr()
+	" close previous opened Narrowed buffers
+	silent! windo | if bufname('')=~'^Narrow_Region' && &diff |diffoff|q!|endif
+	" minimize Window
+	" this is disabled, because this might be useful, to see everything
+	"exe "vert resize -999999"
+	"setl winfixwidth
+	" move to current start of chunk of unified diff
+	if search('^@@', 'bcW') > 0
+		call search('^@@', 'bc')
+	else
+		call search('^@@', 'c')
+	endif
+	let curpos=getpos('.')
+	for i in range(2)
+		if search('^@@', 'nW') > 0
+			.+,/@@/-NR
+		else
+			" Last chunk in file
+			.+,$NR
+		endif
+	   " Split vertically
+	   wincmd H
+	   if i==0
+		   silent! g/^-/d _
+	   else
+		   silent! g/^+/d _
+	   endif
+	   diffthis
+	   0
+	   exe ":noa wincmd p"
+	   call setpos('.', curpos)
+	endfor
+	call winrestview(save_winposview)
+endfun
+	
 
 " vim: ts=4 sts=4 fdm=marker com+=l\:\" fdl=0
 doc/NarrowRegion.txt	[[[1
-223
+253
 *NrrwRgn.txt*   A Narrow Region Plugin (similar to Emacs)
 
 Author:  Christian Brabandt <cb@256bit.org>
-Version: 0.10 Thu, 20 May 2010 23:14:49 +0200
+Version: 0.13 Sun, 22 Aug 2010 14:59:59 +0200
 
 Copyright: (c) 2009, 2010 by Christian Brabandt         
            The VIM LICENSE applies to NrrwRgnPlugin.vim and NrrwRgnPlugin.txt
@@ -455,10 +494,19 @@ combination to open that selection in a new buffer.
                             the contents will be put back on the original
                             buffer. If ! is specified, the window will be
                             closed, otherwise it will remain open.
-                                                                
+
                                                                         *:NRV*
 :NRW                        Opened the narrowed window for the region that was
                             last selected in visual mode
+
+                                                                        *:NUD*
+
+:NUD                        When viewing unified diffs, this command opens the
+                            current chunk in 2 Narrowed Windows in |diff-mode|
+                            The current chunk is determined as the one, that
+                            the cursor is at.
+                            This command does not make sense if editing a
+                            different file format (or even different diff format)
 
 You can also start visual mode and have the selected region being narrowed. In
 this mode, NarrowRegion allows you to block select |CTRL-V| , character select
@@ -468,18 +516,27 @@ default is set to '\', unless you have set it to something different (see
 open in a new scratch buffer. This key combination only works in |Visual-mode|
 
 When finished, simply write that Narrowed Region window, from which you want
-to take the modifications in your original file. 
+to take the modifications in your original file.
 
 It is possible, to recursively open a Narrowed Window on top of an already
 narrowed window. This sounds a little bit silly, but this makes it possible,
 to have several narrowed windows, which you can use for several different
 things, e.g. If you have 2 different buffers opened and you want to diff a
 certain region of each of those 2 buffers, simply open a Narrowed Window for
-each buffer, and execute |:diffthis| in each narrowed window. 
+each buffer, and execute |:diffthis| in each narrowed window.
 
 You can then interactively merge those 2 windows. And when you are finished,
 simply write the narrowed window and the changes will be taken back into the
 original buffer.
+
+When viewing unified diffs, you can use the provided |:NUD| command to open 2
+Narrowed Windows side by side viewing the current chunk in |diff-mode|. Those
+2 Narrowed windows will be marked 'modified', since there was some post
+processing involved when opening the narrowed windows. Be careful, when
+quitting the windows, not to write unwanted changes into your patch file! In
+the window that contains the unified buffer, you can move to a different
+chunk, run :NUD and the 2 Narrowed Windows in diff mode will update.
+
 ==============================================================================
 2.1 NrrwRgn Configuration                                    *NrrwRgn-config*
 
@@ -538,6 +595,18 @@ third line of this document.
 
 ==============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
+
+0.13: August, 22, 2010
+- Unified Diff Handling (experimental feature)
+
+0.12: July 29, 2010
+
+- Version 0.11, wasn't packaged correctly and the vimball file
+  contained some garbage. (Thanks Dennis Hostetler!)
+
+0.11: July 28, 2010
+
+- Don't set 'winfixwidth' and 'winfixheight' (suggested by Charles Campbell)
 
 0.10: May 20,2010
 
