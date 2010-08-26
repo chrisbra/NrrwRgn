@@ -5,9 +5,9 @@ plugin/NrrwRgn.vim	[[[1
 45
 " NrrwRgn.vim - Narrow Region plugin for Vim
 " -------------------------------------------------------------
-" Version:	   0.14
+" Version:	   0.15
 " Maintainer:  Christian Brabandt <cb@256bit.org>
-" Last Change: Thu, 26 Aug 2010 12:52:51 +0200
+" Last Change: Thu, 26 Aug 2010 19:53:30 +0200
 "
 " Script: http://www.vim.org/scripts/script.php?script_id=3075 
 " Copyright:   (c) 2009, 2010 by Christian Brabandt
@@ -16,7 +16,7 @@ plugin/NrrwRgn.vim	[[[1
 "			   instead of "Vim".
 "			   No warranty, express or implied.
 "	 *** ***   Use At-Your-Own-Risk!   *** ***
-" GetLatestVimScripts: 3075 14 :AutoInstall: NrrwRgn.vim
+" GetLatestVimScripts: 3075 15 :AutoInstall: NrrwRgn.vim
 "
 " Init: {{{1
 let s:cpo= &cpo
@@ -52,9 +52,9 @@ autoload/nrrwrgn.vim	[[[1
 382
 " NrrwRgn.vim - Narrow Region plugin for Vim
 " -------------------------------------------------------------
-" Version:	   0.14
+" Version:	   0.15
 " Maintainer:  Christian Brabandt <cb@256bit.org>
-" Last Change: Thu, 26 Aug 2010 12:52:51 +0200
+" Last Change: Thu, 26 Aug 2010 19:53:30 +0200
 "
 " Script: http://www.vim.org/scripts/script.php?script_id=3075 
 " Copyright:   (c) 2009, 2010 by Christian Brabandt
@@ -63,7 +63,7 @@ autoload/nrrwrgn.vim	[[[1
 "			   instead of "Vim".
 "			   No warranty, express or implied.
 "	 *** ***   Use At-Your-Own-Risk!   *** ***
-" GetLatestVimScripts: 3075 14 :AutoInstall: NrrwRgn.vim
+" GetLatestVimScripts: 3075 15 :AutoInstall: NrrwRgn.vim
 "
 " Functions:
 
@@ -433,11 +433,11 @@ endfun
 
 " vim: ts=4 sts=4 fdm=marker com+=l\:\" fdl=0
 doc/NarrowRegion.txt	[[[1
-257
+260
 *NrrwRgn.txt*   A Narrow Region Plugin (similar to Emacs)
 
 Author:  Christian Brabandt <cb@256bit.org>
-Version: 0.14 Thu, 26 Aug 2010 12:52:51 +0200
+Version: 0.15 Thu, 26 Aug 2010 19:53:30 +0200
 
 Copyright: (c) 2009, 2010 by Christian Brabandt         
            The VIM LICENSE applies to NrrwRgnPlugin.vim and NrrwRgnPlugin.txt
@@ -499,7 +499,7 @@ combination to open that selection in a new buffer.
                             closed, otherwise it will remain open.
 
                                                                         *:NRV*
-:NRW                        Opened the narrowed window for the region that was
+:NRV                        Opened the narrowed window for the region that was
                             last selected in visual mode
 
                                                                         *:NUD*
@@ -599,9 +599,12 @@ third line of this document.
 ==============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
 
+0.15: August, 26, 2010
+- Bugfix: minor documentation update (reported by Hong Xu, Thanks!)
+
 0.14: August, 26, 2010
 - Bugfix: :only in the original buffer resulted in errors (reported by Adam
-  Monsen)
+  Monsen, Thanks!)
 
 0.13: August, 22, 2010
 - Unified Diff Handling (experimental feature)
