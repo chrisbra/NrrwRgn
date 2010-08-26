@@ -5,9 +5,9 @@ plugin/NrrwRgn.vim	[[[1
 45
 " NrrwRgn.vim - Narrow Region plugin for Vim
 " -------------------------------------------------------------
-" Version:	   0.13
+" Version:	   0.14
 " Maintainer:  Christian Brabandt <cb@256bit.org>
-" Last Change: Sun, 22 Aug 2010 14:59:59 +0200
+" Last Change: Thu, 26 Aug 2010 12:52:51 +0200
 "
 " Script: http://www.vim.org/scripts/script.php?script_id=3075 
 " Copyright:   (c) 2009, 2010 by Christian Brabandt
@@ -16,7 +16,7 @@ plugin/NrrwRgn.vim	[[[1
 "			   instead of "Vim".
 "			   No warranty, express or implied.
 "	 *** ***   Use At-Your-Own-Risk!   *** ***
-" GetLatestVimScripts: 3075 13 :AutoInstall: NrrwRgn.vim
+" GetLatestVimScripts: 3075 14 :AutoInstall: NrrwRgn.vim
 "
 " Init: {{{1
 let s:cpo= &cpo
@@ -49,12 +49,12 @@ let &cpo=s:cpo
 unlet s:cpo
 " vim: ts=4 sts=4 fdm=marker com+=l\:\"
 autoload/nrrwrgn.vim	[[[1
-379
+382
 " NrrwRgn.vim - Narrow Region plugin for Vim
 " -------------------------------------------------------------
-" Version:	   0.13
+" Version:	   0.14
 " Maintainer:  Christian Brabandt <cb@256bit.org>
-" Last Change: Sun, 22 Aug 2010 14:59:59 +0200
+" Last Change: Thu, 26 Aug 2010 12:52:51 +0200
 "
 " Script: http://www.vim.org/scripts/script.php?script_id=3075 
 " Copyright:   (c) 2009, 2010 by Christian Brabandt
@@ -63,7 +63,7 @@ autoload/nrrwrgn.vim	[[[1
 "			   instead of "Vim".
 "			   No warranty, express or implied.
 "	 *** ***   Use At-Your-Own-Risk!   *** ***
-" GetLatestVimScripts: 3075 13 :AutoInstall: NrrwRgn.vim
+" GetLatestVimScripts: 3075 14 :AutoInstall: NrrwRgn.vim
 "
 " Functions:
 
@@ -97,7 +97,7 @@ fun! <sid>Init()"{{{1
     let s:nrrw_rgn_hl   = (exists("g:nrrw_rgn_hl")    ? g:nrrw_rgn_hl     : "WildMenu")
     let s:nrrw_rgn_nohl = (exists("g:nrrw_rgn_nohl")  ? g:nrrw_rgn_nohl   : 0)
 
-    let s:debug=1
+    let s:debug=0
 	if exists("s:debug") && s:debug
 		com! NI :call <sid>WarningMsg("Instance: ".s:instn)
 		com! NJ :call <sid>WarningMsg("Data: ".string(s:nrrw_rgn_lines))
@@ -167,7 +167,7 @@ fun! nrrwrgn#NrrwRgn() range  "{{{1
 endfun
 
 fu! s:WriteNrrwRgn(...) "{{{1
-	if (bufwinnr(b:orig_buf) == -1)
+	if exists("b:orig_buf") && (bufwinnr(b:orig_buf) == -1)
 		call s:WarningMsg("Original buffer does no longer exist! Aborting!")
 		return
 	endif
@@ -176,6 +176,9 @@ fu! s:WriteNrrwRgn(...) "{{{1
 		setl nomod
 		exe ":WidenRegion"
     else
+		if bufname('') !~# 'Narrow_Region'
+			exe ':noa' . bufwinnr('Narrow_Region') . 'wincmd w'
+		endif
 		call setbufvar(b:orig_buf, '&ma', 1)
 		exe ':noa' . bufwinnr(b:orig_buf) . 'wincmd w'
 		"if exists("s:nrrw_rgn_lines[s:instn].matchid")
@@ -430,11 +433,11 @@ endfun
 
 " vim: ts=4 sts=4 fdm=marker com+=l\:\" fdl=0
 doc/NarrowRegion.txt	[[[1
-253
+257
 *NrrwRgn.txt*   A Narrow Region Plugin (similar to Emacs)
 
 Author:  Christian Brabandt <cb@256bit.org>
-Version: 0.13 Sun, 22 Aug 2010 14:59:59 +0200
+Version: 0.14 Thu, 26 Aug 2010 12:52:51 +0200
 
 Copyright: (c) 2009, 2010 by Christian Brabandt         
            The VIM LICENSE applies to NrrwRgnPlugin.vim and NrrwRgnPlugin.txt
@@ -595,6 +598,10 @@ third line of this document.
 
 ==============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
+
+0.14: August, 26, 2010
+- Bugfix: :only in the original buffer resulted in errors (reported by Adam
+  Monsen)
 
 0.13: August, 22, 2010
 - Unified Diff Handling (experimental feature)

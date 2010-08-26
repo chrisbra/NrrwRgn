@@ -1,8 +1,8 @@
 " NrrwRgn.vim - Narrow Region plugin for Vim
 " -------------------------------------------------------------
-" Version:	   0.13
+" Version:	   0.14
 " Maintainer:  Christian Brabandt <cb@256bit.org>
-" Last Change: Sun, 22 Aug 2010 14:59:59 +0200
+" Last Change: Thu, 26 Aug 2010 12:52:51 +0200
 "
 " Script: http://www.vim.org/scripts/script.php?script_id=3075 
 " Copyright:   (c) 2009, 2010 by Christian Brabandt
@@ -11,7 +11,7 @@
 "			   instead of "Vim".
 "			   No warranty, express or implied.
 "	 *** ***   Use At-Your-Own-Risk!   *** ***
-" GetLatestVimScripts: 3075 13 :AutoInstall: NrrwRgn.vim
+" GetLatestVimScripts: 3075 14 :AutoInstall: NrrwRgn.vim
 "
 " Init: {{{1
 let s:cpo= &cpo
