@@ -1,7 +1,7 @@
 *NrrwRgn.txt*   A Narrow Region Plugin (similar to Emacs)
 
 Author:  Christian Brabandt <cb@256bit.org>
-Version: 0.15 Thu, 26 Aug 2010 19:53:30 +0200
+Version: 0.16 Tue, 16 Nov 2010 16:21:15 +0100
 
 Copyright: (c) 2009, 2010 by Christian Brabandt         
            The VIM LICENSE applies to NrrwRgnPlugin.vim and NrrwRgnPlugin.txt
@@ -162,6 +162,10 @@ third line of this document.
 
 ==============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
+
+0.16: November, 16, 2010
+- Bugfix: copy all local options to the narrowed window (reported by Xu Hong,
+  Thanks!)
 
 0.15: August, 26, 2010
 - Bugfix: minor documentation update (reported by Hong Xu, Thanks!)
