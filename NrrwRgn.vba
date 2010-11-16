@@ -49,7 +49,7 @@ let &cpo=s:cpo
 unlet s:cpo
 " vim: ts=4 sts=4 fdm=marker com+=l\:\"
 autoload/nrrwrgn.vim	[[[1
-432
+433
 " nrrwrgn.vim - Narrow Region plugin for Vim
 " -------------------------------------------------------------
 " Version:	   0.16
@@ -359,7 +359,7 @@ fu! <sid>NrrwRgnAuCmd(bufnr) "{{{1
 		exe "aug NrrwRgn" . b:nrrw_instn
 			au!
 			au BufWriteCmd <buffer> nested :call s:WriteNrrwRgn(1)
-			exe "au BufWipeout,BufDelete <buffer> nested :call s:WriteNrrwRgn()|:call <sid>NrrwRgnAuCmd(".b:nrrw_instn.")"
+			exe "au BufWinLeave,BufWipeout,BufDelete <buffer> nested :call s:WriteNrrwRgn()|:call <sid>NrrwRgnAuCmd(".b:nrrw_instn.")"
 		aug end
     else
 		exe "aug NrrwRgn" .  a:bufnr
@@ -452,6 +452,7 @@ fun! <sid>Options(search) "{{{1
 		let b=split(@a, "\n")
 		call setreg('a', reg_a[0], reg_a[1])
 		call filter(b, 'v:val =~ "^''"')
+		call filter(b, 'v:val !~ "^''modifiable''"')
 		for item in b
 			let item=substitute(item, '''', '', 'g')
 			call add(c, split(item, '\s\+')[0])
