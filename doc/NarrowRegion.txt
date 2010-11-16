@@ -163,6 +163,10 @@ third line of this document.
 ==============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
 
+0.16: November, 16, 2010
+- Bugfix: copy all local options to the narrowed window (reported by Xu Hong,
+  Thanks!)
+
 0.15: August, 26, 2010
 - Bugfix: minor documentation update (reported by Hong Xu, Thanks!)
 

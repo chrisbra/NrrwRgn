@@ -1,4 +1,4 @@
-" NrrwRgn.vim - Narrow Region plugin for Vim
+" nrrwrgn.vim - Narrow Region plugin for Vim
 " -------------------------------------------------------------
 " Version:	   0.15
 " Maintainer:  Christian Brabandt <cb@256bit.org>
@@ -76,11 +76,11 @@ fun! nrrwrgn#NrrwRgn() range  "{{{1
 
 	" initialize Variables
 	call <sid>Init()
+	let local_options=<sid>GetOptions(<sid>Options('local to buffer'))
 	" Protect the original buffer,
 	" so you won't accidentally modify those lines,
 	" that might later be overwritten
 	setl noma
-	let ft=&l:ft
 	let s:nrrw_rgn_lines[s:instn].startline = [ a:firstline, 0 ]
 	let s:nrrw_rgn_lines[s:instn].endline   = [ a:lastline, 0 ]
 	if exists("s:nrrw_rgn_lines[s:instn].matchid")
@@ -105,12 +105,12 @@ fun! nrrwrgn#NrrwRgn() range  "{{{1
 	call setline(1, a)
 	let b:nrrw_instn = s:instn
 	setl nomod
+	call <sid>SetOptions(local_options)
 	"com! -buffer WidenRegion :call nrrwrgn#WidenRegion(0) |sil bd!
     com! -buffer -bang WidenRegion :call nrrwrgn#WidenRegion(0, (empty("<bang>") ? 0 : 1))
 	call <sid>NrrwRgnAuCmd(0)
 
 	" restore settings
-	let &l:ft = ft
 	let &lz   = o_lz
 endfun
 
@@ -266,11 +266,11 @@ fu! nrrwrgn#VisualNrrwRgn(mode) "{{{1
     " Protect the original buffer,
     " so you won't accidentally modify those lines,
     " that will later be overwritten
-    setl noma
     let orig_buf=bufnr('')
     call <sid>SaveRestoreRegister(1)
 
-    let ft=&l:ft
+	let local_options=<sid>GetOptions(<sid>Options('local to buffer'))
+    setl noma
     let [ s:nrrw_rgn_lines[s:instn].startline, s:nrrw_rgn_lines[s:instn].endline ] = <sid>RetVisRegionPos()
     if exists("s:nrrw_rgn_lines[s:instn].matchid")
 		" if you call :NarrowRegion several times, without widening 
@@ -289,6 +289,7 @@ fu! nrrwrgn#VisualNrrwRgn(mode) "{{{1
     silent put a
 	let b:nrrw_instn = s:instn
     silent 0d _
+	call <sid>SetOptions(local_options)
     setl nomod
     "com! -buffer WidenRegion :call nrrwrgn#WidenRegion(1)|sil bd!
     com! -buffer -bang WidenRegion :call nrrwrgn#WidenRegion(1, (empty("<bang>") ? 0 : 1))
@@ -296,7 +297,6 @@ fu! nrrwrgn#VisualNrrwRgn(mode) "{{{1
     call <sid>SaveRestoreRegister(0)
 
     " restore settings
-    let &l:ft = ft
     let &lz   = o_lz
 endfu
 
@@ -377,6 +377,56 @@ fun! nrrwrgn#UnifiedDiff() "{{{1
 	endfor
 	call winrestview(save_winposview)
 endfun
-	
 
+fun! <sid>Options(search) "{{{1
+	let c=[]
+	try
+		" empty search pattern
+		if empty(a:search)
+			return c
+		endif
+		silent sview $VIMRUNTIME/doc/options.txt
+		" for whatever reasons $VIMRUNTIME/doc/options.txt
+		" does not exist, return empty list
+		if line('$') == 1
+			return c
+		endif
+		keepj 0
+		let reg_a=[]
+		call add(reg_a,getreg('a'))
+		call add(reg_a, getregtype('a'))
+		let @a=''
+		exe "silent :g/" . '\v'.escape(a:search, '\\/') . "/-y A"
+		let b=split(@a, "\n")
+		call setreg('a', reg_a[0], reg_a[1])
+		call filter(b, 'v:val =~ "^''"')
+		for item in b
+			let item=substitute(item, '''', '', 'g')
+			call add(c, split(item, '\s\+')[0])
+		endfor
+	finally
+		if bufname('') =~ expand("$VIMRUNTIME/doc/options.txt")
+			bdelete
+		endif
+		return c
+	endtry
+endfun
+
+fun! <sid>GetOptions(opt) "{{{1
+	 let result={}
+	 for item in a:opt
+		 exe "let result[item]=&l:".item
+	 endfor
+	 return result
+endfun
+
+fun! <sid>SetOptions(opt) "{{{1
+	 if type(a:opt) == type({})
+		for [option, result] in items(a:opt)
+			exe "let &l:". option " = " string(result)
+		endfor
+	 endif
+endfun
+
+" Modeline {{{1
 " vim: ts=4 sts=4 fdm=marker com+=l\:\" fdl=0
