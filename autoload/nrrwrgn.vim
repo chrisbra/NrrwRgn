@@ -30,6 +30,7 @@ endfun
 fun! <sid>Init()"{{{1
     if !exists("s:instn")
 		let s:instn=1
+		let s:opts=<sid>Options('local to buffer')
     else
 		let s:instn+=1
     endif
@@ -76,7 +77,7 @@ fun! nrrwrgn#NrrwRgn() range  "{{{1
 
 	" initialize Variables
 	call <sid>Init()
-	let local_options=<sid>GetOptions(<sid>Options('local to buffer'))
+	let local_options=<sid>GetOptions(s:opts)
 	" Protect the original buffer,
 	" so you won't accidentally modify those lines,
 	" that might later be overwritten
@@ -406,7 +407,7 @@ fun! <sid>Options(search) "{{{1
 			call add(c, split(item, '\s\+')[0])
 		endfor
 	finally
-		if bufname('') =~ expand("$VIMRUNTIME/doc/options.txt")
+		if fnamemodify(bufname(''),':p') =~ expand("$VIMRUNTIME/doc/options.txt")
 			bdelete
 		endif
 		return c
