@@ -49,7 +49,7 @@ let &cpo=s:cpo
 unlet s:cpo
 " vim: ts=4 sts=4 fdm=marker com+=l\:\"
 autoload/nrrwrgn.vim	[[[1
-433
+436
 " nrrwrgn.vim - Narrow Region plugin for Vim
 " -------------------------------------------------------------
 " Version:	   0.16
@@ -82,6 +82,7 @@ endfun
 fun! <sid>Init()"{{{1
     if !exists("s:instn")
 		let s:instn=1
+		let s:opts=<sid>Options('local to buffer')
     else
 		let s:instn+=1
     endif
@@ -114,6 +115,8 @@ fun! <sid>NrwRgnWin() "{{{1
 		noa wincmd p
     else
 		exe 'topleft ' . s:nrrw_rgn_wdth . (s:nrrw_rgn_vert?'v':'') . "sp " . s:nrrw_winname
+		" Just in case
+		silent %d _
 		setl noswapfile buftype=acwrite bufhidden=wipe foldcolumn=0 nobuflisted
 		let nrrw_win = bufwinnr("")
     endif
@@ -128,7 +131,7 @@ fun! nrrwrgn#NrrwRgn() range  "{{{1
 
 	" initialize Variables
 	call <sid>Init()
-	let local_options=<sid>GetOptions(<sid>Options('local to buffer'))
+	let local_options=<sid>GetOptions(s:opts)
 	" Protect the original buffer,
 	" so you won't accidentally modify those lines,
 	" that might later be overwritten
@@ -458,7 +461,7 @@ fun! <sid>Options(search) "{{{1
 			call add(c, split(item, '\s\+')[0])
 		endfor
 	finally
-		if bufname('') =~ expand("$VIMRUNTIME/doc/options.txt")
+		if fnamemodify(bufname(''),':p') =~ expand("$VIMRUNTIME/doc/options.txt")
 			bdelete
 		endif
 		return c
@@ -484,7 +487,7 @@ endfun
 " Modeline {{{1
 " vim: ts=4 sts=4 fdm=marker com+=l\:\" fdl=0
 doc/NarrowRegion.txt	[[[1
-264
+272
 *NrrwRgn.txt*   A Narrow Region Plugin (similar to Emacs)
 
 Author:  Christian Brabandt <cb@256bit.org>
@@ -649,6 +652,14 @@ third line of this document.
 
 ==============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
+
+0.17: November, 23, 2010
+- cache the options, that will be set (instead of parsing
+  $VIMRUNTIME/doc/options.txt everytime) in the Narrowed Window
+- getting the options didn't work, when using an autocommand like this:
+  autocmd BufEnter * cd %:p:h
+  (reported by Xu Hong, Thanks!)
+- :q didn't clean up the Narrowed Buffer correctly. Fix this
 
 0.16: November, 16, 2010
 - Bugfix: copy all local options to the narrowed window (reported by Xu Hong,
