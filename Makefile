@@ -12,8 +12,8 @@ vimball: $(PLUGIN).vba
 
 clean:
 	find . -type f \( -name "*.vba" -o -name "*.orig" -o -name "*.~*" \
-	-o -name ".VimballRecord" -o -name ".*.un~" -o -name "*.sw*" \) \
-	-delete
+	-o -name ".VimballRecord" -o -name ".*.un~" -o -name "*.sw*" -o \
+	-name tags \) -delete
 
 dist-clean: clean
 
