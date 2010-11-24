@@ -169,6 +169,7 @@ third line of this document.
 - getting the options didn't work, when using an autocommand like this:
   autocmd BufEnter * cd %:p:h
   (reported by Xu Hong, Thanks!)
+- :q didn't clean up the Narrowed Buffer correctly. Fix this
 
 0.16: November, 16, 2010
 - Bugfix: copy all local options to the narrowed window (reported by Xu Hong,

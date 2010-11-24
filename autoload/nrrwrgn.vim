@@ -63,6 +63,8 @@ fun! <sid>NrwRgnWin() "{{{1
 		noa wincmd p
     else
 		exe 'topleft ' . s:nrrw_rgn_wdth . (s:nrrw_rgn_vert?'v':'') . "sp " . s:nrrw_winname
+		" Just in case
+		silent %d _
 		setl noswapfile buftype=acwrite bufhidden=wipe foldcolumn=0 nobuflisted
 		let nrrw_win = bufwinnr("")
     endif
