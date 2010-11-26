@@ -16,13 +16,14 @@
 " Functions:
 
 fun! <sid>WarningMsg(msg)"{{{1
-	echohl WarningMsg
 	let msg = "NarrowRegion: " . a:msg
+	echohl WarningMsg
 	if exists(":unsilent") == 2
 		unsilent echomsg msg
 	else
 		echomsg msg
 	endif
+	sleep 1
 	echohl Normal
 	let v:errmsg = msg
 endfun
@@ -38,6 +39,7 @@ fun! <sid>Init()"{{{1
 		let s:nrrw_rgn_lines = {}
 	endif
 	let s:nrrw_rgn_lines[s:instn] = {}
+	" show some debugging messages
     let s:nrrw_winname='Narrow_Region'
 
     " Customization
@@ -46,28 +48,32 @@ fun! <sid>Init()"{{{1
     let s:nrrw_rgn_hl   = (exists("g:nrrw_rgn_hl")    ? g:nrrw_rgn_hl     : "WildMenu")
     let s:nrrw_rgn_nohl = (exists("g:nrrw_rgn_nohl")  ? g:nrrw_rgn_nohl   : 0)
 
-    let s:debug=0
-	if exists("s:debug") && s:debug
-		com! NI :call <sid>WarningMsg("Instance: ".s:instn)
-		com! NJ :call <sid>WarningMsg("Data: ".string(s:nrrw_rgn_lines))
-	endif
+	let s:debug = 0
 		
 endfun 
 
 fun! <sid>NrwRgnWin() "{{{1
-	let s:nrrw_winname .= '_' . s:instn
-    let nrrw_win = bufwinnr('^'.s:nrrw_winname.'$')
+	let local_options = s:GetOptions(s:opts)
+	let nrrw_winname = s:nrrw_winname . '_' . s:instn
+    let nrrw_win = bufwinnr('^'.nrrw_winname.'$')
     if nrrw_win != -1
 		exe ":noa " . nrrw_win . 'wincmd w'
+		" just in case, a global nomodifiable was set 
+		" disable this for the narrowed window
+		setl ma
 		silent %d _
 		noa wincmd p
     else
-		exe 'topleft ' . s:nrrw_rgn_wdth . (s:nrrw_rgn_vert?'v':'') . "sp " . s:nrrw_winname
+		exe 'topleft ' . s:nrrw_rgn_wdth . (s:nrrw_rgn_vert?'v':'') . "sp " . nrrw_winname
+		" just in case, a global nomodifiable was set 
+		" disable this for the narrowed window
+		setl ma
 		" Just in case
 		silent %d _
 		setl noswapfile buftype=acwrite bufhidden=wipe foldcolumn=0 nobuflisted
 		let nrrw_win = bufwinnr("")
     endif
+	call <sid>SetOptions(local_options)
     return nrrw_win
 endfu
 
@@ -79,11 +85,16 @@ fun! nrrwrgn#NrrwRgn() range  "{{{1
 
 	" initialize Variables
 	call <sid>Init()
-	let local_options=<sid>GetOptions(s:opts)
+	let b:orig_buf_ro=0
+	if !&l:ma || &l:ro
+		let b:orig_buf_ro=1
+		call s:WarningMsg("Buffer is protected, won't be able to write the changes back!")
+	else 
 	" Protect the original buffer,
 	" so you won't accidentally modify those lines,
 	" that might later be overwritten
-	setl noma
+		setl noma
+	endif
 	let s:nrrw_rgn_lines[s:instn].startline = [ a:firstline, 0 ]
 	let s:nrrw_rgn_lines[s:instn].endline   = [ a:lastline, 0 ]
 	if exists("s:nrrw_rgn_lines[s:instn].matchid")
@@ -93,11 +104,13 @@ fun! nrrwrgn#NrrwRgn() range  "{{{1
 	    call matchdelete(s:nrrw_rgn_lines[s:instn].matchid)
 	endif
 	if !s:nrrw_rgn_nohl
-	    let s:nrrw_rgn_lines[s:instn].matchid =  matchadd(s:nrrw_rgn_hl, 
-		\<sid>GeneratePattern(
+		let pattern=<sid>GeneratePattern(
 		\s:nrrw_rgn_lines[s:instn].startline, 
 		\s:nrrw_rgn_lines[s:instn].endline, 
-		\'V')) "set the highlighting
+		\'V') "set the highlighting
+		if !empty(pattern)
+			let s:nrrw_rgn_lines[s:instn].matchid =  matchadd(s:nrrw_rgn_hl, pattern)
+		endif
 	endif
 	let a=getline(
 	    \s:nrrw_rgn_lines[s:instn].startline[0], 
@@ -106,9 +119,8 @@ fun! nrrwrgn#NrrwRgn() range  "{{{1
 	exe ':noa ' win 'wincmd w'
 	let b:orig_buf = orig_buf
 	call setline(1, a)
-	let b:nrrw_instn = s:instn
 	setl nomod
-	call <sid>SetOptions(local_options)
+	let b:nrrw_instn = s:instn
 	"com! -buffer WidenRegion :call nrrwrgn#WidenRegion(0) |sil bd!
     com! -buffer -bang WidenRegion :call nrrwrgn#WidenRegion(0, (empty("<bang>") ? 0 : 1))
 	call <sid>NrrwRgnAuCmd(0)
@@ -118,6 +130,9 @@ fun! nrrwrgn#NrrwRgn() range  "{{{1
 endfun
 
 fu! s:WriteNrrwRgn(...) "{{{1
+	" if argument is given, write narrowed buffer back
+	" else destroy the narrowed window
+	let nrrw_instn = exists("b:nrrw_instn") ? b:nrrw_instn : s:instn
 	if exists("b:orig_buf") && (bufwinnr(b:orig_buf) == -1)
 		call s:WarningMsg("Original buffer does no longer exist! Aborting!")
 		return
@@ -126,17 +141,25 @@ fu! s:WriteNrrwRgn(...) "{{{1
 		" Write the buffer back to the original buffer
 		setl nomod
 		exe ":WidenRegion"
-    else
 		if bufname('') !~# 'Narrow_Region'
-			exe ':noa' . bufwinnr('Narrow_Region') . 'wincmd w'
+			exe ':noa' . bufwinnr(s:nrrw_winname . '_' . s:instn) . 'wincmd w'
+			"exe ':noa' . bufwinnr(nrrw_instn) . 'wincmd w'
 		endif
-		call setbufvar(b:orig_buf, '&ma', 1)
-		exe ':noa' . bufwinnr(b:orig_buf) . 'wincmd w'
-		"if exists("s:nrrw_rgn_lines[s:instn].matchid")
-		"	call matchdelete(s:nrrw_rgn_lines[s:instn].matchid)
-		"	unlet s:nrrw_rgn_lines[s:instn].matchid
-		"endif
+"		call setbufvar(b:orig_buf, '&ma', 1)
+"    elseif &l:mod
+    else
+		" Best guess
+		if bufname('') =~# 'Narrow_Region'
+			exe ':noa' . bufwinnr(b:orig_buf) . 'wincmd w'
+		endif
+		if !exists("a:1") 
+			" close narrowed buffer
+			call <sid>NrrwRgnAuCmd(nrrw_instn)
+		endif
     endif
+"	if bufwinnr(nrrw_instn) != -1
+"		exe ':noa' . bufwinnr(nrrw_instn) . 'wincmd w'
+"	endif
 endfun
 
 fu! nrrwrgn#WidenRegion(vmode,force) "{{{1
@@ -151,7 +174,12 @@ fu! nrrwrgn#WidenRegion(vmode,force) "{{{1
     call <sid>SaveRestoreRegister(1)
     exe ':noa' . orig_win . 'wincmd w'
 	let wsv=winsaveview()
-    if !(&l:ma)
+	if exists("b:orig_buf_ro") && b:orig_buf_ro && !a:force
+	   call s:WarningMsg("Original buffer protected. Can't write changes!")
+	   :noa wincmd p
+	   return
+	endif
+    if !&l:ma && !( exists("b:orig_buf_ro") && b:orig_buf_ro)
 		setl ma
     endif
     if a:vmode "charwise, linewise or blockwise selection 
@@ -172,20 +200,24 @@ fu! nrrwrgn#WidenRegion(vmode,force) "{{{1
 		let [ s:nrrw_rgn_lines[instn].startline, 
 			 \s:nrrw_rgn_lines[instn].endline ] = <sid>RetVisRegionPos()
 		" also, renew the highlighted region
-		if exists("s:nrrw_rgn_lines[instn].matchid")
+		if exists("s:nrrw_rgn_lines[instn].matchid") && s:nrrw_rgn_lines[instn].matchid > 1
 			" if you call :NarrowRegion several times, without widening 
 			" the previous region, b:matchid might already be defined so
 			" make sure, the previous highlighting is removed.
 			call matchdelete(s:nrrw_rgn_lines[instn].matchid)
 		endif
 		if !s:nrrw_rgn_nohl
-			let s:nrrw_rgn_lines[instn].matchid =  matchadd(s:nrrw_rgn_hl, 
-			\<sid>GeneratePattern(
-			\s:nrrw_rgn_lines[instn].startline, 
-			\s:nrrw_rgn_lines[instn].endline, 
-			\s:nrrw_rgn_lines[instn].vmode))
+			let pattern=<sid>GeneratePattern(
+			\s:nrrw_rgn_lines[s:instn].startline, 
+			\s:nrrw_rgn_lines[s:instn].endline, 
+			\s:nrrw_rgn_lines[instn].vmode)
+			if !empty(pattern)
+				let s:nrrw_rgn_lines[instn].matchid =  matchadd(s:nrrw_rgn_hl, pattern)
+			endif
 		endif
-    else "linewise selection because we started the NarrowRegion with the command NarrowRegion(0)
+    else 
+	    " linewise selection because we started the NarrowRegion with the
+		" command NarrowRegion(0)
 		"
 		" if the endposition of the narrowed buffer is also the last line of
 		" the buffer, the append will add an extra newline that needs to be
@@ -215,27 +247,27 @@ fu! nrrwrgn#WidenRegion(vmode,force) "{{{1
 			call matchdelete(s:nrrw_rgn_lines[instn].matchid)
 		endif
 		if !s:nrrw_rgn_nohl
-			let s:nrrw_rgn_lines[instn].matchid =  matchadd(s:nrrw_rgn_hl, 
-			\<sid>GeneratePattern(
+			let pattern=<sid>GeneratePattern(
 			\s:nrrw_rgn_lines[instn].startline, 
 			\s:nrrw_rgn_lines[instn].endline, 
-			\'V'))
+			\'V')
+			if !empty(pattern)
+				let s:nrrw_rgn_lines[instn].matchid =  matchadd(s:nrrw_rgn_hl, pattern)
+			endif
 		endif
 	    if delete_last_line
-			:$d _
+			silent! $d _
 	    endif
     endif
     call <sid>SaveRestoreRegister(0)
     let  @/=s:o_s
 	call winrestview(wsv)
     " jump back to narrowed window
-    exe ':noa' . bufwinnr(nrw_buf) . 'wincmd w'
-    "call <sid>NrrwRgnAuCmd(0)
-	"exe ':silent :bd!' nrw_buf
+    exe ':noa ' . bufwinnr(nrw_buf) . 'wincmd w'
 	setl nomod
 	if a:force
-		"exe 'bd! ' nrw_buf
-		:bd!
+		" execute auto command
+		bw
 	endif
 endfu
 
@@ -272,8 +304,16 @@ fu! nrrwrgn#VisualNrrwRgn(mode) "{{{1
     let orig_buf=bufnr('')
     call <sid>SaveRestoreRegister(1)
 
-	let local_options=<sid>GetOptions(<sid>Options('local to buffer'))
-    setl noma
+	let b:orig_buf_ro=0
+	if !&l:ma || &l:ro
+		 let b:orig_buf_ro=1
+		 call s:WarningMsg("Buffer is protected, won't be able to write the changes back!")
+    else
+	" Protect the original buffer,
+	" so you won't accidentally modify those lines,
+	" that might later be overwritten
+		 setl noma
+	endif
     let [ s:nrrw_rgn_lines[s:instn].startline, s:nrrw_rgn_lines[s:instn].endline ] = <sid>RetVisRegionPos()
     if exists("s:nrrw_rgn_lines[s:instn].matchid")
 		" if you call :NarrowRegion several times, without widening 
@@ -282,8 +322,11 @@ fu! nrrwrgn#VisualNrrwRgn(mode) "{{{1
 		call matchdelete(s:nrrw_rgn_lines[s:instn].matchid)
     endif
     if !s:nrrw_rgn_nohl
-		let s:nrrw_rgn_lines[s:instn].matchid =  matchadd(s:nrrw_rgn_hl, 
-		\<sid>GeneratePattern(s:nrrw_rgn_lines[s:instn].startline, s:nrrw_rgn_lines[s:instn].endline, s:nrrw_rgn_lines[s:instn].vmode))
+		let pattern=<sid>GeneratePattern(s:nrrw_rgn_lines[s:instn].startline,
+					\s:nrrw_rgn_lines[s:instn].endline, s:nrrw_rgn_lines[s:instn].vmode)
+		if !empty(pattern)
+			let s:nrrw_rgn_lines[s:instn].matchid =  matchadd(s:nrrw_rgn_hl, pattern)
+		endif
     endif
     norm gv"ay
     let win=<sid>NrwRgnWin()
@@ -292,8 +335,7 @@ fu! nrrwrgn#VisualNrrwRgn(mode) "{{{1
     silent put a
 	let b:nrrw_instn = s:instn
     silent 0d _
-	call <sid>SetOptions(local_options)
-    setl nomod
+	setl nomod
     "com! -buffer WidenRegion :call nrrwrgn#WidenRegion(1)|sil bd!
     com! -buffer -bang WidenRegion :call nrrwrgn#WidenRegion(1, (empty("<bang>") ? 0 : 1))
     call <sid>NrrwRgnAuCmd(0)
@@ -310,18 +352,26 @@ fu! <sid>NrrwRgnAuCmd(bufnr) "{{{1
 		exe "aug NrrwRgn" . b:nrrw_instn
 			au!
 			au BufWriteCmd <buffer> nested :call s:WriteNrrwRgn(1)
-			exe "au BufWinLeave,BufWipeout,BufDelete <buffer> nested :call s:WriteNrrwRgn()|:call <sid>NrrwRgnAuCmd(".b:nrrw_instn.")"
+			au BufWinLeave,BufWipeout,BufDelete <buffer> nested :call s:WriteNrrwRgn()
 		aug end
     else
 		exe "aug NrrwRgn" .  a:bufnr
 		au!
 		aug end
 		exe "aug! NrrwRgn" . a:bufnr
-		if exists("s:nrrw_rgn_lines[a:bufnr].matchid")
+		if exists("s:nrrw_rgn_lines[a:bufnr].matchid") && s:nrrw_rgn_lines[a:bufnr].matchid > 1
 			call matchdelete(s:nrrw_rgn_lines[a:bufnr].matchid)
 			unlet s:nrrw_rgn_lines[a:bufnr].matchid
 		endif
-		if s:instn>0
+		if !&ma
+			setl ma
+		endif
+"		if s:debug
+"			echo printf("bufnr: %d a:bufnr: %d\n", bufnr(''), a:bufnr)
+"			echo "bwipe " s:nrrw_winname . '_' . a:bufnr
+"		endif
+		exe "bwipe! " bufnr(s:nrrw_winname . '_' . a:bufnr)
+		if s:instn>1
 			unlet s:nrrw_rgn_lines[a:bufnr]
 			let s:instn-=1
 		endif
@@ -335,12 +385,14 @@ fu! <sid>RetVisRegionPos() "{{{1
 endfu
 
 fun! <sid>GeneratePattern(startl, endl, mode) "{{{1
-    if a:mode ==# ''
+    if a:mode ==# '' && a:startl[0] > 0 && a:startl[1] > 0
 		return '\%>' . (a:startl[0]-1) . 'l\&\%>' . (a:startl[1]-1) . 'v\&\%<' . (a:endl[0]+1) . 'l\&\%<' . (a:endl[1]+1) . 'v'
-    elseif a:mode ==# 'v'
+    elseif a:mode ==# 'v' && a:startl[0] > 0 && a:startl[1] > 0
 		return '\%>' . (a:startl[0]-1) . 'l\&\%>' . (a:startl[1]-1) . 'v\_.*\%<' . (a:endl[0]+1) . 'l\&\%<' . (a:endl[1]+1) . 'v'
-    else
+	elseif a:startl[0] > 0
 		return '\%>' . (a:startl[0]-1) . 'l\&\%<' . (a:endl[0]+1) . 'l'
+	else
+		return ''
     endif
 endfun "}}}
 fun! nrrwrgn#UnifiedDiff() "{{{1
@@ -388,7 +440,7 @@ fun! <sid>Options(search) "{{{1
 		if empty(a:search)
 			return c
 		endif
-		silent sview $VIMRUNTIME/doc/options.txt
+		silent noa sview $VIMRUNTIME/doc/options.txt
 		" for whatever reasons $VIMRUNTIME/doc/options.txt
 		" does not exist, return empty list
 		if line('$') == 1
@@ -403,14 +455,16 @@ fun! <sid>Options(search) "{{{1
 		let b=split(@a, "\n")
 		call setreg('a', reg_a[0], reg_a[1])
 		call filter(b, 'v:val =~ "^''"')
-		call filter(b, 'v:val !~ "^''modifiable''"')
+		" the following options should be set
+		let filter_opt='\%(modifi\%(ed\|able\)\|readonly\|noswapfile\|buftype\|bufhidden\|foldcolumn\|buflisted\)'
+		call filter(b, 'v:val !~ "^''".filter_opt."''"')
 		for item in b
 			let item=substitute(item, '''', '', 'g')
 			call add(c, split(item, '\s\+')[0])
 		endfor
 	finally
-		if fnamemodify(bufname(''),':p') =~ expand("$VIMRUNTIME/doc/options.txt")
-			bdelete
+		if fnamemodify(bufname(''),':p') == expand("$VIMRUNTIME/doc/options.txt")
+			bwipe
 		endif
 		return c
 	endtry
@@ -430,7 +484,17 @@ fun! <sid>SetOptions(opt) "{{{1
 			exe "let &l:". option " = " string(result)
 		endfor
 	 endif
+	 setl nomod noro
 endfun
+
+" Debugging options "{{{1
+if exists("s:debug") && s:debug
+	fun! <sid>ClearOpts() "{{{2
+		unlet s:instn
+		com! NI :call <sid>WarningMsg("Instance: ".s:instn)
+		com! NJ :call <sid>WarningMsg("Data: ".string(s:nrrw_rgn_lines))
+	endfun
+endif
 
 " Modeline {{{1
 " vim: ts=4 sts=4 fdm=marker com+=l\:\" fdl=0
