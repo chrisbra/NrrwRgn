@@ -435,6 +435,7 @@ endfun
 
 fun! <sid>Options(search) "{{{1
 	let c=[]
+	let buf=bufnr('')
 	try
 		" empty search pattern
 		if empty(a:search)
@@ -463,9 +464,11 @@ fun! <sid>Options(search) "{{{1
 			call add(c, split(item, '\s\+')[0])
 		endfor
 	finally
-		if fnamemodify(bufname(''),':p') == expand("$VIMRUNTIME/doc/options.txt")
+		if fnamemodify(bufname(''),':p') ==
+		   \expand("$VIMRUNTIME/doc/options.txt")
 			bwipe
 		endif
+		exe "noa "  bufwinnr(buf) "wincmd  w"
 		return c
 	endtry
 endfun
