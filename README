@@ -1,7 +1,7 @@
 *NrrwRgn.txt*   A Narrow Region Plugin (similar to Emacs)
 
 Author:  Christian Brabandt <cb@256bit.org>
-Version: 0.16 Tue, 16 Nov 2010 16:21:15 +0100
+Version: 0.17 Tue, 30 Nov 2010 20:37:11 +0100
 
 Copyright: (c) 2009, 2010 by Christian Brabandt         
            The VIM LICENSE applies to NrrwRgnPlugin.vim and NrrwRgnPlugin.txt
@@ -170,6 +170,7 @@ third line of this document.
   autocmd BufEnter * cd %:p:h
   (reported by Xu Hong, Thanks!)
 - :q didn't clean up the Narrowed Buffer correctly. Fix this
+- some code cleanup
 
 0.16: November, 16, 2010
 - Bugfix: copy all local options to the narrowed window (reported by Xu Hong,
