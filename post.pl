@@ -23,6 +23,10 @@ my @files=glob('*.vba');
 #my $scriptversion=shift @ARGV;
 my $scriptversion = 0;
 my $versioncomment=shift @ARGV;
+unless ($versioncomment){
+	print "Please enter comment!\n";
+	exit;
+}
 $versioncomment.="\n(automatically uploaded)";
 
 
