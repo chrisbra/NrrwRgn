@@ -24,15 +24,21 @@ let g:loaded_nrrw_rgn = 1
 " ------------------------------------------------------------------------------
 " Public Interface: {{{1
 
-" Define the Command:
-com! -range NarrowRegion :exe ":" . <line1> . ',' . <line2> . "call nrrwrgn#NrrwRgn()"
-com! -range NR	 :exe ":" . <line1> . ',' . <line2> . "call nrrwrgn#NrrwRgn()"
-com! -range NRV  :call nrrwrgn#VisualNrrwRgn(visualmode())
-com! NW	 :exe ":" . line('w0') . ',' . line('w$') . "call nrrwrgn#NrrwRgn()"
-com! NarrowWindow :exe ":" . line('w0') . ',' . line('w$') . "call nrrwrgn#NrrwRgn()"
-com! NUD :call nrrwrgn#UnifiedDiff()
+" Define the Command aliases "{{{2
+com! -range NRPrepare :<line1>,<line2>NRP
+com! -range NarrowRegion :<line1>,<line2>NR
+com! NRMulti :NRM
+com! NarrowWindow :NW
 
-" Define the Mapping:
+" Define the actual Commands "{{{2
+com! -range NR	 :<line1>, <line2>call nrrwrgn#NrrwRgn()
+com! -range NRP  :exe ":" . <line1> . ',' . <line2> . "call nrrwrgn#Prepare()"
+com! NRV :call nrrwrgn#VisualNrrwRgn(visualmode())
+com! NUD :call nrrwrgn#UnifiedDiff()
+com! NW	 :exe ":" . line('w0') . ',' . line('w$') . "call nrrwrgn#NrrwRgn()"
+com! NRM :call nrrwrgn#NrrwRgnDoPrepare()
+
+" Define the Mapping: "{{{2
 if !hasmapto('<Plug>NrrwrgnDo')
 	xmap <unique> <Leader>nr <Plug>NrrwrgnDo
 endif
