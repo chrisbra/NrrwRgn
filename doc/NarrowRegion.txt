@@ -208,6 +208,11 @@ third line of this document.
 ==============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
 
+0.19: (not released yet)
+- fix issue 2 from github https://github.com/chrisbra/NrrwRgn/issues/2
+  (Widening does not work, if the narrowed windows have been moved to a new
+  tabspace). Reported by vanschelven, thanks!
+
 0.18: December 10, 2010
 - experimental feature: Allow to Narrow several different regions at once
   using :g/pattern/NRP and afterwards calling :NRM
