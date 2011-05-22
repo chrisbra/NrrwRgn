@@ -1,7 +1,7 @@
 *NrrwRgn.txt*   A Narrow Region Plugin (similar to Emacs)
 
 Author:  Christian Brabandt <cb@256bit.org>
-Version: 0.18 Fri, 10 Dec 2010 15:16:29 +0100
+Version: 0.19 Sun, 22 May 2011 13:59:50 +0200
 
 Copyright: (c) 2009, 2010 by Christian Brabandt         
            The VIM LICENSE applies to NrrwRgnPlugin.vim and NrrwRgnPlugin.txt
@@ -207,6 +207,11 @@ third line of this document.
 
 ==============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
+
+0.19: (not released yet)
+- fix issue 2 from github https://github.com/chrisbra/NrrwRgn/issues/2
+  (Widening does not work, if the narrowed windows have been moved to a new
+  tabspace). Reported by vanschelven, thanks!
 
 0.18: December 10, 2010
 - experimental feature: Allow to Narrow several different regions at once
