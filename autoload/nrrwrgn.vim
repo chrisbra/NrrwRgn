@@ -562,6 +562,11 @@ fun! <sid>SetOptions(opt) "{{{1
 endfun
 
 fun! <sid>CheckProtected() "{{{1
+	" Protect the original window, unless the user explicitly defines not to
+	" protect the original buffer
+	if !exists("g:nrrw_rgn_protect") || g:nrrw_rgn_protect=='n'
+		return
+	endif
 	let b:orig_buf_ro=0
 	if !&l:ma || &l:ro
 		let b:orig_buf_ro=1
