@@ -234,6 +234,8 @@ third line of this document.
   Sitz!)
 - allow what options will be applied using the g:nrrw_custom_options dict
   (suggested by Herbert Sitz. Thanks!)
+- NRV didn't hightlight the region that was selected (reported by Herbert
+  Sitz, thanks!)
 
 0.19: May 22, 2011
 - fix issue 2 from github https://github.com/chrisbra/NrrwRgn/issues/2
