@@ -291,7 +291,8 @@ fu! nrrwrgn#WidenRegion(vmode,force) "{{{1
 		let [ s:nrrw_rgn_lines[instn].startline, 
 			 \s:nrrw_rgn_lines[instn].endline ] = <sid>RetVisRegionPos()
 		" also, renew the highlighted region
-		call <sid>AddMatches()
+		call <sid>AddMatches(<sid>GeneratePattern(s:nrrw_rgn_lines[s:instn].startline,
+						\s:nrrw_rgn_lines[s:instn].endline, s:nrrw_rgn_lines[s:instn].vmode))
 		if !s:nrrw_rgn_nohl
 			let pattern=<sid>GeneratePattern(
 			\s:nrrw_rgn_lines[s:instn].startline, 
@@ -549,8 +550,6 @@ fun! <sid>GetOptions(opt) "{{{1
 		endfor
 	endif
 	return result
-endfun
-
 endfun
 
 fun! <sid>SetOptions(opt) "{{{1
