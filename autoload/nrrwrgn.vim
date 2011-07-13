@@ -31,7 +31,7 @@ endfun
 fun! <sid>Init() "{{{1
 	if !exists("s:instn")
 		let s:instn=1
-		if !exists(g:nrrw_custom_options) || empty(g:nrrw_custom_options)
+		if !exists("g:nrrw_custom_options") || empty(g:nrrw_custom_options)
 			let s:opts=<sid>Options('local to buffer')
         endif
 	else
@@ -541,7 +541,7 @@ fun! <sid>Options(search) "{{{1
 endfun
 
 fun! <sid>GetOptions(opt) "{{{1
-	if exists(g:nrrw_custom_options) && !empty(g:nrrw_custom_options)
+	if exists("g:nrrw_custom_options") && !empty(g:nrrw_custom_options)
 		let result = g:nrrw_custom_options
 	else
 		let result={}
