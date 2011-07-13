@@ -31,7 +31,9 @@ endfun
 fun! <sid>Init() "{{{1
 	if !exists("s:instn")
 		let s:instn=1
-		let s:opts=<sid>Options('local to buffer')
+		if !exists(g:nrrw_custom_options) || empty(g:nrrw_custom_options)
+			let s:opts=<sid>Options('local to buffer')
+        endif
 	else
 		let s:instn+=1
 	endif
@@ -64,7 +66,10 @@ fun! <sid>NrwRgnWin() "{{{1
 		silent %d _
 		noa wincmd p
 	else
-		exe 'topleft ' . s:nrrw_rgn_wdth . (s:nrrw_rgn_vert?'v':'') . "sp " . nrrw_winname
+		if !exists('g:nrrw_topbot_leftright')
+			let g:nrrw_topbot_leftright = 'topleft'
+		endif
+		exe  g:nrrw_topbot_leftright s:nrrw_rgn_wdth . (s:nrrw_rgn_vert?'v':'') . "sp " . nrrw_winname
 		" just in case, a global nomodifiable was set 
 		" disable this for the narrowed window
 		setl ma
@@ -535,11 +540,17 @@ fun! <sid>Options(search) "{{{1
 endfun
 
 fun! <sid>GetOptions(opt) "{{{1
-	 let result={}
-	 for item in a:opt
-		 exe "let result[item]=&l:".item
-	 endfor
-	 return result
+	if exists(g:nrrw_custom_options) && !empty(g:nrrw_custom_options)
+		let result = g:nrrw_custom_options
+	else
+		let result={}
+		for item in a:opt
+			exe "let result[item]=&l:".item
+		endfor
+	endif
+	return result
+endfun
+
 endfun
 
 fun! <sid>SetOptions(opt) "{{{1

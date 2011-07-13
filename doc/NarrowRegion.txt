@@ -192,6 +192,27 @@ This will let <F3> open the Narrow-Window, but only if you have pressed it in
 Visual Mode. It doesn't really make sense to map this combination to any other
 mode, unless you want it to Narrow your last visually selected range.
 
+------------------------------------------------------------------------------
+
+If you like to specify the options, you want to have applied into the narrowed
+window, you can set the g:nrrw_custom_options setting, in your |.vimrc| e.g. >
+
+   let g:nrrw_custom_options={}
+   let g:nrrw_custom_options['filetype'] = 'python'
+>
+This will only apply those options to the narrowed buffer. You need to take care,
+that all options you need will apply.
+
+------------------------------------------------------------------------------
+
+If you don't like, that your narrowed window opens above to the current window,
+define the g:nrrw_topbot_leftright variable to your taste, e.g. >
+
+  let g:nrrw_topbot_leftright = 'botright'
+<
+Now, all narrowed windows will appear below the original window. If not
+specified, the narrowed window will appear above/left of the original window.
+
 ==============================================================================
 3. NrrwRgn Feedback                                         *NrrwRgn-feedback*
 
@@ -207,6 +228,12 @@ third line of this document.
 
 ==============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
+
+0.20: (unreleased)
+- allow customization via the g:nrrw_topbot_leftright variable (Thanks Herbert
+  Sitz!)
+- allow what options will be applied using the g:nrrw_custom_options dict
+  (suggested by Herbert Sitz. Thanks!)
 
 0.19: May 22, 2011
 - fix issue 2 from github https://github.com/chrisbra/NrrwRgn/issues/2
