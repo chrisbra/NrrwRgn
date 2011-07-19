@@ -1,0 +1,5 @@
+- I really need some tests, like:
+  * Visual Narrowing
+  * Narrowing 1 Region
+  * Narrowing several independent regions with setting the g:nrrw_rgn_protect variable
+  * Multi line narrowing
