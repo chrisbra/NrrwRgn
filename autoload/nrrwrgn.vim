@@ -50,7 +50,7 @@ fun! <sid>Init() "{{{1
 	let s:nrrw_rgn_hl	= (exists("g:nrrw_rgn_hl")	  ? g:nrrw_rgn_hl	  : "WildMenu")
 	let s:nrrw_rgn_nohl = (exists("g:nrrw_rgn_nohl")  ? g:nrrw_rgn_nohl   : 0)
 
-	let s:debug = 1
+	let s:debug = 0
 		
 endfun 
 
@@ -93,12 +93,12 @@ fun! nrrwrgn#NrrwRgn() range  "{{{1
     call <sid>CheckProtected()
 	let s:nrrw_rgn_lines[s:instn].startline = [ a:firstline, 0 ]
 	let s:nrrw_rgn_lines[s:instn].endline	= [ a:lastline, 0 ]
-	call <sid>DeleteMatches()
+	call <sid>DeleteMatches(s:instn)
 	" Set the highlighting
 	call <sid>AddMatches(<sid>GeneratePattern(
 		\s:nrrw_rgn_lines[s:instn].startline, 
 		\s:nrrw_rgn_lines[s:instn].endline, 
-		\'V'))
+		\'V'), s:instn)
 	let a=getline(
 		\s:nrrw_rgn_lines[s:instn].startline[0], 
 		\s:nrrw_rgn_lines[s:instn].endline[0])
@@ -148,7 +148,7 @@ fun! nrrwrgn#NrrwRgnDoPrepare() "{{{1
 	let s:nrrw_rgn_lines[s:instn].startline = []
 	let s:nrrw_rgn_lines[s:instn].endline	= []
 	let s:nrrw_rgn_lines[s:instn].multi     = s:nrrw_rgn_buf
-	call <sid>DeleteMatches()
+	call <sid>DeleteMatches(s:instn)
 
 	let nr=0
 	let lines=[]
@@ -163,7 +163,7 @@ fun! nrrwrgn#NrrwRgnDoPrepare() "{{{1
 		let start = lines[0]
 		let end   = len(lines)==2 ? lines[1] : lines[0]
 "		call <sid>AddMatches('\%>'.(start-1).'l\%<'.(end+1).'l')"
-		call <sid>AddMatches(<sid>GeneratePattern([start,0], [end,0], 'V'))
+		call <sid>AddMatches(<sid>GeneratePattern([start,0], [end,0], 'V'), s:instn)
 "		if !s:nrrw_rgn_nohl
 "			if !exists("s:nrrw_rgn_lines[s:instn].matchid")
 "				let s:nrrw_rgn_lines[s:instn].matchid=[]
@@ -245,7 +245,7 @@ fu! nrrwrgn#WidenRegion(vmode,force) "{{{1
 	let nrw_buf  = bufnr('')
 	let orig_buf = b:orig_buf
 	let orig_tab = tabpagenr()
-	let instn = b:nrrw_instn
+	let instn    = b:nrrw_instn
 	let cont	 = getline(1,'$')
 
 	let tab=<sid>BufInTab(orig_buf)
@@ -269,7 +269,17 @@ fu! nrrwrgn#WidenRegion(vmode,force) "{{{1
 	if !&l:ma && !( exists("b:orig_buf_ro") && b:orig_buf_ro)
 		setl ma
 	endif
-	call <sid>DeleteMatches()
+	call <sid>DeleteMatches(instn)
+	" This is needed to adjust all other narrowed regions
+	" in case we have several narrowed regions within the same buffer
+	if exists("g:nrrw_rgn_protect") && g:nrrw_rgn_protect =~? 'n'
+		let  adjust_line_numbers = len(cont) - 1 - (
+					\s:nrrw_rgn_lines[instn].endline[0] - 
+					\s:nrrw_rgn_lines[instn].startline[0])
+	endif
+
+	" Now copy the content back into the original buffer
+
 	" Multiselection
 	if has_key(s:nrrw_rgn_lines[instn], 'multi')
 		call <sid>WidenRegionMulti(cont, instn)
@@ -291,16 +301,18 @@ fu! nrrwrgn#WidenRegion(vmode,force) "{{{1
 		let [ s:nrrw_rgn_lines[instn].startline, 
 			 \s:nrrw_rgn_lines[instn].endline ] = <sid>RetVisRegionPos()
 		" also, renew the highlighted region
-		call <sid>AddMatches(<sid>GeneratePattern(s:nrrw_rgn_lines[s:instn].startline,
-						\s:nrrw_rgn_lines[s:instn].endline, s:nrrw_rgn_lines[s:instn].vmode))
+		call <sid>AddMatches(<sid>GeneratePattern(s:nrrw_rgn_lines[instn].startline,
+						\s:nrrw_rgn_lines[instn].endline, s:nrrw_rgn_lines[instn].vmode),
+						\instn)
 		if !s:nrrw_rgn_nohl
 			let pattern=<sid>GeneratePattern(
-			\s:nrrw_rgn_lines[s:instn].startline, 
-			\s:nrrw_rgn_lines[s:instn].endline, 
+			\s:nrrw_rgn_lines[instn].startline, 
+			\s:nrrw_rgn_lines[instn].endline, 
 			\s:nrrw_rgn_lines[instn].vmode)
 			if !empty(pattern)
-				let s:nrrw_rgn_lines[s:instn].matchid=[]
-				call add(s:nrrw_rgn_lines[instn].matchid, matchadd(s:nrrw_rgn_hl, pattern))
+				let s:nrrw_rgn_lines[instn].matchid=[]
+				call add(s:nrrw_rgn_lines[instn].matchid,
+					\matchadd(s:nrrw_rgn_hl, pattern))
 			endif
 		endif
 	else 
@@ -330,11 +342,16 @@ fu! nrrwrgn#WidenRegion(vmode,force) "{{{1
 		call <sid>AddMatches(<sid>GeneratePattern(
 			\s:nrrw_rgn_lines[instn].startline, 
 			\s:nrrw_rgn_lines[instn].endline, 
-			\'V'))
+			\'V'),
+			\instn)
 		if delete_last_line
 			silent! $d _
 		endif
 	endif
+	" Recalculate start- and endline numbers for all other Narrowed Windows.
+	" This matters, if you narrow different regions of the same file and
+	" write your changes back.
+	call <sid>RecalculateLineNumbers(instn, adjust_line_numbers)
 	call <sid>SaveRestoreRegister(0)
 	let  @/=s:o_s
 	call winrestview(wsv)
@@ -394,9 +411,10 @@ fu! nrrwrgn#VisualNrrwRgn(mode) "{{{1
 
 	call <sid>CheckProtected()
 	let [ s:nrrw_rgn_lines[s:instn].startline, s:nrrw_rgn_lines[s:instn].endline ] = <sid>RetVisRegionPos()
-	call <sid>DeleteMatches()
+	call <sid>DeleteMatches(s:instn)
 	call <sid>AddMatches(<sid>GeneratePattern(s:nrrw_rgn_lines[s:instn].startline,
-					\s:nrrw_rgn_lines[s:instn].endline, s:nrrw_rgn_lines[s:instn].vmode))
+					\s:nrrw_rgn_lines[s:instn].endline, s:nrrw_rgn_lines[s:instn].vmode),
+					\s:instn)
 	norm gv"ay
 	let win=<sid>NrwRgnWin()
 	exe ':noa ' win 'wincmd w'
@@ -414,31 +432,31 @@ fu! nrrwrgn#VisualNrrwRgn(mode) "{{{1
 	let &lz   = o_lz
 endfu
 
-fu! <sid>NrrwRgnAuCmd(bufnr) "{{{1
-	" If a:bufnr==0, then enable auto commands
-	" else disable auto commands for a:bufnr
-	if !a:bufnr
+fu! <sid>NrrwRgnAuCmd(instn) "{{{1
+	" If a:instn==0, then enable auto commands
+	" else disable auto commands for a:instn
+	if !a:instn
 		exe "aug NrrwRgn" . b:nrrw_instn
 			au!
 			au BufWriteCmd <buffer> nested :call s:WriteNrrwRgn(1)
 			au BufWinLeave,BufWipeout,BufDelete <buffer> nested :call s:WriteNrrwRgn()
 		aug end
 	else
-		exe "aug NrrwRgn" .  a:bufnr
+		exe "aug NrrwRgn" .  a:instn
 		au!
 		aug end
-		exe "aug! NrrwRgn" . a:bufnr
-		call <sid>DeleteMatches()
+		exe "aug! NrrwRgn" . a:instn
+		call <sid>DeleteMatches(a:instn)
 		if !&ma
 			setl ma
 		endif
-"		if s:debug
-"			echo printf("bufnr: %d a:bufnr: %d\n", bufnr(''), a:bufnr)
-"			echo "bwipe " s:nrrw_winname . '_' . a:bufnr
-"		endif
-		exe "bwipe! " bufnr(s:nrrw_winname . '_' . a:bufnr)
-		if s:instn>1
-			unlet s:nrrw_rgn_lines[a:bufnr]
+		if s:debug
+			echo printf("bufnr: %d a:instn: %d\n", bufnr(''), a:instn)
+			echo "bwipe " s:nrrw_winname . '_' . a:instn
+		endif
+		exe "bwipe! " bufnr(s:nrrw_winname . '_' . a:instn)
+		if s:instn>=1
+			unlet s:nrrw_rgn_lines[a:instn]
 			let s:instn-=1
 		endif
 	endif
@@ -563,8 +581,8 @@ endfun
 
 fun! <sid>CheckProtected() "{{{1
 	" Protect the original window, unless the user explicitly defines not to
-	" protect the original buffer
-	if !exists("g:nrrw_rgn_protect") || g:nrrw_rgn_protect=='n'
+	" protect it
+	if exists("g:nrrw_rgn_protect") && g:nrrw_rgn_protect =~? 'n'
 		return
 	endif
 	let b:orig_buf_ro=0
@@ -579,18 +597,18 @@ fun! <sid>CheckProtected() "{{{1
 	endif
 endfun
 
-fun! <sid>DeleteMatches() "{{{1
+fun! <sid>DeleteMatches(instn) "{{{1
 	if exists("s:nrrw_rgn_lines[s:instn].matchid")
 		" if you call :NarrowRegion several times, without widening 
 		" the previous region, b:matchid might already be defined so
 		" make sure, the previous highlighting is removed.
-		for item in s:nrrw_rgn_lines[s:instn].matchid
+		for item in s:nrrw_rgn_lines[a:instn].matchid
 			if item > 0
 				" If the match has been deleted, discard the error
 				silent call matchdelete(item)
 			endif
 		endfor
-		let s:nrrw_rgn_lines[s:instn].matchid=[]
+		let s:nrrw_rgn_lines[a:instn].matchid=[]
 	endif
 endfun
 
@@ -660,24 +678,23 @@ fun! <sid>WidenRegionMulti(content, instn) "{{{1
 		call append((first-1),a:content[indexs : indexe])
 		" Recalculate the start and end positions of the narrowed window
 		" so subsequent calls will adjust the region accordingly
-		" so subsequent calls will adjust the region accordingly
 		let  last = first + len(a:content[indexs : indexe]) - 1
 		if last > line('$')
 			let last = line('$')
 		endif
-		call <sid>AddMatches(<sid>GeneratePattern([first, 0 ], [last,0], 'V'))
+		call <sid>AddMatches(<sid>GeneratePattern([first, 0 ], [last, 0], 'V'), a:instn)
 		if delete_last_line
 			silent! $d _
 		endif
 	endfor
 endfun
 	
-fun! <sid>AddMatches(pattern) "{{{1
+fun! <sid>AddMatches(pattern, instn) "{{{1
 	if !s:nrrw_rgn_nohl || empty(a:pattern)
 		if !exists("s:nrrw_rgn_lines[s:instn].matchid")
-			let s:nrrw_rgn_lines[s:instn].matchid=[]
+			let s:nrrw_rgn_lines[a:instn].matchid=[]
 		endif
-		call add(s:nrrw_rgn_lines[s:instn].matchid, matchadd(s:nrrw_rgn_hl, a:pattern))
+		call add(s:nrrw_rgn_lines[a:instn].matchid, matchadd(s:nrrw_rgn_hl, a:pattern))
 	endif
 endfun
 
@@ -695,6 +712,39 @@ fun! <sid>JumpToBufinTab(tab,buf) "{{{1
 		exe "tabn" a:tab
 	endif
 	exe ':noa ' . bufwinnr(a:buf) . 'wincmd w'
+endfun
+
+fun! <sid>RecalculateLineNumbers(instn, adjust) "{{{1
+	" This only matters, if the original window isn't protected
+	if !exists("g:nrrw_rgn_protect") || g:nrrw_rgn_protect !~# 'n'
+		return
+	endif
+
+	for instn in filter(keys(s:nrrw_rgn_lines), 'v:val != a:instn')
+		" Skip narrowed instances, when they are before
+		" the region, we are currently putting back
+		if s:nrrw_rgn_lines[instn].startline[0] <=
+		\ s:nrrw_rgn_lines[a:instn].startline[0]
+			" Skip this instn
+			continue
+		else 
+		   let s:nrrw_rgn_lines[instn].startline[0] += a:adjust
+		   let s:nrrw_rgn_lines[instn].endline[0]   += a:adjust
+
+		   if s:nrrw_rgn_lines[instn].startline[0] < 1
+			   let s:nrrw_rgn_lines[instn].startline[0] = 1
+		   endif
+		   if s:nrrw_rgn_lines[instn].endline[0] < 1
+			   let s:nrrw_rgn_lines[instn].endline[0] = 1
+		   endif
+		   call <sid>DeleteMatches(instn)
+		   call <sid>AddMatches(<sid>GeneratePattern(
+				\s:nrrw_rgn_lines[instn].startline, 
+				\s:nrrw_rgn_lines[instn].endline, 
+				\'V'), instn)
+		endif
+	endfor
+
 endfun
 
 " Debugging options "{{{1
