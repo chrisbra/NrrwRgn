@@ -415,7 +415,7 @@ fu! nrrwrgn#VisualNrrwRgn(mode) "{{{1
 	call <sid>AddMatches(<sid>GeneratePattern(s:nrrw_rgn_lines[s:instn].startline,
 					\s:nrrw_rgn_lines[s:instn].endline, s:nrrw_rgn_lines[s:instn].vmode),
 					\s:instn)
-	norm gv"ay
+	norm! gv"ay
 	let win=<sid>NrwRgnWin()
 	exe ':noa ' win 'wincmd w'
 	let b:orig_buf = orig_buf
