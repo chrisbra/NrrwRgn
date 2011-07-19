@@ -227,6 +227,12 @@ to be able to put back the changes at different positions. Note, you should
 make sure, not to accidently change those part, that will later be influenced
 when writing the narrowed region back.
 
+Note: Don't use overlapping regions! Your changes will probably not be put
+back correctly and there is no guard against losing data accidently. NrrwRgn
+tries hard to adjust the highlighting and regions as you write your changes back
+into the original buffer, but it might fail silently. Therefore, this feature
+is experimental!
+
 ==============================================================================
 3. NrrwRgn Feedback                                         *NrrwRgn-feedback*
 
