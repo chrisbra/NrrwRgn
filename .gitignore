@@ -1,0 +1,8 @@
+post.pl
+vim_passfile
+.*.un~
+.*.sw*
+# ignore vimballs
+*.vba
+# ignore *.orig files
+*.orig
