@@ -261,6 +261,7 @@ fu! nrrwrgn#WidenRegion(vmode,force) "{{{1
 	exe ':noa' . orig_win . 'wincmd w'
 	call <sid>SaveRestoreRegister(1)
 	let wsv=winsaveview()
+	call <sid>DeleteMatches(instn)
 	if exists("b:orig_buf_ro") && b:orig_buf_ro && !a:force
 		call s:WarningMsg("Original buffer protected. Can't write changes!")
 		call <sid>JumpToBufinTab(orig_tab, nrw_buf)
@@ -269,7 +270,6 @@ fu! nrrwrgn#WidenRegion(vmode,force) "{{{1
 	if !&l:ma && !( exists("b:orig_buf_ro") && b:orig_buf_ro)
 		setl ma
 	endif
-	call <sid>DeleteMatches(instn)
 	" This is needed to adjust all other narrowed regions
 	" in case we have several narrowed regions within the same buffer
 	if exists("g:nrrw_rgn_protect") && g:nrrw_rgn_protect =~? 'n'
@@ -598,14 +598,14 @@ fun! <sid>CheckProtected() "{{{1
 endfun
 
 fun! <sid>DeleteMatches(instn) "{{{1
-	if exists("s:nrrw_rgn_lines[s:instn].matchid")
+	if exists("s:nrrw_rgn_lines[a:instn].matchid")
 		" if you call :NarrowRegion several times, without widening 
 		" the previous region, b:matchid might already be defined so
 		" make sure, the previous highlighting is removed.
 		for item in s:nrrw_rgn_lines[a:instn].matchid
 			if item > 0
 				" If the match has been deleted, discard the error
-				silent call matchdelete(item)
+				exe (s:debug ? "" : "silent") "call matchdelete(item)"
 			endif
 		endfor
 		let s:nrrw_rgn_lines[a:instn].matchid=[]
