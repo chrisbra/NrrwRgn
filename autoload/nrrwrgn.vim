@@ -162,14 +162,8 @@ fun! nrrwrgn#NrrwRgnDoPrepare() "{{{1
 		let lines = s:nrrw_rgn_buf[nr]
 		let start = lines[0]
 		let end   = len(lines)==2 ? lines[1] : lines[0]
-"		call <sid>AddMatches('\%>'.(start-1).'l\%<'.(end+1).'l')"
-		call <sid>AddMatches(<sid>GeneratePattern([start,0], [end,0], 'V'), s:instn)
-"		if !s:nrrw_rgn_nohl
-"			if !exists("s:nrrw_rgn_lines[s:instn].matchid")
-"				let s:nrrw_rgn_lines[s:instn].matchid=[]
-"			endif
-"			exe "call add(s:nrrw_rgn_lines[s:instn].matchid, matchadd(s:nrrw_rgn_hl, '\\%>".(start-1)."l\\%<".(end+1)."l'))"
-"		endif
+		call <sid>AddMatches(<sid>GeneratePattern([start,0], [end,0], 'V'),
+				\s:instn)
 		call add(buffer, comment.' Start NrrwRgn'.nr)
 		let buffer = buffer +
 				\ getline(start,end) +
@@ -301,20 +295,11 @@ fu! nrrwrgn#WidenRegion(vmode,force) "{{{1
 		let [ s:nrrw_rgn_lines[instn].startline, 
 			 \s:nrrw_rgn_lines[instn].endline ] = <sid>RetVisRegionPos()
 		" also, renew the highlighted region
-		call <sid>AddMatches(<sid>GeneratePattern(s:nrrw_rgn_lines[instn].startline,
-						\s:nrrw_rgn_lines[instn].endline, s:nrrw_rgn_lines[instn].vmode),
+		call <sid>AddMatches(<sid>GeneratePattern(
+					    \s:nrrw_rgn_lines[instn].startline,
+						\s:nrrw_rgn_lines[instn].endline,
+						\s:nrrw_rgn_lines[instn].vmode),
 						\instn)
-		if !s:nrrw_rgn_nohl
-			let pattern=<sid>GeneratePattern(
-			\s:nrrw_rgn_lines[instn].startline, 
-			\s:nrrw_rgn_lines[instn].endline, 
-			\s:nrrw_rgn_lines[instn].vmode)
-			if !empty(pattern)
-				let s:nrrw_rgn_lines[instn].matchid=[]
-				call add(s:nrrw_rgn_lines[instn].matchid,
-					\matchadd(s:nrrw_rgn_hl, pattern))
-			endif
-		endif
 	else 
 		" linewise selection because we started the NarrowRegion with the
 		" command NarrowRegion(0)
@@ -410,11 +395,14 @@ fu! nrrwrgn#VisualNrrwRgn(mode) "{{{1
 	call <sid>SaveRestoreRegister(1)
 
 	call <sid>CheckProtected()
-	let [ s:nrrw_rgn_lines[s:instn].startline, s:nrrw_rgn_lines[s:instn].endline ] = <sid>RetVisRegionPos()
+	let [ s:nrrw_rgn_lines[s:instn].startline,
+		\s:nrrw_rgn_lines[s:instn].endline ] = <sid>RetVisRegionPos()
 	call <sid>DeleteMatches(s:instn)
-	call <sid>AddMatches(<sid>GeneratePattern(s:nrrw_rgn_lines[s:instn].startline,
-					\s:nrrw_rgn_lines[s:instn].endline, s:nrrw_rgn_lines[s:instn].vmode),
-					\s:instn)
+	call <sid>AddMatches(<sid>GeneratePattern(
+				\s:nrrw_rgn_lines[s:instn].startline,
+				\s:nrrw_rgn_lines[s:instn].endline,
+				\s:nrrw_rgn_lines[s:instn].vmode),
+				\s:instn)
 	norm! gv"ay
 	let win=<sid>NrwRgnWin()
 	exe ':noa ' win 'wincmd w'
@@ -423,7 +411,6 @@ fu! nrrwrgn#VisualNrrwRgn(mode) "{{{1
 	let b:nrrw_instn = s:instn
 	silent 0d _
 	setl nomod
-	"com! -buffer WidenRegion :call nrrwrgn#WidenRegion(1)|sil bd!
 	com! -buffer -bang WidenRegion :call nrrwrgn#WidenRegion(1, (empty("<bang>") ? 0 : 1))
 	call <sid>NrrwRgnAuCmd(0)
 	call <sid>SaveRestoreRegister(0)
@@ -691,10 +678,11 @@ endfun
 	
 fun! <sid>AddMatches(pattern, instn) "{{{1
 	if !s:nrrw_rgn_nohl || empty(a:pattern)
-		if !exists("s:nrrw_rgn_lines[s:instn].matchid")
+		if !exists("s:nrrw_rgn_lines[a:instn].matchid")
 			let s:nrrw_rgn_lines[a:instn].matchid=[]
 		endif
-		call add(s:nrrw_rgn_lines[a:instn].matchid, matchadd(s:nrrw_rgn_hl, a:pattern))
+		call add(s:nrrw_rgn_lines[a:instn].matchid,
+					\matchadd(s:nrrw_rgn_hl, a:pattern))
 	endif
 endfun
 
