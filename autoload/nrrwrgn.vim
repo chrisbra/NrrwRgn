@@ -35,7 +35,12 @@ fun! <sid>Init() "{{{1
 			let s:opts=<sid>Options('local to buffer')
         endif
 	else
-		let s:instn+=1
+		" Prevent accidently overwriting windows with instn_id set
+		" back to an already existing instn_id
+		let s:instn = (s:instn==0 ? 1 : s:instn)
+		while (has_key(s:nrrw_rgn_lines, s:instn))
+			let s:instn+=1
+		endw
 	endif
 	if !exists("s:nrrw_rgn_lines")
 		let s:nrrw_rgn_lines = {}
@@ -50,7 +55,7 @@ fun! <sid>Init() "{{{1
 	let s:nrrw_rgn_hl	= (exists("g:nrrw_rgn_hl")	  ? g:nrrw_rgn_hl	  : "WildMenu")
 	let s:nrrw_rgn_nohl = (exists("g:nrrw_rgn_nohl")  ? g:nrrw_rgn_nohl   : 0)
 
-	let s:debug = 0
+	let s:debug         = (exists("s:debug") ? s:debug : 0)
 		
 endfun 
 
@@ -69,7 +74,8 @@ fun! <sid>NrwRgnWin() "{{{1
 		if !exists('g:nrrw_topbot_leftright')
 			let g:nrrw_topbot_leftright = 'topleft'
 		endif
-		exe  g:nrrw_topbot_leftright s:nrrw_rgn_wdth . (s:nrrw_rgn_vert?'v':'') . "sp " . nrrw_winname
+		exe  g:nrrw_topbot_leftright s:nrrw_rgn_wdth .
+			\(s:nrrw_rgn_vert?'v':'') . "sp " . nrrw_winname
 		" just in case, a global nomodifiable was set 
 		" disable this for the narrowed window
 		setl ma
@@ -592,7 +598,7 @@ fun! <sid>DeleteMatches(instn) "{{{1
 		for item in s:nrrw_rgn_lines[a:instn].matchid
 			if item > 0
 				" If the match has been deleted, discard the error
-				exe (s:debug ? "" : "silent") "call matchdelete(item)"
+				exe (s:debug ? "" : "silent!") "call matchdelete(item)"
 			endif
 		endfor
 		let s:nrrw_rgn_lines[a:instn].matchid=[]
@@ -736,15 +742,24 @@ fun! <sid>RecalculateLineNumbers(instn, adjust) "{{{1
 endfun
 
 " Debugging options "{{{1
-if exists("s:debug") && s:debug
-	fun! <sid>NrrwRgnDebug() "{{{2
-		"sil! unlet s:instn
-		com! NI :call <sid>WarningMsg("Instance: ".s:instn)
-		com! NJ :call <sid>WarningMsg("Data: ".string(s:nrrw_rgn_lines))
-		com! -nargs=1 NOutput :exe 'echo s:'.<q-args>
-	endfun
-	call <sid>NrrwRgnDebug()
-endif
+fun! nrrwrgn#Debug(enable) "{{{1
+	if (a:enable)
+		let s:debug=1
+		fun! <sid>NrrwRgnDebug() "{{{2
+			"sil! unlet s:instn
+			com! NI :call <sid>WarningMsg("Instance: ".s:instn)
+			com! NJ :call <sid>WarningMsg("Data: ".string(s:nrrw_rgn_lines))
+			com! -nargs=1 NOutput :exe 'echo s:'.<q-args>
+		endfun
+		call <sid>NrrwRgnDebug()
+	else
+		let s:debug=0
+		delf <sid>NrrwRgnDebug
+		delc NI
+		delc NJ
+		delc MOutput
+	endif
+endfun
 
 " Modeline {{{1
 " vim: ts=4 sts=4 fdm=marker com+=l\:\" fdl=0
