@@ -557,7 +557,10 @@ fun! <sid>GetOptions(opt) "{{{1
 	else
 		let result={}
 		for item in a:opt
-			exe "let result[item]=&l:".item
+			try
+				exe "let result[item]=&l:".item
+			catch
+			endtry
 		endfor
 	endif
 	return result
