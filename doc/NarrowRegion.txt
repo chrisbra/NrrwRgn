@@ -249,7 +249,7 @@ third line of this document.
 ==============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
 
-0.20: July 20, 2011 {{{1
+0.20: July 25, 2011 {{{1
 - allow customization via the g:nrrw_topbot_leftright variable (Thanks Herbert
   Sitz!)
 - allow what options will be applied using the g:nrrw_custom_options dict
