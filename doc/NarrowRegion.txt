@@ -229,9 +229,9 @@ when writing the narrowed region back.
 
 Note: Don't use overlapping regions! Your changes will probably not be put
 back correctly and there is no guard against losing data accidently. NrrwRgn
-tries hard to adjust the highlighting and regions as you write your changes back
-into the original buffer, but it might fail silently. Therefore, this feature
-is experimental!
+tries hard to adjust the highlighting and regions as you write your changes
+back into the original buffer, but it can't guarantee that this will work and
+might fail silently. Therefore, this feature is experimental!
 
 ==============================================================================
 3. NrrwRgn Feedback                                         *NrrwRgn-feedback*
@@ -249,7 +249,7 @@ third line of this document.
 ==============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
 
-0.20: (unreleased) {{{1
+0.20: July 20, 2011 {{{1
 - allow customization via the g:nrrw_topbot_leftright variable (Thanks Herbert
   Sitz!)
 - allow what options will be applied using the g:nrrw_custom_options dict
@@ -260,6 +260,11 @@ third line of this document.
   will be protected. This is useful, if you narrow several regions of the same
   buffer and want to write those changes indepentently (reported by kolyuchiy
   in https://github.com/chrisbra/NrrwRgn/issues/3, Thanks!)
+- fix an error with not correctly deleting the highlighted region, that was
+  discovered when reporting issue 3 (see above). (Reported by kolyuchiy,
+  thanks!)
+- Catch errors, when setting window local options. (Patch by Sung Pae,
+  Thanks!)
 
 0.19: May 22, 2011 {{{1
 - fix issue 2 from github https://github.com/chrisbra/NrrwRgn/issues/2
