@@ -342,7 +342,9 @@ fu! nrrwrgn#WidenRegion(vmode,force) "{{{1
 	" Recalculate start- and endline numbers for all other Narrowed Windows.
 	" This matters, if you narrow different regions of the same file and
 	" write your changes back.
-	call <sid>RecalculateLineNumbers(instn, adjust_line_numbers)
+	if exists("g:nrrw_rgn_protect") && g:nrrw_rgn_protect =~? 'n'
+		call <sid>RecalculateLineNumbers(instn, adjust_line_numbers)
+	endif
 	call <sid>SaveRestoreRegister(0)
 	let  @/=s:o_s
 	call winrestview(wsv)
