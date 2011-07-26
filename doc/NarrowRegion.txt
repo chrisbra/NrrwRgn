@@ -249,6 +249,13 @@ third line of this document.
 ==============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
 
+
+0.21: July 26, 2011 {{{1
+
+- Fix undefined variable adjust_line_numbers
+  https://github.com/chrisbra/NrrwRgn/issues/5 (reported by jmcantrell,
+  thanks!)
+
 0.20: July 25, 2011 {{{1
 - allow customization via the g:nrrw_topbot_leftright variable (Thanks Herbert
   Sitz!)
