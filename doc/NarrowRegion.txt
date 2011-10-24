@@ -287,6 +287,14 @@ third line of this document.
 4. NrrwRgn History                                          *NrrwRgn-history*
 
 
+0.24: Oct 24, 2011 {{{1
+
+- error on vim.org page, reuploaded version 0.22 as 0.24
+
+0.23: Oct 24, 2011 {{{1
+
+- (wrongly uploaded to vim.org)
+  
 0.22: Oct 24, 2011 {{{1
 
 - Allow customization via the use of hooks (|NR-hooks|)
