@@ -1,7 +1,7 @@
 *NrrwRgn.txt*   A Narrow Region Plugin (similar to Emacs)
 
 Author:  Christian Brabandt <cb@256bit.org>
-Version: 0.21 Tue, 26 Jul 2011 09:06:42 +0200
+Version: 0.22 Mon, 24 Oct 2011 21:19:47 +0200
 
 Copyright: (c) 2009, 2010 by Christian Brabandt         
            The VIM LICENSE applies to NrrwRgnPlugin.vim and NrrwRgnPlugin.txt
@@ -70,12 +70,12 @@ This plugin defines the following commands:
 
                                                                         *:NUD*
 
-:NUD                        When viewing unified diffs, this command opens the
-                            current chunk in 2 Narrowed Windows in |diff-mode|
-                            The current chunk is determined as the one, that
-                            the cursor is at.
-                            This command does not make sense if editing a
-                            different file format (or even different diff format)
+:NUD                        When viewing unified diffs, this command opens
+                            the current chunk in 2 Narrowed Windows in
+                            |diff-mode| The current chunk is determined as the
+                            one, that the cursor is at. This command does not
+                            make sense if editing a different file format (or
+                            even different diff format)
 
                                                                   *:NRPrepare*
 :[range]NRPrepare
@@ -94,7 +94,9 @@ This plugin defines the following commands:
                             that was created with |NRP|.
                             See also |NR-multi-example|.
 
-                                                                 *NR-HowTo*
+2.1 NrrwRgn HowTo                                                *NR-HowTo*
+-----------------
+
 Use the commands provided above to select a certain region to narrow. You can
 also start visual mode and have the selected region being narrowed. In this
 mode, NarrowRegion allows you to block select |CTRL-V| , character select |v|
@@ -125,7 +127,9 @@ quitting the windows, not to write unwanted changes into your patch file! In
 the window that contains the unified buffer, you can move to a different
 chunk, run |:NUD| and the 2 Narrowed Windows in diff mode will update.
 
-                                                     *NR-multi-example*
+2.2 NrrwRgn Multi                                    *NR-multi-example*
+-----------------
+
 Using the commands |:NRP| and |:NRM| allows to select a range of lines, that
 will be put into a narrowed buffer together. This might sound confusing, but
 this allows to apply a filter before making changes. For example before
@@ -150,7 +154,9 @@ shouldn't change those separating lines.
 When you are finished, simply write your changes back.
 
 ==============================================================================
-2.1 NrrwRgn Configuration                                    *NrrwRgn-config*
+
+2.3 NrrwRgn Configuration                                    *NrrwRgn-config*
+-------------------------
 
 NarrowRegion can be customized by setting some global variables. If you'd
 like to open the narrowed windo as a vertical split buffer, simply set the
@@ -233,6 +239,37 @@ tries hard to adjust the highlighting and regions as you write your changes
 back into the original buffer, but it can't guarantee that this will work and
 might fail silently. Therefore, this feature is experimental!
 
+------------------------------------------------------------------------------
+                                                                    *NR-hooks*
+
+NarrowRegion can execute certain commands, when creating the narrowed window
+and when closing the narrowed window. For this, you can set 2 buffer-local
+variables, that specify what commands to execute, which will hook into the
+execution of the Narrow Region plugin.
+
+For example, suppose you have a file, containing columns separated data (CSV
+format) which you want to modify and you also have the CSV filetype plugin
+(http://www.vim.org/scripts/script.php?script_id=2830) installed and you want
+to modify the CSV data which should be visually arranged like a table in the
+narrowed window. 
+
+Therefore you want that in the new narrowed window the command :ArrangeColumn
+is executed after entering it, and when writing the changes back, you want
+that the command :UnArrangeColumn will executed just before putting the
+changes back. So you set those two variables, in your original buffer: >
+
+    let b:nrrw_aucmd_create = "set ft=csv|%ArrangeCol"
+    let b:nrrw_aucmd_close  = "%UnArrangeColumn"
+<
+This will execute in the narrowed window the commands: >
+
+    :set ft=csv
+    :%ArrangeCol
+
+and before writing the changes back, it'll execute: >
+    
+    :%UnArrangeCol
+
 ==============================================================================
 3. NrrwRgn Feedback                                         *NrrwRgn-feedback*
 
@@ -249,6 +286,10 @@ third line of this document.
 ==============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
 
+
+0.22: Oct 24, 2011 {{{1
+
+- Allow customization via the use of hooks (|NR-hooks|)
 
 0.21: July 26, 2011 {{{1
 
