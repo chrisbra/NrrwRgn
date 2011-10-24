@@ -287,7 +287,7 @@ third line of this document.
 4. NrrwRgn History                                          *NrrwRgn-history*
 
 
-0.22: (unreleased) {{{1
+0.22: Oct 24, 2011 {{{1
 
 - Allow customization via the use of hooks (|NR-hooks|)
 
