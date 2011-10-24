@@ -19,7 +19,7 @@ sub GetPassword() {
 
 my $sid=3075;
 my $file;
-my @files=glob('*.vba');
+my @files=glob('*.vmb');
 #my $scriptversion=shift @ARGV;
 my $scriptversion = 0;
 my $versioncomment=shift @ARGV;
@@ -32,7 +32,7 @@ $versioncomment.="\n(automatically uploaded)";
 
 my @userpasswordpair = GetPassword();
 for (@files) {
-	my $f = $_ if [ -f $_ ] && $_ =~ /\w+-[^.]+\.(\d+)\.vba/;
+	my $f = $_ if [ -f $_ ] && $_ =~ /\w+-[^.]+\.(\d+)\.vmb/;
 	if ($1 > $scriptversion) {
 		$scriptversion=$1;
 		$file = $f;
