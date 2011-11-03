@@ -29,7 +29,7 @@ This plugin is based on a discussion in comp.editors (see the thread at
 http://groups.google.com/group/comp.editors/browse_frm/thread/0f562d97f80dde13)
 
 Narrowing means focussing on a region and making the rest inaccessible. You
-simply select the region, call :NarrowRegion and the selected part will open
+simply select the region, call |:NarrowRegion| and the selected part will open
 in a new scratch buffer. The rest of the file will be protected, so you won't
 accidentally modify that buffer. In the new buffer, you can do a global
 replace, search or anything else to modify that part. When you are finished,
@@ -182,15 +182,15 @@ result, you could put that in your |.vimrc| >
 
     let g:nrrw_rgn_hl = 'Search'
 <
-If you want to turn off the highlighting (because this can be disturbing, you
+If you want to turn off the highlighting (because this can be distracting), you
 can set the global variable g:nrrw_rgn_nohl to 1 in your |.vimrc| >
 
     let g:nrrw_rgn_nohl = 1
 <
 ------------------------------------------------------------------------------
 
-If you'd like to change the key combination, that starts the Narrowed Window
-for you selected range, you could put this in your |.vimrc| >
+If you'd like to change the key combination that starts the Narrowed Window
+for your selected range, you could put this in your |.vimrc| >
 
    xmap <F3> <Plug>NrrwrgnDo
 <
@@ -200,18 +200,19 @@ mode, unless you want it to Narrow your last visually selected range.
 
 ------------------------------------------------------------------------------
 
-If you like to specify the options, you want to have applied into the narrowed
-window, you can set the g:nrrw_custom_options setting, in your |.vimrc| e.g. >
+If you'd like to specify the options that you want to have set for the
+narrowed window, you can set the g:nrrw_custom_options setting, in your
+|.vimrc| e.g. >
 
    let g:nrrw_custom_options={}
    let g:nrrw_custom_options['filetype'] = 'python'
 >
-This will only apply those options to the narrowed buffer. You need to take care,
-that all options you need will apply.
+This will only apply those options to the narrowed buffer. You need to take
+care that all options you need will apply.
 
 ------------------------------------------------------------------------------
 
-If you don't like, that your narrowed window opens above to the current window,
+If you don't like that your narrowed window opens above the current window,
 define the g:nrrw_topbot_leftright variable to your taste, e.g. >
 
   let g:nrrw_topbot_leftright = 'botright'
@@ -228,9 +229,9 @@ really useful. Therefore, set the g:nrrw_rgn_protect variable, e.g. in your
   
    let g:nrrw_rgn_protect = 'n'
 <
-This can be useful, if you diff different regions of the same file, and want
-to be able to put back the changes at different positions. Note, you should
-make sure, not to accidentally change those part, that will later be influenced
+This can be useful if you diff different regions of the same file, and want
+to be able to put back the changes at different positions. Please note that
+you should take care not to change any part that will later be influenced
 when writing the narrowed region back.
 
 Note: Don't use overlapping regions! Your changes will probably not be put
@@ -244,7 +245,7 @@ might fail silently. Therefore, this feature is experimental!
 
 NarrowRegion can execute certain commands, when creating the narrowed window
 and when closing the narrowed window. For this, you can set 2 buffer-local
-variables, that specify what commands to execute, which will hook into the
+variables that specify what commands to execute, which will hook into the
 execution of the Narrow Region plugin.
 
 For example, suppose you have a file, containing columns separated data (CSV
@@ -253,15 +254,15 @@ format) which you want to modify and you also have the CSV filetype plugin
 to modify the CSV data which should be visually arranged like a table in the
 narrowed window. 
 
-Therefore you want that in the new narrowed window the command :ArrangeColumn
-is executed after entering it, and when writing the changes back, you want
-that the command :UnArrangeColumn will executed just before putting the
-changes back. So you set those two variables, in your original buffer: >
+Therefore you want the command |:ArrangeColumn| to be executed in the new
+narrowed window upon entering it, and when writing the changes back, you want
+the command |:UnArrangeColumn| to be executed just before putting the
+changes back. So you set those two variables in your original buffer: >
 
     let b:nrrw_aucmd_create = "set ft=csv|%ArrangeCol"
     let b:nrrw_aucmd_close  = "%UnArrangeColumn"
 <
-This will execute in the narrowed window the commands: >
+This will execute the commands in the narrowed window: >
 
     :set ft=csv
     :%ArrangeCol
