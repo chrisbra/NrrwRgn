@@ -478,8 +478,8 @@ endfun
 fun! <sid>SetupBufLocalCommands(visual) "{{{1
 	exe 'com! -buffer -bang WidenRegion :call nrrwrgn#WidenRegion('. a:visual.
 		\ ', <bang>0)'
-	com! -buffer NREnableSync  :call nrrwrgn#ToggleSyncWrite(1)
-	com! -buffer NRDisableSync :call nrrwrgn#ToggleSyncWrite(0)
+	com! -buffer NRSyncOnWrite  :call nrrwrgn#ToggleSyncWrite(1)
+	com! -buffer NRNoSyncOnWrite :call nrrwrgn#ToggleSyncWrite(0)
 endfun
 
 fun! nrrwrgn#NrrwRgnDoPrepare() "{{{1
