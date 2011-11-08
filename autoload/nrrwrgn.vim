@@ -200,8 +200,9 @@ fun! <sid>NrrwRgnAuCmd(instn) "{{{1
 			echo printf("bufnr: %d a:instn: %d\n", bufnr(''), a:instn)
 			echo "bwipe " s:nrrw_winname . '_' . a:instn
 		endif
-		if has_key(s:nrrw_rgn_lines[a:instn], 'disable') &&
-			\	!s:nrrw_rgn_lines[a:instn].disable
+		if (has_key(s:nrrw_rgn_lines[a:instn], 'disable') &&
+		\	!s:nrrw_rgn_lines[a:instn].disable ) ||
+		\   !has_key(s:nrrw_rgn_lines[a:instn], 'disable')
 			call <sid>DeleteMatches(a:instn)
 			exe "bwipe! " bufnr(s:nrrw_winname . '_' . a:instn)
 			if s:instn>=1
