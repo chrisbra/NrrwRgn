@@ -1,5 +1,9 @@
+- When disabling Narrowing using :NRN and one quits the buffer,
+  should the highlighting be removed? (it doesn't yet)
+
 - I really need some tests, like:
   * Visual Narrowing
   * Narrowing 1 Region
-  * Narrowing several independent regions with setting the g:nrrw_rgn_protect variable
+  * Narrowing several independent regions with setting the g:nrrw_rgn_protect
+    variable
   * Multi line narrowing
