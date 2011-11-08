@@ -100,9 +100,9 @@ This plugin defines the following commands:
                             original buffer when writing.
                             (this is the default).
 
-                                                    *:NRNoSyncOnWrite* *:NRNS*
+                                                    *:NRNoSyncOnWrite* *:NRN*
 :NRNoSyncOnWrite
-:NRNS                       Disable synching the buffer content back to the
+:NRN                        Disable synching the buffer content back to the
                             original buffer when writing. When set, the
                             narrowed buffer behaves like an ordinary buffer
                             that you can write in the filesystem.
