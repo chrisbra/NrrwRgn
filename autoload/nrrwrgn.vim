@@ -90,7 +90,7 @@ fun! <sid>NrwRgnWin() "{{{1
 		silent %d _
 		" Set up some options like 'bufhidden', 'noswapfile', 
 		" 'buftype', 'bufhidden', when enabling Narrowing.
-		call <sid>NrrwSettings(0)
+		call <sid>NrrwSettings(1)
 		let nrrw_win = bufwinnr("")
 	endif
 	call <sid>SetOptions(local_options)
