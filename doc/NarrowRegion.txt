@@ -1,7 +1,7 @@
 *NrrwRgn.txt*   A Narrow Region Plugin (similar to Emacs)
 
 Author:  Christian Brabandt <cb@256bit.org>
-Version: 0.24 Mon, 24 Oct 2011 21:26:45 +0200
+Version: 0.25 Tue, 08 Nov 2011 21:53:49 +0100
 
 Copyright: (c) 2009, 2010 by Christian Brabandt         
            The VIM LICENSE applies to NrrwRgnPlugin.vim and NrrwRgnPlugin.txt
@@ -302,7 +302,7 @@ third line of this document.
 4. NrrwRgn History                                          *NrrwRgn-history*
 
 
-0.25: (unreleased) {{{1
+0.25: Nov 08, 2011 {{{1
 
 - updated documentation (patch by Jean, thanks!)
 - make it possible, to not sync the narrowed buffer back by disabling
