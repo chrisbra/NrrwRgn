@@ -302,6 +302,12 @@ third line of this document.
 4. NrrwRgn History                                          *NrrwRgn-history*
 
 
+0.26: Jan 02, 2012 {{{1
+
+- Fix issue https://github.com/chrisbra/NrrwRgn/issues/7
+  (reported by Alessio B., thanks!)
+
+
 0.25: Nov 08, 2011 {{{1
 
 - updated documentation (patch by Jean, thanks!)
