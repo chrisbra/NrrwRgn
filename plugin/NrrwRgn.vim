@@ -31,14 +31,14 @@ endif
 " Public Interface: {{{1
 
 " Define the Command aliases "{{{2
-com! -range NRPrepare :<line1>,<line2>NRP
+com! -range -bang NRPrepare :<line1>,<line2>NRP<bang>
 com! -range NarrowRegion :<line1>,<line2>NR
 com! NRMulti :NRM
 com! NarrowWindow :NW
 
 " Define the actual Commands "{{{2
 com! -range NR	 :<line1>, <line2>call nrrwrgn#NrrwRgn()
-com! -range NRP  :exe ":" . <line1> . ',' . <line2> . "call nrrwrgn#Prepare()"
+com! -range -bang NRP  :exe ":" . <line1> . ',' . <line2> . 'call nrrwrgn#Prepare(<q-bang>)'
 com! NRV :call nrrwrgn#VisualNrrwRgn(visualmode())
 com! NUD :call nrrwrgn#UnifiedDiff()
 com! NW	 :exe ":" . line('w0') . ',' . line('w$') . "call nrrwrgn#NrrwRgn()"

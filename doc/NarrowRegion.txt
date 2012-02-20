@@ -79,10 +79,12 @@ This plugin defines the following commands:
                             even different diff format)
 
                                                                   *:NRPrepare*
-:[range]NRPrepare
-:[range]NRP                 You can use this command, to mark several lines
+:[range]NRPrepare[!]
+:[range]NRP[!]              You can use this command, to mark several lines
                             that will later be put into a Narrowed Window
                             using |:NRM|.
+                            If the ! is used, all earlier selected lines will
+                            be cleared first.
 
                                                                   *:NRMulti*
 :NRMulti
@@ -308,6 +310,7 @@ third line of this document.
   in the Narrowed window.
 - Better filetype detection for comments
 - Error handling, when doing |:NRM| without doing |:NRP| first
+- Use |:NRP!| to clear the old selection
 
 0.26: Jan 02, 2012 {{{1
 

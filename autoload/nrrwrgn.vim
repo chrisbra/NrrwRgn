@@ -99,6 +99,7 @@ endfun
 
 fun! <sid>CleanRegions() "{{{1
 	 let s:nrrw_rgn_line=[]
+	 unlet! s:nrrw_rgn_last
 endfun
 
 fun! <sid>CompareNumbers(a1,a2) "{{{1
@@ -601,7 +602,13 @@ fun! nrrwrgn#NrrwRgn() range  "{{{1
 	let &lz   = o_lz
 endfun
 
-fun! nrrwrgn#Prepare() "{{{1
+fun! nrrwrgn#Prepare(bang) "{{{1
+	let ltime = localtime()
+	if !empty(a:bang) &&
+	\ (!exists("s:nrrw_rgn_last") || s:nrrw_rgn_last + 10 < ltime)
+		let s:nrrw_rgn_last = ltime
+		let s:nrrw_rgn_line = []
+	endif
 	if !exists("s:nrrw_rgn_line") | let s:nrrw_rgn_line=[] | endif
 	call add(s:nrrw_rgn_line, line('.'))
 endfun
