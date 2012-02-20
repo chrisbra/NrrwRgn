@@ -4,5 +4,6 @@ vim_passfile
 .*.sw*
 # ignore vimballs
 *.vba
+*.vmb
 # ignore *.orig files
 *.orig
