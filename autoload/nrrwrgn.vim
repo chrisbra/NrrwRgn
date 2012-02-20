@@ -545,8 +545,16 @@ fun! nrrwrgn#NrrwRgn() range  "{{{1
 	" initialize Variables
 	call <sid>Init()
     call <sid>CheckProtected()
-	let s:nrrw_rgn_lines[s:instn].startline = [ a:firstline, 0 ]
-	let s:nrrw_rgn_lines[s:instn].endline	= [ a:lastline, 0 ]
+	let first = a:firstline
+	let last  = a:lastline
+	" If first line is in a closed fold,
+	" include complete fold in Narrowed window
+	if first == last && foldclosed(first) != -1
+		let first = foldclosed(first)
+		let last  = foldclosedend(last)
+	endif
+	let s:nrrw_rgn_lines[s:instn].startline = [ first, 0 ]
+	let s:nrrw_rgn_lines[s:instn].endline	= [ last , 0 ]
 	call <sid>DeleteMatches(s:instn)
 	" Set the highlighting
 	call <sid>AddMatches(<sid>GeneratePattern(
