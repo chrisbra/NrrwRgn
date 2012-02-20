@@ -344,16 +344,16 @@ fun! <sid>ReturnCommentFT() "{{{1
 	if &l:ft=="vim"
 		return '"'
 	" Perl, PHP, Ruby, Python, Sh
-	elseif &l:ft=~"^\(perl\|php\|ruby\|python\|sh\)$"
+	elseif &l:ft=~'^\(perl\|php\|ruby\|python\|sh\)$'
 	    return '#'
 	" C, C++
-	elseif &l:ft=~"^\(c\%(pp\)\?\|java\)"
-		return '//'
+	elseif &l:ft=~'^\(c\%(pp\)\?\|java\)'
+		return '/* */'
 	" HTML, XML
-	elseif &l:ft=~"^\(ht\|x\)ml\?$"
+	elseif &l:ft=~'^\(ht\|x\)ml\?$'
 		return '<!-- -->'
 	" LaTex
-	elseif &l:ft=~"^\(la\)tex"
+	elseif &l:ft=~'^\(la\)tex'
 		return '%'
 	else
 		" Fallback
@@ -368,7 +368,7 @@ fun! <sid>WidenRegionMulti(content, instn) "{{{1
 
 	let output= []
 	let list  = []
-	let cmt   = <sid>ReturnCommentFT()
+	let [c_s, c_e] =  <sid>ReturnComments()
 	let lastline = line('$')
 	" We must put the regions back from top to bottom,
 	" otherwise, changing lines in between messes up the list of lines that
@@ -378,8 +378,8 @@ fun! <sid>WidenRegionMulti(content, instn) "{{{1
 		let range    = s:nrrw_rgn_lines[a:instn].multi[key]
 		let last     = (len(range)==2) ? range[1] : range[0]
 		let first    = range[0]
-		let indexs   = index(a:content, cmt.' Start NrrwRgn'.key) + 1
-		let indexe   = index(a:content, cmt.' End NrrwRgn'.key) - 1
+		let indexs   = index(a:content, c_s.' Start NrrwRgn'.key.c_e) + 1
+		let indexe   = index(a:content, c_s.' End NrrwRgn'.key.c_e) - 1
 		if indexs <= 0 || indexe < -1
 		   call s:WarningMsg("Skipping Region " . key)
 		   continue
@@ -483,6 +483,13 @@ fun! <sid>SetupBufLocalCommands(visual) "{{{1
 	com! -buffer NRNoSyncOnWrite :call nrrwrgn#ToggleSyncWrite(0)
 endfun
 
+fun! <sid>ReturnComments() "{{{1
+	let cmt = <sid>ReturnCommentFT()
+	let c_s    = split(cmt)[0]
+	let c_e    = (len(split(cmt)) == 1 ? "" : " " . split(cmt)[1])
+	return [c_s, c_e]
+endfun
+
 fun! nrrwrgn#NrrwRgnDoPrepare() "{{{1
 	let s:nrrw_rgn_buf =  <sid>ParseList(s:nrrw_rgn_line)
 	if empty(s:nrrw_rgn_buf)
@@ -509,17 +516,17 @@ fun! nrrwrgn#NrrwRgnDoPrepare() "{{{1
 	let keys = keys(s:nrrw_rgn_buf)
 	call sort(keys,"<sid>CompareNumbers")
 	"for [ nr,lines] in items(s:nrrw_rgn_buf)
-	let comment=<sid>ReturnCommentFT()
+	let [c_s, c_e] =  <sid>ReturnComments()
 	for nr in keys
 		let lines = s:nrrw_rgn_buf[nr]
 		let start = lines[0]
 		let end   = len(lines)==2 ? lines[1] : lines[0]
 		call <sid>AddMatches(<sid>GeneratePattern([start,0], [end,0], 'V'),
 				\s:instn)
-		call add(buffer, comment.' Start NrrwRgn'.nr)
+		call add(buffer, c_s.' Start NrrwRgn'.nr.c_e)
 		let buffer = buffer +
 				\ getline(start,end) +
-				\ [comment.' End NrrwRgn'.nr, '']
+				\ [c_s.' End NrrwRgn'.nr.c_e, '']
 	endfor
 
 	let win=<sid>NrwRgnWin()
