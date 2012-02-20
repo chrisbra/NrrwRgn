@@ -306,6 +306,8 @@ third line of this document.
 0.27: (unreleased) {{{1
 - When using |:NR| on a line that is folded, include the whole folded region
   in the Narrowed window.
+- Better filetype detection for comments
+- Error handling, when doing |:NRM| without doing |:NRP| first
 
 0.26: Jan 02, 2012 {{{1
 
