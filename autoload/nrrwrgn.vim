@@ -496,10 +496,14 @@ fun! <sid>ReturnComments() "{{{1
 endfun
 
 fun! nrrwrgn#NrrwRgnDoPrepare() "{{{1
+	if !exists("s:nrrw_rgn_line")
+		call <sid>WarningMsg("You need to first select the lines to".
+			\ " narrow using :NRP!")
+	   return
+	endif
 	let s:nrrw_rgn_buf =  <sid>ParseList(s:nrrw_rgn_line)
 	if empty(s:nrrw_rgn_buf)
-		call <sid>WarningMsg("You need to first select the lines to".
-			\ " narrow using NRP!")
+		call <sid>WarningMsg("No lines selected from :NRP, aborting!")
 	   return
 	endif
 	let o_lz = &lz
