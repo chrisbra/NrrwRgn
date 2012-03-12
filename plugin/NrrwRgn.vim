@@ -24,7 +24,7 @@ let g:loaded_nrrw_rgn = 1
 " Debug Setting
 let s:debug=0
 if s:debug
-	call nrrwrgn#Debug(1)
+	exe "call nrrwrgn#Debug(1)"
 endif
 
 " ----------------------------------------------------------------------------
