@@ -311,6 +311,8 @@ third line of this document.
 - Better filetype detection for comments
 - Error handling, when doing |:NRM| without doing |:NRP| first
 - Use |:NRP!| to clear the old selection
+- Don't load the autoload script when sourcing the plugin script
+  (reported by Sergey Khorev, thanks!)
 
 0.26: Jan 02, 2012 {{{1
 
