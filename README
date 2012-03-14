@@ -2,8 +2,7 @@
 
 Author:  Christian Brabandt <cb@256bit.org>
 Version: 0.26 Mon, 02 Jan 2012 21:33:50 +0100
-
-Copyright: (c) 2009, 2010 by Christian Brabandt         
+Copyright: (c) 2009, 2010, 2011, 2012 by Christian Brabandt         
            The VIM LICENSE applies to NrrwRgnPlugin.vim and NrrwRgnPlugin.txt
            (see |copyright|) except use NrrwRgnPlugin instead of "Vim".
            NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
@@ -46,7 +45,9 @@ This plugin defines the following commands:
 :[range]NR
 :[range]NarrowRegion        When [range] is omitted, select only the current
                             line, else use the lines in the range given and 
-                            open it in a new Scratch Window. 
+                            open it in a new Scratch Window.
+                            If the current line is selected and is on a folded
+                            region, select the whole folded text.
                             Whenever you are finished modifying that region
                             simply write the buffer.
 
@@ -78,10 +79,12 @@ This plugin defines the following commands:
                             even different diff format)
 
                                                                   *:NRPrepare*
-:[range]NRPrepare
-:[range]NRP                 You can use this command, to mark several lines
+:[range]NRPrepare[!]
+:[range]NRP[!]              You can use this command, to mark several lines
                             that will later be put into a Narrowed Window
                             using |:NRM|.
+                            If the ! is used, all earlier selected lines will
+                            be cleared first.
 
                                                                   *:NRMulti*
 :NRMulti
@@ -301,6 +304,13 @@ third line of this document.
 ==============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
 
+
+0.27: (unreleased) {{{1
+- When using |:NR| on a line that is folded, include the whole folded region
+  in the Narrowed window.
+- Better filetype detection for comments
+- Error handling, when doing |:NRM| without doing |:NRP| first
+- Use |:NRP!| to clear the old selection
 
 0.26: Jan 02, 2012 {{{1
 
