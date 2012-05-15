@@ -203,7 +203,9 @@ fun! <sid>NrrwRgnAuCmd(instn) "{{{1
 		\	!s:nrrw_rgn_lines[a:instn].disable ) ||
 		\   !has_key(s:nrrw_rgn_lines[a:instn], 'disable')
 			call <sid>DeleteMatches(a:instn)
-			exe "bwipe! " bufnr(s:nrrw_winname . '_' . a:instn)
+			" bwipe! throws E855 (catching does not work)
+			" but because of 'bufhidden' wipeing will happen anyways
+			"exe "bwipe! " bufnr(s:nrrw_winname . '_' . a:instn)
 			if s:instn>=1
 				unlet s:nrrw_rgn_lines[a:instn]
 				let s:instn-=1
