@@ -313,6 +313,7 @@ third line of this document.
 - Use |:NRP!| to clear the old selection
 - Don't load the autoload script when sourcing the plugin script
   (reported by Sergey Khorev, thanks!)
+- Vim 7.3.449 introduced E855, prevent this error.
 
 0.26: Jan 02, 2012 {{{1
 
