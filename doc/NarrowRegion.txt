@@ -111,6 +111,12 @@ This plugin defines the following commands:
                             that you can write in the filesystem.
                             (this is the default).
 
+                                                                    *:NRL*
+                
+:NRL                        Reselect the last selected region again and open in
+                            a narrowed window. 
+
+
 2.1 NrrwRgn HowTo                                                *NR-HowTo*
 -----------------
 
@@ -314,6 +320,10 @@ third line of this document.
 - Don't load the autoload script when sourcing the plugin script
   (reported by Sergey Khorev, thanks!)
 - Vim 7.3.449 introduced E855, prevent this error.
+- |:NRL|
+- |NRM| did not correctly parse the list of lines provided by |:NRP|
+- highlighted pattern for blockwise visual narrowed regions was wrong
+- Saving blockwise visual selected regions back, could corrupt the contents
 
 0.26: Jan 02, 2012 {{{1
 
