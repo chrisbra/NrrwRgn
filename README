@@ -1,7 +1,7 @@
 *NrrwRgn.txt*   A Narrow Region Plugin (similar to Emacs)
 
 Author:  Christian Brabandt <cb@256bit.org>
-Version: 0.26 Mon, 02 Jan 2012 21:33:50 +0100
+Version: 0.27 Thu, 17 May 2012 21:13:45 +0200
 Copyright: (c) 2009, 2010, 2011, 2012 by Christian Brabandt         
            The VIM LICENSE applies to NrrwRgnPlugin.vim and NrrwRgnPlugin.txt
            (see |copyright|) except use NrrwRgnPlugin instead of "Vim".
@@ -110,6 +110,12 @@ This plugin defines the following commands:
                             narrowed buffer behaves like an ordinary buffer
                             that you can write in the filesystem.
                             (this is the default).
+
+                                                                    *:NRL*
+                
+:NRL                        Reselect the last selected region again and open in
+                            a narrowed window. 
+
 
 2.1 NrrwRgn HowTo                                                *NR-HowTo*
 -----------------
@@ -301,16 +307,27 @@ http://github.com/chrisbra/NrrwRgn
 Please don't hesitate to report any bugs to the maintainer, mentioned in the
 third line of this document.
 
+If you like the plugin, write me an email (look in the third line for my mail
+address). And if you are really happy, vote for the plugin and consider
+looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
+
 ==============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
 
 
-0.27: (unreleased) {{{1
+0.27: May 17, 2012 {{{1
 - When using |:NR| on a line that is folded, include the whole folded region
   in the Narrowed window.
 - Better filetype detection for comments
 - Error handling, when doing |:NRM| without doing |:NRP| first
 - Use |:NRP!| to clear the old selection
+- Don't load the autoload script when sourcing the plugin script
+  (reported by Sergey Khorev, thanks!)
+- Vim 7.3.449 introduced E855, prevent this error.
+- |:NRL|
+- |NRM| did not correctly parse the list of lines provided by |:NRP|
+- highlighted pattern for blockwise visual narrowed regions was wrong
+- Saving blockwise visual selected regions back, could corrupt the contents
 
 0.26: Jan 02, 2012 {{{1
 
