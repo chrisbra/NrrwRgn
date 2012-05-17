@@ -4,10 +4,10 @@
 " Maintainer:  Christian Brabandt <cb@256bit.org>
 " Last Change: Mon, 02 Jan 2012 21:33:50 +0100
 "
-" Script: http://www.vim.org/scripts/script.php?script_id=3075 
+" Script: http://www.vim.org/scripts/script.php?script_id=3075
 " Copyright:   (c) 2009, 2010 by Christian Brabandt
-"			   The VIM LICENSE applies to histwin.vim 
-"			   (see |copyright|) except use "NrrwRgn.vim" 
+"			   The VIM LICENSE applies to histwin.vim
+"			   (see |copyright|) except use "NrrwRgn.vim"
 "			   instead of "Vim".
 "			   No warranty, express or implied.
 "	 *** ***   Use At-Your-Own-Risk!   *** ***
@@ -35,6 +35,7 @@ com! -range -bang NRPrepare :<line1>,<line2>NRP<bang>
 com! -range NarrowRegion :<line1>,<line2>NR
 com! NRMulti :NRM
 com! NarrowWindow :NW
+com! NRLast :NRL
 
 " Define the actual Commands "{{{2
 com! -range NR	 :<line1>, <line2>call nrrwrgn#NrrwRgn()
@@ -43,12 +44,15 @@ com! NRV :call nrrwrgn#VisualNrrwRgn(visualmode())
 com! NUD :call nrrwrgn#UnifiedDiff()
 com! NW	 :exe ":" . line('w0') . ',' . line('w$') . "call nrrwrgn#NrrwRgn()"
 com! NRM :call nrrwrgn#NrrwRgnDoPrepare()
+com! NRL :call nrrwrgn#LastNrrwRgn()
 
 " Define the Mapping: "{{{2
 if !hasmapto('<Plug>NrrwrgnDo')
 	xmap <unique> <Leader>nr <Plug>NrrwrgnDo
 endif
-xnoremap <unique> <script> <Plug>NrrwrgnDo <sid>VisualNrrwRgn
+if !hasmapto('VisualNrrwRgn')
+	xnoremap <unique> <script> <Plug>NrrwrgnDo <sid>VisualNrrwRgn
+endif
 xnoremap <sid>VisualNrrwRgn :<c-u>call nrrwrgn#VisualNrrwRgn(visualmode())<cr>
 
 " Restore: "{{{1
