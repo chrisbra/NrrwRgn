@@ -100,6 +100,7 @@ endfun
 fun! <sid>CleanRegions() "{{{1
 	 let s:nrrw_rgn_line=[]
 	 unlet! s:nrrw_rgn_last
+	 unlet! s:nrrw_rgn_buf
 endfun
 
 fun! <sid>CompareNumbers(a1,a2) "{{{1
@@ -109,6 +110,8 @@ fun! <sid>CompareNumbers(a1,a2) "{{{1
 endfun
 
 fun! <sid>ParseList(list) "{{{1
+	 " for a given list of line numbers, return those line numbers
+	 " in a format start:end for continous items, else [start, next]
      let result={}
      let start=0
      let temp=0
@@ -116,16 +119,16 @@ fun! <sid>ParseList(list) "{{{1
      for item in sort(a:list, "<sid>CompareNumbers")
          if start==0
             let start=item
-         endif
-         if temp==item-1
-             let result[i]=[start,item]
-         else
+		 elseif temp!=item-1
+             let result[i]=[start,temp]
              let start=item
-             let result[i]=[item]
+			 let i+=1
          endif
-		 let i+=1
-         let temp=item
+		 let temp=item
      endfor
+	 if result[i-1][1] != item
+		 let result[i]=[item,item]
+	 endif
      return result
 endfun
 
@@ -146,6 +149,7 @@ fun! <sid>WriteNrrwRgn(...) "{{{1
 			exe ':noa' . bufwinnr(s:nrrw_winname . '_' . s:instn) . 'wincmd w'
 		endif
 	else
+		call <sid>StoreLastNrrwRgn(nrrw_instn)
 		" Best guess
 		if bufname('') =~# 'Narrow_Region'
 			exe ':noa' . bufwinnr(b:orig_buf) . 'wincmd w'
@@ -214,6 +218,30 @@ fun! <sid>NrrwRgnAuCmd(instn) "{{{1
 	endif
 endfun
 
+fun! <sid>StoreLastNrrwRgn(instn) "{{{1
+	if has_key(s:nrrw_rgn_lines, 'last')
+		unlet s:nrrw_rgn_lines['last']
+	endif
+	let s:nrrw_rgn_lines['last'] = []
+	if has_key(s:nrrw_rgn_lines[a:instn], 'multi')
+		call add(s:nrrw_rgn_lines['last'], [ b:orig_buf, 
+			\ s:nrrw_rgn_lines[a:instn]['multi']])
+	elseif has_key(s:nrrw_rgn_lines[a:instn], 'vmode')
+		let s:nrrw_rgn_lines['last'] = [ [b:orig_buf] + getpos("'<")[1:],
+		\ [b:orig_buf] + getpos("'>")[1:] ]
+		call add(s:nrrw_rgn_lines['last'], s:nrrw_rgn_lines[a:instn].vmode)
+	else
+		" Linewise narrowed region, pretend it was done like a visual
+		" narrowed region
+		let s:nrrw_rgn_lines['last'] = [ [ b:orig_buf,
+		\ s:nrrw_rgn_lines[a:instn].startline[0], 
+		\ s:nrrw_rgn_lines[a:instn].startline[1], 0], [ b:orig_buf,
+		\ s:nrrw_rgn_lines[a:instn].endline[0],
+		\ s:nrrw_rgn_lines[a:instn].endline[1], 0] ]
+		call add(s:nrrw_rgn_lines['last'], 'V')
+	endif
+endfu
+
 fun! <sid>RetVisRegionPos() "{{{1
 	let startline = [ getpos("'<")[1], virtcol("'<") ]
 	let endline   = [ getpos("'>")[1], virtcol("'>") ]
@@ -221,7 +249,16 @@ fun! <sid>RetVisRegionPos() "{{{1
 endfun
 
 fun! <sid>GeneratePattern(startl, endl, mode) "{{{1
-	if a:mode ==# '' && a:startl[0] > 0 && a:startl[1] > 0
+	let _c = getpos('.')
+	call setpos('.', [_c[0]] + a:endl + [0])
+	let endcol = virtcol('$')
+	call setpos('.', _c)
+	" This is just a best guess, the highlighted block could still be wrong (a
+	" rectangle has been selected, but the complete lines are highlighted
+	if a:mode ==# '' && a:startl[0] > 0 && a:startl[1] > 0 && a:endl[1] == endcol
+		return '\%>' . (a:startl[0]-1) . 'l\&\%>' . (a:startl[1]-1) .
+			\ 'v\&\%<' . (a:endl[0]+1) . 'l'
+	elseif a:mode ==# '' && a:startl[0] > 0 && a:startl[1] > 0
 		return '\%>' . (a:startl[0]-1) . 'l\&\%>' . (a:startl[1]-1) .
 			\ 'v\&\%<' . (a:endl[0]+1) . 'l\&\%<' . (a:endl[1]+1) . 'v'
 	elseif a:mode ==# 'v' && a:startl[0] > 0 && a:startl[1] > 0
@@ -366,6 +403,27 @@ fun! <sid>ReturnCommentFT() "{{{1
 	endif
 endfun
 
+fun! <sid>CheckRectangularRegion(reg) "{{{1
+	" Check whether the region that was pasted into
+	" register a:reg has always the same length
+	" This is needed, to be able to select the correct region
+	" when writing back the changes.
+	" Needs +float
+	if !has("float")
+		return 0
+	endif
+	let list=split(a:reg, "\n")
+	call map(list, 'substitute(v:val, ".", "x", "g")')
+	let len  = len(list[0])
+	let llen = len(list) + 0.0
+	call map(list, 'len(v:val)')
+	" round, because there could be some empty lines
+	if len == round((eval(join(list, '+'))+0.0)/llen)
+		return 1
+	else
+		return 0
+	endif
+endfu
 fun! <sid>WidenRegionMulti(content, instn) "{{{1
 	if empty(s:nrrw_rgn_lines[a:instn].multi)
 		return
@@ -438,7 +496,7 @@ endfun
 
 fun! <sid>JumpToBufinTab(tab,buf) "{{{1
 	if a:tab
-		exe "tabn" a:tab
+		exe "noa tabn" a:tab
 	endif
 	exe ':noa ' . bufwinnr(a:buf) . 'wincmd w'
 endfun
@@ -504,7 +562,9 @@ fun! nrrwrgn#NrrwRgnDoPrepare() "{{{1
 			\ " narrow using :NRP!")
 	   return
 	endif
-	let s:nrrw_rgn_buf =  <sid>ParseList(s:nrrw_rgn_line)
+	if !exists("s:nrrw_rgn_buf")
+		let s:nrrw_rgn_buf =  <sid>ParseList(s:nrrw_rgn_line)
+	endif
 	if empty(s:nrrw_rgn_buf)
 		call <sid>WarningMsg("No lines selected from :NRP, aborting!")
 	   return
@@ -627,7 +687,7 @@ fun! nrrwrgn#WidenRegion(vmode,force) "{{{1
 	let cont	 = getline(1,'$')
 
 	let tab=<sid>BufInTab(orig_buf)
-	if tab != tabpagenr()
+	if tab != tabpagenr() && tab > 0
 		exe "tabn" tab
 	endif
 	let orig_win = bufwinnr(orig_buf)
@@ -661,7 +721,8 @@ fun! nrrwrgn#WidenRegion(vmode,force) "{{{1
 	" Multiselection
 	if has_key(s:nrrw_rgn_lines[instn], 'multi')
 		call <sid>WidenRegionMulti(cont, instn)
-	elseif a:vmode "charwise, linewise or blockwise selection 
+	elseif a:vmode
+		"charwise, linewise or blockwise selection 
 		call setreg('a', join(cont, "\n") . "\n", s:nrrw_rgn_lines[instn].vmode)
 		if s:nrrw_rgn_lines[instn].vmode == 'v'
 		   " in characterwise selection, remove trailing \n
@@ -672,7 +733,13 @@ fun! nrrwrgn#WidenRegion(vmode,force) "{{{1
 		exe "keepj norm!" s:nrrw_rgn_lines[instn].startline[1] . '|'
 		exe "keepj norm!" s:nrrw_rgn_lines[instn].vmode
 		exe "keepj" s:nrrw_rgn_lines[instn].endline[0]
-		exe "keepj norm!" s:nrrw_rgn_lines[instn].endline[1] . '|'
+		if s:nrrw_rgn_lines[instn].blockmode
+			exe "keepj norm!" s:nrrw_rgn_lines[instn].endline[1] . '|'
+		else
+			keepj norm! $
+		endif
+		" overwrite the visually selected region with the contents from the
+		" narrowed buffer
 		norm! "aP
 		" Recalculate the start and end positions of the narrowed window
 		" so subsequent calls will adjust the region accordingly
@@ -769,6 +836,13 @@ fun! nrrwrgn#VisualNrrwRgn(mode) "{{{1
 				\s:nrrw_rgn_lines[s:instn].vmode),
 				\s:instn)
 	norm! gv"ay
+	if a:mode == '' && <sid>CheckRectangularRegion(@a)
+		" Rectangular selection
+		let s:nrrw_rgn_lines[s:instn].blockmode = 1
+	else
+		" Non-Rectangular selection
+		let s:nrrw_rgn_lines[s:instn].blockmode = 0
+	endif
 	let win=<sid>NrwRgnWin()
 	exe ':noa ' win 'wincmd w'
 	let b:orig_buf = orig_buf
@@ -842,6 +916,46 @@ fun! nrrwrgn#ToggleSyncWrite(enable) "{{{1
 		call <sid>NrrwRgnAuCmd(b:nrrw_instn)
 	endif
 endfun
+
+fun! nrrwrgn#LastNrrwRgn() "{{{1
+    if !has_key(s:nrrw_rgn_lines, 'last')
+		call <sid>WarningMsg("There is no last region to re-select")
+	   return
+	endif
+	let orig_buf = s:nrrw_rgn_lines['last'][0][0] + 0
+	let tab = <sid>BufInTab(orig_buf)
+	if tab != tabpagenr() && tab > 0
+		exe "tabn" tab
+	endif
+	let orig_win = bufwinnr(orig_buf)
+	" Should be in the right tab now!
+	if (orig_win == -1)
+		call s:WarningMsg("Original buffer does no longer exist! Aborting!")
+		return
+	endif
+	if orig_win != winnr()
+		exe "noa" orig_win "wincmd w"
+	endif
+	if len(s:nrrw_rgn_lines['last']) == 1
+		" Multi Narrowed
+		let s:nrrw_rgn_buf =  s:nrrw_rgn_lines['last'][0][1]
+		call nrrwrgn#NrrwRgnDoPrepare()
+	else
+		exe "keepj" s:nrrw_rgn_lines['last'][0][1]
+		exe "keepj norm!" s:nrrw_rgn_lines['last'][0][2] . '|'
+		exe "keepj norm!" s:nrrw_rgn_lines['last'][2]
+		exe "keepj" s:nrrw_rgn_lines['last'][1][1]
+		if col(s:nrrw_rgn_lines['last'][1][2]) == col('$') &&
+		\ s:nrrw_rgn_lines['last'][2] == ''
+			" Best guess
+			exe "keepj $"
+		else
+			exe "keepj norm!" s:nrrw_rgn_lines['last'][1][2] . '|'
+		endif
+		" Call VisualNrrwRgn()
+		call nrrwrgn#VisualNrrwRgn(visualmode())
+	endif
+endfu
 " Debugging options "{{{1
 fun! nrrwrgn#Debug(enable) "{{{1
 	if (a:enable)
@@ -850,7 +964,7 @@ fun! nrrwrgn#Debug(enable) "{{{1
 			"sil! unlet s:instn
 			com! NI :call <sid>WarningMsg("Instance: ".s:instn)
 			com! NJ :call <sid>WarningMsg("Data: ".string(s:nrrw_rgn_lines))
-			com! -nargs=1 NOutput :exe 'echo s:'.<q-args>
+			com! -nargs=1 NOutput :if exists("s:".<q-args>)|redraw!|:exe 'echo s:'.<q-args>|else| echo "s:".<q-args>. " does not exist!"|endif
 		endfun
 		call <sid>NrrwRgnDebug()
 	else
