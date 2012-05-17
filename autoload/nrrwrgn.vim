@@ -408,21 +408,24 @@ fun! <sid>CheckRectangularRegion(reg) "{{{1
 	" register a:reg has always the same length
 	" This is needed, to be able to select the correct region
 	" when writing back the changes.
-	" Needs +float
-	if !has("float")
-		return 0
-	endif
+	let result={}
 	let list=split(a:reg, "\n")
 	call map(list, 'substitute(v:val, ".", "x", "g")')
-	let len  = len(list[0])
-	let llen = len(list) + 0.0
+	let llen = len(list)/2
 	call map(list, 'len(v:val)')
-	" round, because there could be some empty lines
-	if len == round((eval(join(list, '+'))+0.0)/llen)
-		return 1
-	else
-		return 0
-	endif
+	for item in list
+		if has_key(result, item)
+			let result[item] += 1
+		else
+			let result[item] = 1
+		endif
+	endfor
+	for [key, value] in items(result)
+		if value > llen
+			return 1
+		endif
+	endfor
+	return 0
 endfu
 fun! <sid>WidenRegionMulti(content, instn) "{{{1
 	if empty(s:nrrw_rgn_lines[a:instn].multi)
