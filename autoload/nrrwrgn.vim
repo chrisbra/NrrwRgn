@@ -248,14 +248,15 @@ fun! <sid>RetVisRegionPos() "{{{1
 	return [ startline, endline ]
 endfun
 
-fun! <sid>GeneratePattern(startl, endl, mode) "{{{1
-	let _c = getpos('.')
-	call setpos('.', [_c[0]] + a:endl + [0])
-	let endcol = virtcol('$')
-	call setpos('.', _c)
+fun! <sid>GeneratePattern(startl, endl, mode, ...) "{{{1
+	if exists("a:1") && a:1
+		let block = 0
+	else
+		let block = 1
+	endif
 	" This is just a best guess, the highlighted block could still be wrong (a
 	" rectangle has been selected, but the complete lines are highlighted
-	if a:mode ==# '' && a:startl[0] > 0 && a:startl[1] > 0 && a:endl[1] == endcol
+	if a:mode ==# '' && a:startl[0] > 0 && a:startl[1] > 0 && block
 		return '\%>' . (a:startl[0]-1) . 'l\&\%>' . (a:startl[1]-1) .
 			\ 'v\&\%<' . (a:endl[0]+1) . 'l'
 	elseif a:mode ==# '' && a:startl[0] > 0 && a:startl[1] > 0
@@ -833,11 +834,6 @@ fun! nrrwrgn#VisualNrrwRgn(mode) "{{{1
 	let [ s:nrrw_rgn_lines[s:instn].startline,
 		\s:nrrw_rgn_lines[s:instn].endline ] = <sid>RetVisRegionPos()
 	call <sid>DeleteMatches(s:instn)
-	call <sid>AddMatches(<sid>GeneratePattern(
-				\s:nrrw_rgn_lines[s:instn].startline,
-				\s:nrrw_rgn_lines[s:instn].endline,
-				\s:nrrw_rgn_lines[s:instn].vmode),
-				\s:instn)
 	norm! gv"ay
 	if a:mode == '' && <sid>CheckRectangularRegion(@a)
 		" Rectangular selection
@@ -846,6 +842,12 @@ fun! nrrwrgn#VisualNrrwRgn(mode) "{{{1
 		" Non-Rectangular selection
 		let s:nrrw_rgn_lines[s:instn].blockmode = 0
 	endif
+	call <sid>AddMatches(<sid>GeneratePattern(
+				\s:nrrw_rgn_lines[s:instn].startline,
+				\s:nrrw_rgn_lines[s:instn].endline,
+				\s:nrrw_rgn_lines[s:instn].vmode, 
+				\s:nrrw_rgn_lines[s:instn].blockmode),
+				\s:instn)
 	let win=<sid>NrwRgnWin()
 	exe ':noa ' win 'wincmd w'
 	let b:orig_buf = orig_buf
