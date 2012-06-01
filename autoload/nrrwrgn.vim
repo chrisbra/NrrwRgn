@@ -67,7 +67,7 @@ fun! <sid>Init() "{{{1
 endfun 
 
 fun! <sid>NrwRgnWin() "{{{1
-	let local_options = s:GetOptions(s:opts)
+	let local_options = <sid>GetOptions(s:opts)
 	let nrrw_winname = s:nrrw_winname . '_' . s:instn
 	let nrrw_win = bufwinnr('^'.nrrw_winname.'$')
 	if nrrw_win != -1
@@ -658,7 +658,6 @@ fun! nrrwrgn#NrrwRgn() range  "{{{1
 	call setline(1, a)
 	setl nomod
 	let b:nrrw_instn = s:instn
-	call <sid>NrrwSettings(1)
 	call <sid>SetupBufLocalCommands(0)
 	call <sid>NrrwRgnAuCmd(0)
 	if has_key(s:nrrw_aucmd, "create")
