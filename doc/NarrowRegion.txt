@@ -315,6 +315,10 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 4. NrrwRgn History                                          *NrrwRgn-history*
 
 
+0.28: (unreleased) {{{1
+- Plugin did not store last narrowed region when narrowed window was moved to
+  another tabpage (reported by Ben Fritz, thanks!)
+
 0.27: May 17, 2012 {{{1
 - When using |:NR| on a line that is folded, include the whole folded region
   in the Narrowed window.

@@ -219,23 +219,25 @@ fun! <sid>NrrwRgnAuCmd(instn) "{{{1
 endfun
 
 fun! <sid>StoreLastNrrwRgn(instn) "{{{1
-	if has_key(s:nrrw_rgn_lines, 'last')
-		unlet s:nrrw_rgn_lines['last']
-	endif
 	let s:nrrw_rgn_lines['last'] = []
+	if !exists("b:orig_buf")
+		let orig_buf = s:nrrw_rgn_lines[a:instn].orig_buf
+	else
+		let orig_buf = b:orig_buf
+	endif
 	if has_key(s:nrrw_rgn_lines[a:instn], 'multi')
-		call add(s:nrrw_rgn_lines['last'], [ b:orig_buf, 
+		call add(s:nrrw_rgn_lines['last'], [ orig_buf, 
 			\ s:nrrw_rgn_lines[a:instn]['multi']])
 	elseif has_key(s:nrrw_rgn_lines[a:instn], 'vmode')
-		let s:nrrw_rgn_lines['last'] = [ [b:orig_buf] + getpos("'<")[1:],
-		\ [b:orig_buf] + getpos("'>")[1:] ]
+		let s:nrrw_rgn_lines['last'] = [ [orig_buf] + getpos("'<")[1:],
+		\ [orig_buf] + getpos("'>")[1:] ]
 		call add(s:nrrw_rgn_lines['last'], s:nrrw_rgn_lines[a:instn].vmode)
 	else
 		" Linewise narrowed region, pretend it was done like a visual
 		" narrowed region
-		let s:nrrw_rgn_lines['last'] = [ [ b:orig_buf,
+		let s:nrrw_rgn_lines['last'] = [ [ orig_buf,
 		\ s:nrrw_rgn_lines[a:instn].startline[0], 
-		\ s:nrrw_rgn_lines[a:instn].startline[1], 0], [ b:orig_buf,
+		\ s:nrrw_rgn_lines[a:instn].startline[1], 0], [ orig_buf,
 		\ s:nrrw_rgn_lines[a:instn].endline[0],
 		\ s:nrrw_rgn_lines[a:instn].endline[1], 0] ]
 		call add(s:nrrw_rgn_lines['last'], 'V')
@@ -584,6 +586,7 @@ fun! nrrwrgn#NrrwRgnDoPrepare() "{{{1
 	let s:nrrw_rgn_lines[s:instn].startline = []
 	let s:nrrw_rgn_lines[s:instn].endline	= []
 	let s:nrrw_rgn_lines[s:instn].multi     = s:nrrw_rgn_buf
+	let s:nrrw_rgn_lines[s:instn].orig_buf  = orig_buf
 	call <sid>DeleteMatches(s:instn)
 
 	let nr=0
@@ -639,6 +642,7 @@ fun! nrrwrgn#NrrwRgn() range  "{{{1
 	endif
 	let s:nrrw_rgn_lines[s:instn].startline = [ first, 0 ]
 	let s:nrrw_rgn_lines[s:instn].endline	= [ last , 0 ]
+	let s:nrrw_rgn_lines[s:instn].orig_buf  = orig_buf
 	call <sid>DeleteMatches(s:instn)
 	" Set the highlighting
 	call <sid>AddMatches(<sid>GeneratePattern(
