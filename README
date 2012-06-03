@@ -1,7 +1,7 @@
 *NrrwRgn.txt*   A Narrow Region Plugin (similar to Emacs)
 
 Author:  Christian Brabandt <cb@256bit.org>
-Version: 0.27 Thu, 17 May 2012 21:13:45 +0200
+Version: 0.28 Sun, 03 Jun 2012 13:47:04 +0200
 Copyright: (c) 2009, 2010, 2011, 2012 by Christian Brabandt         
            The VIM LICENSE applies to NrrwRgnPlugin.vim and NrrwRgnPlugin.txt
            (see |copyright|) except use NrrwRgnPlugin instead of "Vim".
@@ -314,6 +314,10 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 ==============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
 
+
+0.28: Jun 03, 2012 {{{1
+- Plugin did not store last narrowed region when narrowed window was moved to
+  another tabpage (reported by Ben Fritz, thanks!)
 
 0.27: May 17, 2012 {{{1
 - When using |:NR| on a line that is folded, include the whole folded region
