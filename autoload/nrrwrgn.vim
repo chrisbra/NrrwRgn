@@ -154,7 +154,7 @@ fun! <sid>WriteNrrwRgn(...) "{{{1
 		let winnr = bufwinnr(b:orig_buf)
 		" Best guess
 		if bufname('') =~# 'Narrow_Region' && winnr > 0
-			exe ':noa' . bufwinnr(b:orig_buf) . 'wincmd w'
+			exe ':noa' . winnr . 'wincmd w'
 		endif
 		if !exists("a:1") 
 			" close narrowed buffer
