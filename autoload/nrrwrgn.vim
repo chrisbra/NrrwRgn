@@ -579,7 +579,7 @@ fun! <sid>ReturnComments() "{{{1
 endfun
 
 fun! nrrwrgn#NrrwRgnDoPrepare(bang) "{{{1
-	bang = !empty(a:bang)
+	let bang = !empty(a:bang)
 	if !exists("s:nrrw_rgn_line")
 		call <sid>WarningMsg("You need to first select the lines to".
 			\ " narrow using :NRP!")
