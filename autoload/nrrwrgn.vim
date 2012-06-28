@@ -213,6 +213,9 @@ fun! <sid>NrrwRgnAuCmd(instn) "{{{1
 			" but because of 'bufhidden' wipeing will happen anyways
 			"exe "bwipe! " bufnr(s:nrrw_winname . '_' . a:instn)
 			if winnr('$') > 1
+				" If there is only a single window open don't clean up now
+				" because we can't put the narrowed lines back, so do not
+				" clean up now. We need to clean up then later. But how?
 				call <sid>CleanUpInstn(a:instn)
 			endif
 		endif
@@ -298,12 +301,14 @@ fun! <sid>Options(search) "{{{1
 		endif
 		keepj 0
 		let reg_a=[]
+		call add(reg_a, 'a')
 		call add(reg_a,getreg('a'))
 		call add(reg_a, getregtype('a'))
 		let @a=''
 		exe "silent :g/" . '\v'.escape(a:search, '\\/') . "/-y A"
 		let b=split(@a, "\n")
-		call setreg('a', reg_a[0], reg_a[1])
+		call call('setreg', reg_a)
+		"call setreg('a', reg_a[0], reg_a[1])
 		call filter(b, 'v:val =~ "^''"')
 		" the following options should be set
 		let filter_opt='\%(modifi\%(ed\|able\)\|readonly\|noswapfile\|' .
