@@ -29,9 +29,9 @@ fun! <sid>WarningMsg(msg) "{{{1
 endfun
 
 fun! <sid>Init() "{{{1
+	let s:opts = []
 	if !exists("s:instn")
 		let s:instn=1
-		let s:opts = []
 		if !exists("g:nrrw_custom_options") || empty(g:nrrw_custom_options)
 			let s:opts=<sid>Options('local to buffer')
         endif
