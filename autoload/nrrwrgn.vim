@@ -584,8 +584,8 @@ fun! <sid>ReturnComments() "{{{1
 	return [c_s, c_e]
 endfun
 
-fun! nrrwrgn#NrrwRgnDoPrepare(bang) "{{{1
-	let bang = !empty(a:bang)
+fun! nrrwrgn#NrrwRgnDoPrepare(...) "{{{1
+	let bang = (a:0 > 0 && !empty(a:1))
 	if !exists("s:nrrw_rgn_line")
 		call <sid>WarningMsg("You need to first select the lines to".
 			\ " narrow using :NRP!")
@@ -646,12 +646,12 @@ fun! nrrwrgn#NrrwRgnDoPrepare(bang) "{{{1
 	let &lz   = o_lz
 endfun
 
-fun! nrrwrgn#NrrwRgn(bang) range  "{{{1
+fun! nrrwrgn#NrrwRgn(...) range  "{{{1
 	let o_lz = &lz
 	let s:o_s  = @/
 	set lz
 	let orig_buf=bufnr('')
-	let bang = !empty(a:bang)
+	let bang = (a:0 > 0 && !empty(a:1))
 
 	" initialize Variables
 	call <sid>Init()
@@ -715,10 +715,9 @@ fun! nrrwrgn#NrrwRgn(bang) range  "{{{1
 	let &lz   = o_lz
 endfun
 
-fun! nrrwrgn#Prepare(bang) "{{{1
+fun! nrrwrgn#Prepare() "{{{1
 	let ltime = localtime()
-	if !empty(a:bang) &&
-	\ (!exists("s:nrrw_rgn_last") || s:nrrw_rgn_last + 10 < ltime)
+	if  (!exists("s:nrrw_rgn_last") || s:nrrw_rgn_last + 10 < ltime)
 		let s:nrrw_rgn_last = ltime
 		let s:nrrw_rgn_line = []
 	endif
@@ -867,7 +866,7 @@ fun! nrrwrgn#WidenRegion(vmode,force, close) "{{{1
 	endif
 endfun
 
-fun! nrrwrgn#VisualNrrwRgn(mode, bang) "{{{1
+fun! nrrwrgn#VisualNrrwRgn(mode, ...) "{{{1
 	" bang: open the narrowed buffer in the current window and don't open a
 	" new split window
 	if empty(a:mode)
@@ -881,7 +880,7 @@ fun! nrrwrgn#VisualNrrwRgn(mode, bang) "{{{1
 	" e.g. by using :NRV, so using :sil!
 	" else exiting visual mode
 	exe "sil! norm! \<ESC>"
-	let bang = !empty(a:bang)
+	let bang = (a:0 > 0 && !empty(a:1))
 	" stop visualmode
 	let o_lz = &lz
 	let s:o_s  = @/
