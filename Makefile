@@ -6,9 +6,9 @@ VERSION=$(shell sed -n '/Version:/{s/^.*\(\S\.\S\+\)$$/\1/;p}' $(SCRIPT))
 
 .PHONY: $(PLUGIN).vmb README
 
-all: uninstall vimball install README
+all: uninstall vimball install
 
-vimball: $(PLUGIN).vmb
+vimball: $(PLUGIN).vmb README
 
 clean:
 	find . -type f \( -name "*.vba" -o -name "*.orig" -o -name "*.~*" \
