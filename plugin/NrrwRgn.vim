@@ -50,17 +50,17 @@ com! -bang NRL :call nrrwrgn#LastNrrwRgn(<q-bang>)
 if !hasmapto('<Plug>NrrwrgnDo')
 	xmap <unique> <Leader>nr <Plug>NrrwrgnDo
 endif
-if !hasmapto('<Plug>NrrwrgnDo1')
-	xmap <unique> <Leader>Nr <Plug>NrrwrgnDo1
+if !hasmapto('<Plug>NrrwrgnBangDo')
+	xmap <unique> <Leader>Nr <Plug>NrrwrgnBangDo
 endif
 if !hasmapto('VisualNrrwRgn')
 	xnoremap <unique> <script> <Plug>NrrwrgnDo <sid>VisualNrrwRgn
 endif
-if !hasmapto('VisualNrrwRgn1')
-	xnoremap <unique> <script> <Plug>NrrwrgnDo1 <sid>VisualNrrwRgn1
+if !hasmapto('VisualNrrwRgnBang')
+	xnoremap <unique> <script> <Plug>NrrwrgnBangDo <sid>VisualNrrwBang
 endif
 xnoremap <sid>VisualNrrwRgn :<c-u>call nrrwrgn#VisualNrrwRgn(visualmode(),'')<cr>
-xnoremap <sid>VisualNrrwRgn1 :<c-u>call nrrwrgn#VisualNrrwRgn(visualmode(),'!')<cr>
+xnoremap <sid>VisualNrrwBang :<c-u>call nrrwrgn#VisualNrrwRgn(visualmode(),'!')<cr>
 
 " Restore: "{{{1
 let &cpo=s:cpo
