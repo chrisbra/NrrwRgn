@@ -8,7 +8,7 @@ VERSION=$(shell sed -n '/Version:/{s/^.*\(\S\.\S\+\)$$/\1/;p}' $(SCRIPT))
 
 all: uninstall vimball install
 
-vimball: $(PLUGIN).vmb README
+vimball: $(PLUGIN).vmb
 
 clean:
 	find . -type f \( -name "*.vba" -o -name "*.orig" -o -name "*.~*" \
@@ -34,7 +34,7 @@ $(PLUGIN).vmb:
 	vim -N -c 'ru! vimballPlugin.vim' -c ':call append("0", [ "$(SCRIPT)", "$(AUTOL)", "$(DOC)"])' -c '$$d' -c ":%MkVimball $(PLUGIN)-$(VERSION)  ." -c':q!'
 	ln -f $(PLUGIN)-$(VERSION).vmb $(PLUGIN).vmb
      
-release: version all
+release: version all README
 
 version:
 	perl -i.orig -pne 'if (/Version:/) {s/\.(\d*)/sprintf(".%d", 1+$$1)/e}' ${SCRIPT} ${AUTOL}
