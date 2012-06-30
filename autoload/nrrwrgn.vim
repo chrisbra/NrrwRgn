@@ -905,7 +905,7 @@ fun! nrrwrgn#VisualNrrwRgn(mode, ...) "{{{1
 		" Non-Rectangular selection
 		let s:nrrw_rgn_lines[s:instn].blockmode = 0
 	endif
-	if a:bang
+	if bang
 		try
 			let local_options = <sid>GetOptions(s:opts)
 			" enew fails, when no new unnamed buffer can be edited
