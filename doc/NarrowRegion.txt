@@ -327,6 +327,8 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 - Use ! to have the narrowed buffer not opened in a new window (suggested by
   Greg Sexton thanks!, issue #8
   https://github.com/chrisbra/NrrwRgn/issues/8)
+- Fix mappings for visual mode (https://github.com/chrisbra/NrrwRgn/issues/9,
+  reported by Sung Pae, thanks!)
 0.28: Jun 03, 2012 {{{1
 - Plugin did not store last narrowed region when narrowed window was moved to
   another tabpage (reported by Ben Fritz, thanks!)
