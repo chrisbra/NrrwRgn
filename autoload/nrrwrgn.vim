@@ -29,7 +29,10 @@ fun! <sid>WarningMsg(msg) "{{{1
 endfun
 
 fun! <sid>Init() "{{{1
-	let s:opts = []
+	if !exists("s:opts")
+		" init once
+		let s:opts = []
+	endif
 	if !exists("s:instn")
 		let s:instn=1
 		if !exists("g:nrrw_custom_options") || empty(g:nrrw_custom_options)
