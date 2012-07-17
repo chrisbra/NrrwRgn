@@ -244,25 +244,26 @@ fun! <sid>StoreLastNrrwRgn(instn) "{{{1
 		call add(s:nrrw_rgn_lines['last'], [ orig_buf, 
 			\ s:nrrw_rgn_lines[a:instn]['multi']])
 	elseif has_key(s:nrrw_rgn_lines[a:instn], 'vmode')
-		let s:nrrw_rgn_lines['last'] = [ [orig_buf] + getpos("'<")[1:],
-		\ [orig_buf] + getpos("'>")[1:] ]
+		let s:nrrw_rgn_lines['last'] = [ getpos("'<"),
+		\ getpos("'>") ]
 		call add(s:nrrw_rgn_lines['last'], s:nrrw_rgn_lines[a:instn].vmode)
 	else
 		" Linewise narrowed region, pretend it was done like a visual
 		" narrowed region
 		let s:nrrw_rgn_lines['last'] = [ [ orig_buf,
-		\ s:nrrw_rgn_lines[a:instn].startline[0], 
-		\ s:nrrw_rgn_lines[a:instn].startline[1], 0], [ orig_buf,
-		\ s:nrrw_rgn_lines[a:instn].endline[0],
-		\ s:nrrw_rgn_lines[a:instn].endline[1], 0] ]
+		\ s:nrrw_rgn_lines[a:instn].start[1:]], 
+		\ [ orig_buf, s:nrrw_rgn_lines[a:instn].end[1:]]]
 		call add(s:nrrw_rgn_lines['last'], 'V')
 	endif
 endfu
 
 fun! <sid>RetVisRegionPos() "{{{1
-	let startline = [ getpos("'<")[1], virtcol("'<") ]
-	let endline   = [ getpos("'>")[1], virtcol("'>") ]
-	return [ startline, endline ]
+	if v:version > 703 || (v:version == 703 && has("patch(590"))
+		return [ getpos("'<"), getpos("'>") ]
+	else
+		return [ getpos("'<")[0:1] + [virtcol("'<"), 0],
+			\    getpos("'>")[0:1] + [virtcol("'>"), 0] ]
+	endif
 endfun
 
 fun! <sid>GeneratePattern(startl, endl, mode, ...) "{{{1
@@ -541,24 +542,24 @@ fun! <sid>RecalculateLineNumbers(instn, adjust) "{{{1
 	for instn in filter(keys(s:nrrw_rgn_lines), 'v:val != a:instn')
 		" Skip narrowed instances, when they are before
 		" the region, we are currently putting back
-		if s:nrrw_rgn_lines[instn].startline[0] <=
-		\ s:nrrw_rgn_lines[a:instn].startline[0]
+		if s:nrrw_rgn_lines[instn].start[1] <=
+		\ s:nrrw_rgn_lines[a:instn].start[1]
 			" Skip this instn
 			continue
 		else 
-		   let s:nrrw_rgn_lines[instn].startline[0] += a:adjust
-		   let s:nrrw_rgn_lines[instn].endline[0]   += a:adjust
+		   let s:nrrw_rgn_lines[instn].start[1] += a:adjust
+		   let s:nrrw_rgn_lines[instn].end[1]   += a:adjust
 
-		   if s:nrrw_rgn_lines[instn].startline[0] < 1
-			   let s:nrrw_rgn_lines[instn].startline[0] = 1
+		   if s:nrrw_rgn_lines[instn].start[1] < 1
+			   let s:nrrw_rgn_lines[instn].start[1] = 1
 		   endif
-		   if s:nrrw_rgn_lines[instn].endline[0] < 1
-			   let s:nrrw_rgn_lines[instn].endline[0] = 1
+		   if s:nrrw_rgn_lines[instn].end[1] < 1
+			   let s:nrrw_rgn_lines[instn].end[1] = 1
 		   endif
 		   call <sid>DeleteMatches(instn)
 		   call <sid>AddMatches(<sid>GeneratePattern(
-				\s:nrrw_rgn_lines[instn].startline, 
-				\s:nrrw_rgn_lines[instn].endline, 
+				\s:nrrw_rgn_lines[instn].start[1:2], 
+				\s:nrrw_rgn_lines[instn].end[1:2], 
 				\'V'), instn)
 		endif
 	endfor
@@ -609,8 +610,8 @@ fun! nrrwrgn#NrrwRgnDoPrepare(...) "{{{1
 	" initialize Variables
 	call <sid>Init()
     call <sid>CheckProtected()
-	let s:nrrw_rgn_lines[s:instn].startline = []
-	let s:nrrw_rgn_lines[s:instn].endline	= []
+	let s:nrrw_rgn_lines[s:instn].start		= []
+	let s:nrrw_rgn_lines[s:instn].end		= []
 	let s:nrrw_rgn_lines[s:instn].multi     = s:nrrw_rgn_buf
 	let s:nrrw_rgn_lines[s:instn].orig_buf  = orig_buf
 	call <sid>DeleteMatches(s:instn)
@@ -667,12 +668,12 @@ fun! nrrwrgn#NrrwRgn(...) range  "{{{1
 		let first = foldclosed(first)
 		let last  = foldclosedend(last)
 	endif
-	let s:nrrw_rgn_lines[s:instn].startline = [ first, 0 ]
-	let s:nrrw_rgn_lines[s:instn].endline	= [ last , 0 ]
+	let s:nrrw_rgn_lines[s:instn].start = [ 0, first, 0, 0 ]
+	let s:nrrw_rgn_lines[s:instn].end	= [ 0, last , 0, 0 ]
 	let s:nrrw_rgn_lines[s:instn].orig_buf  = orig_buf
 	let a=getline(
-		\s:nrrw_rgn_lines[s:instn].startline[0], 
-		\s:nrrw_rgn_lines[s:instn].endline[0])
+		\s:nrrw_rgn_lines[s:instn].start[1], 
+		\s:nrrw_rgn_lines[s:instn].end[1])
 	call <sid>DeleteMatches(s:instn)
 	if bang
 		try
@@ -686,8 +687,8 @@ fun! nrrwrgn#NrrwRgn(...) range  "{{{1
 			" Fall back and use a new window
 			" Set the highlighting
 			call <sid>AddMatches(<sid>GeneratePattern(
-				\s:nrrw_rgn_lines[s:instn].startline, 
-				\s:nrrw_rgn_lines[s:instn].endline, 
+				\s:nrrw_rgn_lines[s:instn].start[1:2], 
+				\s:nrrw_rgn_lines[s:instn].end[1:2], 
 				\'V'), s:instn)
 			let win=<sid>NrwRgnWin()
 			exe ':noa ' win 'wincmd w'
@@ -695,8 +696,8 @@ fun! nrrwrgn#NrrwRgn(...) range  "{{{1
 	else
 		" Set the highlighting
 		call <sid>AddMatches(<sid>GeneratePattern(
-			\s:nrrw_rgn_lines[s:instn].startline, 
-			\s:nrrw_rgn_lines[s:instn].endline, 
+			\s:nrrw_rgn_lines[s:instn].start[1:2], 
+			\s:nrrw_rgn_lines[s:instn].end[1:2], 
 			\'V'), s:instn)
 		let win=<sid>NrwRgnWin()
 		exe ':noa ' win 'wincmd w'
@@ -772,8 +773,8 @@ fun! nrrwrgn#WidenRegion(vmode,force, close) "{{{1
 	" in case we have several narrowed regions within the same buffer
 	if exists("g:nrrw_rgn_protect") && g:nrrw_rgn_protect =~? 'n'
 		let  adjust_line_numbers = len(cont) - 1 - (
-					\s:nrrw_rgn_lines[instn].endline[0] - 
-					\s:nrrw_rgn_lines[instn].startline[0])
+					\s:nrrw_rgn_lines[instn].end[1] - 
+					\s:nrrw_rgn_lines[instn].start[1])
 	endif
 
 	" Now copy the content back into the original buffer
@@ -789,29 +790,46 @@ fun! nrrwrgn#WidenRegion(vmode,force, close) "{{{1
 		   call setreg('a', substitute(@a, '\n$', '', ''), 
 			   \s:nrrw_rgn_lines[instn].vmode)
 		endif
-		exe "keepj" s:nrrw_rgn_lines[instn].startline[0]
-		exe "keepj norm!" s:nrrw_rgn_lines[instn].startline[1] . '|'
-		exe "keepj norm!" s:nrrw_rgn_lines[instn].vmode
-		exe "keepj" s:nrrw_rgn_lines[instn].endline[0]
-		if s:nrrw_rgn_lines[instn].blockmode
-			exe "keepj norm!" s:nrrw_rgn_lines[instn].endline[1] . '|'
+		if v:version > 703 || (v:version == 703 && has("patch590"))
+			" settable '< and '> marks
+			let _v = []
+			" store actual values
+			let _v = [getpos("'<"), getpos("'>"), [visualmode(1)]]
+			" set the mode for the gv command
+			exe "norm! ". s:nrrw_rgn_lines[instn].vmode."\<ESC>"
+			call setpos("'<", s:nrrw_rgn_lines[instn].start)
+			call setpos("'>", s:nrrw_rgn_lines[instn].end)
+			exe 'norm! gv"aP'
+			if !empty(_v[2][0]) && (_v[2][0] != visualmode())
+				exe 'norm!' _v[2][0]. "\<ESC>"
+				call setpos("'<", _v[0])
+				call setpos("'>", _v[1])
+			endif
 		else
-			keepj norm! $
+			exe "keepj" s:nrrw_rgn_lines[instn].start[1]
+			exe "keepj norm!" s:nrrw_rgn_lines[instn].start[2] . '|'
+			exe "keepj norm!" s:nrrw_rgn_lines[instn].vmode
+			exe "keepj" s:nrrw_rgn_lines[instn].end[1]
+			if s:nrrw_rgn_lines[instn].blockmode
+				exe "keepj norm!" s:nrrw_rgn_lines[instn].end[2] . '|'
+			else
+				keepj norm! $
+			endif
+			" overwrite the visually selected region with the contents from the
+			" narrowed buffer
+			norm! "aP
 		endif
-		" overwrite the visually selected region with the contents from the
-		" narrowed buffer
-		norm! "aP
 		" Recalculate the start and end positions of the narrowed window
 		" so subsequent calls will adjust the region accordingly
-		let [ s:nrrw_rgn_lines[instn].startline, 
-			 \s:nrrw_rgn_lines[instn].endline ] = <sid>RetVisRegionPos()
+		let [ s:nrrw_rgn_lines[instn].start, 
+			 \s:nrrw_rgn_lines[instn].end ] = <sid>RetVisRegionPos()
 		" also, renew the highlighted region
 		if !a:close
 			call <sid>AddMatches(<sid>GeneratePattern(
-					    \s:nrrw_rgn_lines[instn].startline,
-						\s:nrrw_rgn_lines[instn].endline,
-						\s:nrrw_rgn_lines[instn].vmode),
-						\instn)
+				\ s:nrrw_rgn_lines[instn].start[1:2],
+				\ s:nrrw_rgn_lines[instn].end[1:2],
+				\ s:nrrw_rgn_lines[instn].vmode),
+				\ instn)
 		endif
 	else 
 		" linewise selection because we started the NarrowRegion with the
@@ -820,27 +838,27 @@ fun! nrrwrgn#WidenRegion(vmode,force, close) "{{{1
 		" if the endposition of the narrowed buffer is also the last line of
 		" the buffer, the append will add an extra newline that needs to be
 		" cleared.
-		if s:nrrw_rgn_lines[instn].endline[0]==line('$') &&
-		\  s:nrrw_rgn_lines[instn].startline[0] == 1
+		if s:nrrw_rgn_lines[instn].end[1]==line('$') &&
+		\  s:nrrw_rgn_lines[instn].start[1] == 1
 			let delete_last_line=1
 		else
 			let delete_last_line=0
 		endif
-		exe ':silent :'.s:nrrw_rgn_lines[instn].startline[0].','
-			\.s:nrrw_rgn_lines[instn].endline[0].'d _'
-		call append((s:nrrw_rgn_lines[instn].startline[0]-1),cont)
+		exe ':silent :'.s:nrrw_rgn_lines[instn].start[1].','
+			\.s:nrrw_rgn_lines[instn].end[1].'d _'
+		call append((s:nrrw_rgn_lines[instn].start[1]-1),cont)
 		" Recalculate the start and end positions of the narrowed window
 		" so subsequent calls will adjust the region accordingly
 		" so subsequent calls will adjust the region accordingly
-		let  s:nrrw_rgn_lines[instn].endline[0] =
-			\s:nrrw_rgn_lines[instn].startline[0] + len(cont) -1
-		if s:nrrw_rgn_lines[instn].endline[0] > line('$')
-			let s:nrrw_rgn_lines[instn].endline[0] = line('$')
+		let  s:nrrw_rgn_lines[instn].end[1] =
+			\s:nrrw_rgn_lines[instn].start[1] + len(cont) -1
+		if s:nrrw_rgn_lines[instn].end[1] > line('$')
+			let s:nrrw_rgn_lines[instn].end[1] = line('$')
 		endif
 		if !a:close
 			call <sid>AddMatches(<sid>GeneratePattern(
-				\s:nrrw_rgn_lines[instn].startline, 
-				\s:nrrw_rgn_lines[instn].endline, 
+				\s:nrrw_rgn_lines[instn].start[1:2], 
+				\s:nrrw_rgn_lines[instn].end[1:2], 
 				\'V'),
 				\instn)
 		endif
@@ -897,10 +915,16 @@ fun! nrrwrgn#VisualNrrwRgn(mode, ...) "{{{1
 	call <sid>SaveRestoreRegister(1)
 
 	call <sid>CheckProtected()
-	let [ s:nrrw_rgn_lines[s:instn].startline,
-		\s:nrrw_rgn_lines[s:instn].endline ] = <sid>RetVisRegionPos()
+	let [ s:nrrw_rgn_lines[s:instn].start,
+		\s:nrrw_rgn_lines[s:instn].end ] = <sid>RetVisRegionPos()
 	call <sid>DeleteMatches(s:instn)
 	norm! gv"ay
+	if len(split(@a, "\n", 1)) != 
+			\ (s:nrrw_rgn_lines[s:instn].end[1] - s:nrrw_rgn_lines[s:instn].start[1] + 1)
+		" remove trailing "\n"
+		let @a=substitute(@a, '\n$', '', '') 
+	endif
+
 	if a:mode == '' && <sid>CheckRectangularRegion(@a)
 		" Rectangular selection
 		let s:nrrw_rgn_lines[s:instn].blockmode = 1
@@ -920,8 +944,8 @@ fun! nrrwrgn#VisualNrrwRgn(mode, ...) "{{{1
 			" Fall back and use a new window
 			" Set the highlighting
 			call <sid>AddMatches(<sid>GeneratePattern(
-					\s:nrrw_rgn_lines[s:instn].startline,
-					\s:nrrw_rgn_lines[s:instn].endline,
+					\s:nrrw_rgn_lines[s:instn].start[1:2],
+					\s:nrrw_rgn_lines[s:instn].end[1:2],
 					\s:nrrw_rgn_lines[s:instn].vmode, 
 					\s:nrrw_rgn_lines[s:instn].blockmode),
 					\s:instn)
@@ -930,8 +954,8 @@ fun! nrrwrgn#VisualNrrwRgn(mode, ...) "{{{1
 		endtry
 	else
 		call <sid>AddMatches(<sid>GeneratePattern(
-				\s:nrrw_rgn_lines[s:instn].startline,
-				\s:nrrw_rgn_lines[s:instn].endline,
+				\s:nrrw_rgn_lines[s:instn].start[1:2],
+				\s:nrrw_rgn_lines[s:instn].end[1:2],
 				\s:nrrw_rgn_lines[s:instn].vmode, 
 				\s:nrrw_rgn_lines[s:instn].blockmode),
 				\s:instn)
