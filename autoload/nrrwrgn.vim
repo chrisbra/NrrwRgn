@@ -258,7 +258,7 @@ fun! <sid>StoreLastNrrwRgn(instn) "{{{1
 endfu
 
 fun! <sid>RetVisRegionPos() "{{{1
-	if v:version > 703 || (v:version == 703 && has("patch(590"))
+	if v:version > 703 || (v:version == 703 && has("patch590"))
 		return [ getpos("'<"), getpos("'>") ]
 	else
 		return [ getpos("'<")[0:1] + [virtcol("'<"), 0],
@@ -785,10 +785,12 @@ fun! nrrwrgn#WidenRegion(vmode,force, close) "{{{1
 	elseif a:vmode
 		"charwise, linewise or blockwise selection 
 		call setreg('a', join(cont, "\n") . "\n", s:nrrw_rgn_lines[instn].vmode)
-		if s:nrrw_rgn_lines[instn].vmode == 'v'
+		if s:nrrw_rgn_lines[instn].vmode == 'v' &&
+			\ s:nrrw_rgn_lines[instn].end[1] -
+			\ s:nrrw_rgn_lines[instn].start[1] + 1 == len(cont) + 1
 		   " in characterwise selection, remove trailing \n
 		   call setreg('a', substitute(@a, '\n$', '', ''), 
-			   \s:nrrw_rgn_lines[instn].vmode)
+			\ s:nrrw_rgn_lines[instn].vmode)
 		endif
 		if v:version > 703 || (v:version == 703 && has("patch590"))
 			" settable '< and '> marks
@@ -823,6 +825,15 @@ fun! nrrwrgn#WidenRegion(vmode,force, close) "{{{1
 		" so subsequent calls will adjust the region accordingly
 		let [ s:nrrw_rgn_lines[instn].start, 
 			 \s:nrrw_rgn_lines[instn].end ] = <sid>RetVisRegionPos()
+		" make sure the visual selected lines did not add a new linebreak,
+		" this messes up the characterwise selected regions and removes lines
+		" on further writings
+		if s:nrrw_rgn_lines[instn].end[1] - s:nrrw_rgn_lines[instn].start[1] + 1 >
+			\	len(cont) && s:nrrw_rgn_lines[instn].vmode == 'v'
+			let s:nrrw_rgn_lines[instn].end[1] = s:nrrw_rgn_lines[instn].end[1] - 1
+			let s:nrrw_rgn_lines[instn].end[2] = virtcol('$')
+		endif
+
 		" also, renew the highlighted region
 		if !a:close
 			call <sid>AddMatches(<sid>GeneratePattern(
