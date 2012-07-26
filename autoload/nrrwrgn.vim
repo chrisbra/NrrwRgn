@@ -234,6 +234,12 @@ fun! <sid>CleanUpInstn(instn) "{{{1
 endfu
 
 fun! <sid>StoreLastNrrwRgn(instn) "{{{1
+	" Only store the last region, when the narrowed instance is still valid
+	if !has_key(s:nrrw_rgn_lines, a:instn)
+		call <sid>WarningMsg("Error storing the last Narrowed Window, it's invalid!")
+		return
+	endif
+
 	let s:nrrw_rgn_lines['last'] = []
 	if !exists("b:orig_buf")
 		let orig_buf = s:nrrw_rgn_lines[a:instn].orig_buf
