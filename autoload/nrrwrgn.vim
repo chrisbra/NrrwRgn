@@ -202,9 +202,13 @@ fun! <sid>NrrwRgnAuCmd(instn) "{{{1
 		au!
 		aug end
 		exe "aug! NrrwRgn" . a:instn
-		if !&ma
-			setl ma
+
+		" make the original buffer modifiable, if possible
+		let buf = s:nrrw_rgn_lines[a:instn].orig_buf
+		if !getbufvar(buf, '&l:ma') && !getbufvar(buf, 'orig_buf_ro')
+			call setbufvar(s:nrrw_rgn_lines[a:instn].orig_buf, '&ma', 1)
 		endif
+
 		if s:debug
 			echo printf("bufnr: %d a:instn: %d\n", bufnr(''), a:instn)
 			echo "bwipe " s:nrrw_winname . '_' . a:instn
