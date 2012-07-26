@@ -777,11 +777,19 @@ fun! nrrwrgn#WidenRegion(vmode,force, close) "{{{1
 					\s:nrrw_rgn_lines[instn].start[1])
 	endif
 
+	" Make sure the narrowed buffer is still valid (happens, when 2 split
+	" window of the narrowed buffer is opened.
+	if !has_key(s:nrrw_rgn_lines, instn)
+		call <sid>WarningMsg("Error writing changes back, Narrowed Window invalid!")
+		return
+	endif
+
 	" Now copy the content back into the original buffer
 
-	" Multiselection
+	" 1) Check: Multiselection
 	if has_key(s:nrrw_rgn_lines[instn], 'multi')
 		call <sid>WidenRegionMulti(cont, instn, a:close)
+	" 2) Visual Selection
 	elseif a:vmode
 		"charwise, linewise or blockwise selection 
 		call setreg('a', join(cont, "\n") . "\n", s:nrrw_rgn_lines[instn].vmode)
@@ -842,6 +850,7 @@ fun! nrrwrgn#WidenRegion(vmode,force, close) "{{{1
 				\ s:nrrw_rgn_lines[instn].vmode),
 				\ instn)
 		endif
+	" 3) :NR started selection
 	else 
 		" linewise selection because we started the NarrowRegion with the
 		" command NarrowRegion(0)
