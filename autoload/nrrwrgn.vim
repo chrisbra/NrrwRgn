@@ -993,6 +993,7 @@ fun! nrrwrgn#VisualNrrwRgn(mode, ...) "{{{1
 		exe ':noa ' win 'wincmd w'
 	endif
 	let b:orig_buf = orig_buf
+	let s:nrrw_rgn_lines[s:instn].orig_buf  = orig_buf
 	silent put a
 	let b:nrrw_instn = s:instn
 	silent 0d _
