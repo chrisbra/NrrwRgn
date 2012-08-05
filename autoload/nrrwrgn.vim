@@ -605,12 +605,12 @@ fun! nrrwrgn#NrrwRgnDoPrepare(...) "{{{1
 			\ " narrow using :NRP!")
 	   return
 	endif
-	if !exists("s:nrrw_rgn_buf")
-		let s:nrrw_rgn_buf =  <sid>ParseList(s:nrrw_rgn_line)
-	endif
-	if empty(s:nrrw_rgn_buf)
+	if empty(s:nrrw_rgn_line)
 		call <sid>WarningMsg("No lines selected from :NRP, aborting!")
 	   return
+	endif
+	if !exists("s:nrrw_rgn_buf")
+		let s:nrrw_rgn_buf =  <sid>ParseList(s:nrrw_rgn_line)
 	endif
 	let o_lz = &lz
 	let s:o_s  = @/
