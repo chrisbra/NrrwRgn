@@ -131,7 +131,7 @@ fun! <sid>ParseList(list) "{{{1
 		 let temp=item
      endfor
 	 if result[i-1][1] != item
-		 let result[i]=[item,item]
+		 let result[i]=[start,item]
 	 endif
      return result
 endfun
