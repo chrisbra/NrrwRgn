@@ -63,7 +63,8 @@ fun! <sid>Init() "{{{1
 	" Customization
 	let s:nrrw_rgn_vert = (exists("g:nrrw_rgn_vert") ? g:nrrw_rgn_vert : 0)
 	let s:nrrw_rgn_wdth = (exists("g:nrrw_rgn_wdth") ? g:nrrw_rgn_wdth : 20)
-	let s:nrrw_rgn_hl	= (exists("g:nrrw_rgn_hl")	 ? g:nrrw_rgn_hl   : "WildMenu")
+	let s:nrrw_rgn_hl	= (exists("g:nrrw_rgn_hl")	 ? g:nrrw_rgn_hl   :
+							\ "WildMenu")
 	let s:nrrw_rgn_nohl = (exists("g:nrrw_rgn_nohl") ? g:nrrw_rgn_nohl : 0)
 
 	let s:debug         = (exists("s:debug") ? s:debug : 0)
@@ -195,7 +196,8 @@ fun! <sid>NrrwRgnAuCmd(instn) "{{{1
 		exe "aug NrrwRgn" . b:nrrw_instn
 			au!
 			au BufWriteCmd <buffer> nested :call s:WriteNrrwRgn(1)
-			au BufWinLeave,BufWipeout,BufDelete <buffer> nested :call s:WriteNrrwRgn()
+			au BufWinLeave,BufWipeout,BufDelete <buffer> nested
+						\ :call s:WriteNrrwRgn()
 		aug end
 	else
 		exe "aug NrrwRgn" .  a:instn
@@ -248,7 +250,8 @@ endfu
 fun! <sid>StoreLastNrrwRgn(instn) "{{{1
 	" Only store the last region, when the narrowed instance is still valid
 	if !has_key(s:nrrw_rgn_lines, a:instn)
-		call <sid>WarningMsg("Error storing the last Narrowed Window, it's invalid!")
+		call <sid>WarningMsg("Error storing the last Narrowed Window,".
+					\ "it's invalid!")
 		return
 	endif
 
@@ -290,8 +293,9 @@ fun! <sid>GeneratePattern(startl, endl, mode, ...) "{{{1
 	else
 		let block = 1
 	endif
-	" This is just a best guess, the highlighted block could still be wrong (a
-	" rectangle has been selected, but the complete lines are highlighted
+	" This is just a best guess, the highlighted block could still be wrong
+	" (a " rectangle has been selected, but the complete lines are
+	" highlighted
 	if a:mode ==# '' && a:startl[0] > 0 && a:startl[1] > 0 && block
 		return '\%>' . (a:startl[0]-1) . 'l\&\%>' . (a:startl[1]-1) .
 			\ 'v\&\%<' . (a:endl[0]+1) . 'l'
@@ -414,10 +418,10 @@ fun! <sid>DeleteMatches(instn) "{{{1
 endfun
 
 fun! <sid>HideNrrwRgnLines() "{{{1
-	 syn region StartNrrwRgnIgnore start="^# Start NrrwRgn\z(\d\+\).*$" fold
-	 syn region EndNrrwRgnIgnore start="^# End NrrwRgn\z1\d\+.*$" end="^$" fold
-	 hi def link StartNrrwRgnIgnore Ignore
-	 hi def link EndNrrwRgnIgnore Ignore
+	syn region StartNrrwRgnIgnore start="^# Start NrrwRgn\z(\d\+\).*$" fold
+	syn region EndNrrwRgnIgnore start="^# End NrrwRgn\z1\d\+.*$" end="^$" fold
+	hi def link StartNrrwRgnIgnore Ignore
+	hi def link EndNrrwRgnIgnore Ignore
 endfun
 
 fun! <sid>ReturnCommentFT() "{{{1
@@ -586,7 +590,8 @@ endfun
 
 fun! <sid>NrrwSettings(on) "{{{1
 	if a:on
-		setl noswapfile buftype=acwrite bufhidden=wipe foldcolumn=0 nobuflisted
+		setl noswapfile buftype=acwrite bufhidden=wipe foldcolumn=0
+		setl nobuflisted
 	else
 		setl swapfile buftype= bufhidden= buflisted
 	endif
@@ -772,7 +777,8 @@ fun! nrrwrgn#WidenRegion(vmode, force, close) "{{{1
 		if bufexists(orig_buf)
 			exe orig_buf "b!"
 		else
-			call s:WarningMsg("Original buffer does no longer exist! Aborting!")
+			call s:WarningMsg("Original buffer does no longer exist!".
+						\ " Aborting!")
 			return
 		endif
 	else
@@ -800,7 +806,8 @@ fun! nrrwrgn#WidenRegion(vmode, force, close) "{{{1
 	" Make sure the narrowed buffer is still valid (happens, when 2 split
 	" window of the narrowed buffer is opened.
 	if !has_key(s:nrrw_rgn_lines, instn)
-		call <sid>WarningMsg("Error writing changes back, Narrowed Window invalid!")
+		call <sid>WarningMsg("Error writing changes back,".
+					\ "Narrowed Window invalid!")
 		return
 	endif
 
@@ -812,7 +819,8 @@ fun! nrrwrgn#WidenRegion(vmode, force, close) "{{{1
 	" 2) Visual Selection
 	elseif a:vmode
 		"charwise, linewise or blockwise selection 
-		call setreg('a', join(cont, "\n") . "\n", s:nrrw_rgn_lines[instn].vmode)
+		call setreg('a', join(cont, "\n") . "\n",
+					\ s:nrrw_rgn_lines[instn].vmode)
 		if s:nrrw_rgn_lines[instn].vmode == 'v' &&
 			\ s:nrrw_rgn_lines[instn].end[1] -
 			\ s:nrrw_rgn_lines[instn].start[1] + 1 == len(cont) + 1
@@ -845,8 +853,8 @@ fun! nrrwrgn#WidenRegion(vmode, force, close) "{{{1
 			else
 				keepj norm! $
 			endif
-			" overwrite the visually selected region with the contents from the
-			" narrowed buffer
+			" overwrite the visually selected region with the contents from
+			" the narrowed buffer
 			norm! "aP
 		endif
 		" Recalculate the start and end positions of the narrowed window
@@ -856,9 +864,10 @@ fun! nrrwrgn#WidenRegion(vmode, force, close) "{{{1
 		" make sure the visual selected lines did not add a new linebreak,
 		" this messes up the characterwise selected regions and removes lines
 		" on further writings
-		if s:nrrw_rgn_lines[instn].end[1] - s:nrrw_rgn_lines[instn].start[1] + 1 >
-			\	len(cont) && s:nrrw_rgn_lines[instn].vmode == 'v'
-			let s:nrrw_rgn_lines[instn].end[1] = s:nrrw_rgn_lines[instn].end[1] - 1
+		if s:nrrw_rgn_lines[instn].end[1] - s:nrrw_rgn_lines[instn].start[1]
+				\ + 1 >	len(cont) && s:nrrw_rgn_lines[instn].vmode == 'v'
+			let s:nrrw_rgn_lines[instn].end[1] =
+				\ s:nrrw_rgn_lines[instn].end[1] - 1
 			let s:nrrw_rgn_lines[instn].end[2] = virtcol('$')
 		endif
 
@@ -891,7 +900,7 @@ fun! nrrwrgn#WidenRegion(vmode, force, close) "{{{1
 		" so subsequent calls will adjust the region accordingly
 		" so subsequent calls will adjust the region accordingly
 		let  s:nrrw_rgn_lines[instn].end[1] =
-			\s:nrrw_rgn_lines[instn].start[1] + len(cont) -1
+			\ s:nrrw_rgn_lines[instn].start[1] + len(cont) -1
 		if s:nrrw_rgn_lines[instn].end[1] > line('$')
 			let s:nrrw_rgn_lines[instn].end[1] = line('$')
 		endif
@@ -966,7 +975,8 @@ fun! nrrwrgn#VisualNrrwRgn(mode, ...) "{{{1
 	call <sid>DeleteMatches(s:instn)
 	norm! gv"ay
 	if len(split(@a, "\n", 1)) != 
-			\ (s:nrrw_rgn_lines[s:instn].end[1] - s:nrrw_rgn_lines[s:instn].start[1] + 1)
+			\ (s:nrrw_rgn_lines[s:instn].end[1] -
+			\ s:nrrw_rgn_lines[s:instn].start[1] + 1)
 		" remove trailing "\n"
 		let @a=substitute(@a, '\n$', '', '') 
 	endif
@@ -1033,7 +1043,8 @@ fun! nrrwrgn#UnifiedDiff() "{{{1
 	let save_winposview=winsaveview()
 	let orig_win = winnr()
 	" close previous opened Narrowed buffers
-	silent! windo | if bufname('')=~'^Narrow_Region' && &diff |diffoff|q!|endif
+	silent! windo | if bufname('')=~'^Narrow_Region' &&
+			\ &diff |diffoff|q!|endif
 	" minimize Window
 	" this is disabled, because this might be useful, to see everything
 	"exe "vert resize -999999"
@@ -1131,7 +1142,9 @@ fun! nrrwrgn#Debug(enable) "{{{1
 			"sil! unlet s:instn
 			com! NI :call <sid>WarningMsg("Instance: ".s:instn)
 			com! NJ :call <sid>WarningMsg("Data: ".string(s:nrrw_rgn_lines))
-			com! -nargs=1 NOutput :if exists("s:".<q-args>)|redraw!|:exe 'echo s:'.<q-args>|else| echo "s:".<q-args>. " does not exist!"|endif
+			com! -nargs=1 NOutput :if exists("s:".<q-args>)|redraw!|
+						\ :exe 'echo s:'.<q-args>|else|
+						\ echo "s:".<q-args>. " does not exist!"|endif
 		endfun
 		call <sid>NrrwRgnDebug()
 	else
