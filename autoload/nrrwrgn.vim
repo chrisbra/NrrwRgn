@@ -418,10 +418,18 @@ fun! <sid>DeleteMatches(instn) "{{{1
 endfun
 
 fun! <sid>HideNrrwRgnLines() "{{{1
-	syn region StartNrrwRgnIgnore start="^# Start NrrwRgn\z(\d\+\).*$" fold
-	syn region EndNrrwRgnIgnore start="^# End NrrwRgn\z1\d\+.*$" end="^$" fold
-	hi def link StartNrrwRgnIgnore Ignore
-	hi def link EndNrrwRgnIgnore Ignore
+	let cnc = has("Conceal")
+	syn region NrrwRgn start="^# Start NrrwRgn\z(\d\+\).*$"
+		\ end="^# End NrrwRgn\z1$" fold transparent
+	let cmd='syn match NrrwRgnStart "^# Start NrrwRgn\d\+$" '.
+				\ (cnc ? 'conceal' : '')
+	exe cmd
+	let cmd='syn match NrrwRgnEnd "^# End NrrwRgn\d\+$" '.
+				\ (cnc ? 'conceal' : '')
+	exe cmd
+	if cnc
+		setl conceallevel=3
+	endif
 endfun
 
 fun! <sid>ReturnCommentFT() "{{{1
@@ -668,6 +676,7 @@ fun! nrrwrgn#NrrwRgnDoPrepare(...) "{{{1
 	call <sid>SetupBufLocalCommands(0, bang)
 	call <sid>NrrwRgnAuCmd(0)
 	call <sid>CleanRegions()
+	call <sid>HideNrrwRgnLines()
 
 	" restore settings
 	let &lz   = o_lz
