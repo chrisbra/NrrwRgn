@@ -202,13 +202,13 @@ fun! <sid>NrrwRgnAuCmd(instn) "{{{1
 		au!
 		aug end
 		exe "aug! NrrwRgn" . a:instn
-
 		
 		if !has_key(s:nrrw_rgn_lines, a:instn)
 			" narrowed buffer was already cleaned up
 			call s:WarningMsg("Window was already cleaned up. Nothing to do.")
 			return
 		endif
+
 		" make the original buffer modifiable, if possible
 		let buf = s:nrrw_rgn_lines[a:instn].orig_buf
 		if !getbufvar(buf, '&l:ma') && !getbufvar(buf, 'orig_buf_ro')
@@ -226,18 +226,20 @@ fun! <sid>NrrwRgnAuCmd(instn) "{{{1
 			" bwipe! throws E855 (catching does not work)
 			" but because of 'bufhidden' wipeing will happen anyways
 			"exe "bwipe! " bufnr(s:nrrw_winname . '_' . a:instn)
-			if winnr('$') > 1
+			if has_key(s:nrrw_rgn_lines[a:instn], 'single') &&
+			\  s:nrrw_rgn_lines[a:instn].single
 				" If there is only a single window open don't clean up now
 				" because we can't put the narrowed lines back, so do not
 				" clean up now. We need to clean up then later. But how?
-				call <sid>CleanUpInstn(a:instn)
+				return
 			endif
+			call <sid>CleanUpInstn(a:instn)
 		endif
 	endif
 endfun
 
 fun! <sid>CleanUpInstn(instn) "{{{1
-	if s:instn>=1
+	if s:instn>=1 && has_key(s:nrrw_rgn_lines, 'a:instn')
 		unlet s:nrrw_rgn_lines[a:instn]
 		let s:instn-=1
 	endif
@@ -699,6 +701,8 @@ fun! nrrwrgn#NrrwRgn(...) range  "{{{1
 			exe 'f' s:nrrw_winname . '_' . s:instn
 			call <sid>SetOptions(local_options)
 			call <sid>NrrwSettings(1)
+			" succeeded to create a single window
+			let s:nrrw_rgn_lines[s:instn].single = 1
 		catch /^Vim\%((\a\+)\)\=:E37/	" catch error E37
 			" Fall back and use a new window
 			" Set the highlighting
@@ -745,7 +749,7 @@ fun! nrrwrgn#Prepare() "{{{1
 	call add(s:nrrw_rgn_line, line('.'))
 endfun
 
-fun! nrrwrgn#WidenRegion(vmode,force, close) "{{{1
+fun! nrrwrgn#WidenRegion(vmode, force, close) "{{{1
 	" a:close: original narrowed window is going to be closed
 	" so, clean up, don't renew highlighting, etc.
 	let nrw_buf  = bufnr('')
@@ -908,7 +912,13 @@ fun! nrrwrgn#WidenRegion(vmode,force, close) "{{{1
 	if exists("g:nrrw_rgn_protect") && g:nrrw_rgn_protect =~? 'n'
 		call <sid>RecalculateLineNumbers(instn, adjust_line_numbers)
 	endif
-	if a:close
+	if a:close && !has_key(s:nrrw_rgn_lines[instn], 'single')
+		" For narrowed windows that have been created using !,
+		" don't clean up yet, or else we loose all data and can't write
+		" it back later.
+		" (e.g. :NR! createas a new single window, do :sp
+		"  and you can only write one of the windows back, the other will
+		"  become invalid, if CleanUp is executed)
 		call <sid>CleanUpInstn(instn)
 	endif
 	call <sid>SaveRestoreRegister(0)
@@ -976,6 +986,8 @@ fun! nrrwrgn#VisualNrrwRgn(mode, ...) "{{{1
 			exe 'f' s:nrrw_winname . '_' . s:instn
 			call <sid>SetOptions(local_options)
 			call <sid>NrrwSettings(1)
+			" succeeded to create a single window
+			let s:nrrw_rgn_lines[s:instn].single = 1
 		catch /^Vim\%((\a\+)\)\=:E37/	" catch error E37
 			" Fall back and use a new window
 			" Set the highlighting
