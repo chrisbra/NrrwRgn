@@ -203,6 +203,12 @@ fun! <sid>NrrwRgnAuCmd(instn) "{{{1
 		aug end
 		exe "aug! NrrwRgn" . a:instn
 
+		
+		if !has_key(s:nrrw_rgn_lines, a:instn)
+			" narrowed buffer was already cleaned up
+			call s:WarningMsg("Window was already cleaned up. Nothing to do.")
+			return
+		endif
 		" make the original buffer modifiable, if possible
 		let buf = s:nrrw_rgn_lines[a:instn].orig_buf
 		if !getbufvar(buf, '&l:ma') && !getbufvar(buf, 'orig_buf_ro')
