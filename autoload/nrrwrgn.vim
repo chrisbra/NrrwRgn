@@ -419,17 +419,18 @@ endfun
 
 fun! <sid>HideNrrwRgnLines() "{{{1
 	let cnc = has("Conceal")
-	syn region NrrwRgn start="^# Start NrrwRgn\z(\d\+\).*$"
-		\ end="^# End NrrwRgn\z1$" fold transparent
 	let cmd='syn match NrrwRgnStart "^# Start NrrwRgn\d\+$" '.
 				\ (cnc ? 'conceal' : '')
 	exe cmd
 	let cmd='syn match NrrwRgnEnd "^# End NrrwRgn\d\+$" '.
 				\ (cnc ? 'conceal' : '')
 	exe cmd
+	syn region NrrwRgn start="^# Start NrrwRgn\z(\d\+\).*$"
+		\ end="^# End NrrwRgn\z1$" fold transparent
 	if cnc
 		setl conceallevel=3
 	endif
+	setl fdm=syntax
 endfun
 
 fun! <sid>ReturnCommentFT() "{{{1
