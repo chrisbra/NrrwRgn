@@ -323,7 +323,7 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 4. NrrwRgn History                                          *NrrwRgn-history*
 
 
-0.29: (unreleased) {{{1
+0.29: Aug 20, 2012 {{{1
 - Use ! to have the narrowed buffer not opened in a new window (suggested by
   Greg Sexton thanks!, issue #8
   https://github.com/chrisbra/NrrwRgn/issues/8)
