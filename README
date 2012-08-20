@@ -1,7 +1,7 @@
 *NrrwRgn.txt*   A Narrow Region Plugin (similar to Emacs)
 
 Author:  Christian Brabandt <cb@256bit.org>
-Version: 0.28 Sun, 03 Jun 2012 13:47:04 +0200
+Version: 0.29 Mon, 20 Aug 2012 19:34:23 +0200
 Copyright: (c) 2009, 2010, 2011, 2012 by Christian Brabandt         
            The VIM LICENSE applies to NrrwRgnPlugin.vim and NrrwRgnPlugin.txt
            (see |copyright|) except use NrrwRgnPlugin instead of "Vim".
@@ -42,21 +42,25 @@ combination to open that selection in a new buffer.
 This plugin defines the following commands:
 
                                                         *:NarrowRegion* *:NR*
-:[range]NR
-:[range]NarrowRegion        When [range] is omitted, select only the current
+:[range]NR[!]
+:[range]NarrowRegion[!]     When [range] is omitted, select only the current
                             line, else use the lines in the range given and 
                             open it in a new Scratch Window.
                             If the current line is selected and is on a folded
                             region, select the whole folded text.
                             Whenever you are finished modifying that region
                             simply write the buffer.
+                            If ! is given, open the narrowed buffer not in a
+                            split buffer but in the current window.
 
                                                         *:NarrowWindow* *:NW*
-:NW
-:NarrowWindow               Select only the range that is visible the current
+:NW[!]
+:NarrowWindow[!]            Select only the range that is visible the current
                             window and open it in a new Scratch Window. 
                             Whenever you are finished modifying that region
                             simply write the buffer.
+                            If ! is given, open the narrowed buffer not in a
+                            split buffer but in the current window.
 
                                                                 *:WidenRegion*
 :WidenRegion[!]             This command is only available in the narrowed 
@@ -66,8 +70,10 @@ This plugin defines the following commands:
                             closed, otherwise it will remain open.
 
                                                                         *:NRV*
-:NRV                        Opened the narrowed window for the region that was
+:NRV[!]                     Opened the narrowed window for the region that was
                             last selected in visual mode
+                            If ! is given, open the narrowed buffer not in a
+                            split buffer but in the current window.
 
                                                                         *:NUD*
 
@@ -113,8 +119,10 @@ This plugin defines the following commands:
 
                                                                     *:NRL*
                 
-:NRL                        Reselect the last selected region again and open in
+:NRL[!]                     Reselect the last selected region again and open in
                             a narrowed window. 
+                            If ! is given, open the narrowed buffer not in a
+                            split buffer but in the current window.
 
 
 2.1 NrrwRgn HowTo                                                *NR-HowTo*
@@ -315,6 +323,16 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 4. NrrwRgn History                                          *NrrwRgn-history*
 
 
+0.29: Aug 20, 2012 {{{1
+- Use ! to have the narrowed buffer not opened in a new window (suggested by
+  Greg Sexton thanks!, issue #8
+  https://github.com/chrisbra/NrrwRgn/issues/8)
+- Fix mappings for visual mode (https://github.com/chrisbra/NrrwRgn/issues/9,
+  reported by Sung Pae, thanks!)
+- Fix problem with setting the filetype
+  (https://github.com/chrisbra/NrrwRgn/issues/10, reported by Hong Xu,
+  thanks!)
+- Fix some minor problems, when using ! mode
 0.28: Jun 03, 2012 {{{1
 - Plugin did not store last narrowed region when narrowed window was moved to
   another tabpage (reported by Ben Fritz, thanks!)
