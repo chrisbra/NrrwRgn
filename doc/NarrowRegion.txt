@@ -9,7 +9,7 @@ Copyright: (c) 2009, 2010, 2011, 2012 by Christian Brabandt
 
 
 ==============================================================================
-1. Contents                                     *NarrowRegion*  *NrrwRgnPlugin*
+1. Contents                                    *NarrowRegion*  *NrrwRgnPlugin*
 
         1.  Contents.....................................: |NrrwRgnPlugin|
         2.  NrrwRgn Manual...............................: |NrrwRgn-manual|
@@ -119,8 +119,8 @@ This plugin defines the following commands:
 
                                                                     *:NRL*
                 
-:NRL[!]                     Reselect the last selected region again and open in
-                            a narrowed window. 
+:NRL[!]                     Reselect the last selected region again and open
+                            in a narrowed window. 
                             If ! is given, open the narrowed buffer not in a
                             split buffer but in the current window.
 
