@@ -1106,7 +1106,7 @@ endfun
 
 fun! nrrwrgn#LastNrrwRgn(bang) "{{{1
 	let bang = !empty(a:bang)
-    if !has_key(s:nrrw_rgn_lines, 'last')
+    if !exists("s:nrrw_rgn_lines") || !has_key(s:nrrw_rgn_lines, 'last')
 		call <sid>WarningMsg("There is no last region to re-select")
 	   return
 	endif
