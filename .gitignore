@@ -7,3 +7,4 @@ vim_passfile
 *.vmb
 # ignore *.orig files
 *.orig
+doc/tags
