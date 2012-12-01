@@ -131,7 +131,12 @@ fun! <sid>ParseList(list) "{{{1
          endif
 		 let temp=item
      endfor
-	 if result[i-1][1] != item
+	 if empty(result)
+		 " add all items from the list to the result
+		 " list consists only of consecutive items
+		 let result[i] = [a:list[0], a:list[-1]]
+	 endif
+	 if get(result, (i-1), 0) && result[i-1][1] != item
 		 let result[i]=[start,item]
 	 endif
      return result
@@ -264,17 +269,15 @@ fun! <sid>StoreLastNrrwRgn(instn) "{{{1
 	if has_key(s:nrrw_rgn_lines[a:instn], 'multi')
 		call add(s:nrrw_rgn_lines['last'], [ orig_buf, 
 			\ s:nrrw_rgn_lines[a:instn]['multi']])
-	elseif has_key(s:nrrw_rgn_lines[a:instn], 'vmode')
-		let s:nrrw_rgn_lines['last'] = [ getpos("'<"),
-		\ getpos("'>") ]
-		call add(s:nrrw_rgn_lines['last'], s:nrrw_rgn_lines[a:instn].vmode)
 	else
 		" Linewise narrowed region, pretend it was done like a visual
 		" narrowed region
 		let s:nrrw_rgn_lines['last'] = [ [ orig_buf,
 		\ s:nrrw_rgn_lines[a:instn].start[1:]], 
 		\ [ orig_buf, s:nrrw_rgn_lines[a:instn].end[1:]]]
-		call add(s:nrrw_rgn_lines['last'], 'V')
+		call add(s:nrrw_rgn_lines['last'],
+					\ has_key(s:nrrw_rgn_lines[a:instn], 'vmode') ?
+					\ s:nrrw_rgn_lines[a:instn].vmode : 'V')
 	endif
 endfu
 
@@ -627,13 +630,18 @@ fun! nrrwrgn#NrrwRgnDoPrepare(...) "{{{1
 			\ " narrow using :NRP!")
 	   return
 	endif
-	if empty(s:nrrw_rgn_line)
+	if empty(s:nrrw_rgn_line) && !exists("s:nrrw_rgn_buf")
 		call <sid>WarningMsg("No lines selected from :NRP, aborting!")
 	   return
 	endif
 	if !exists("s:nrrw_rgn_buf")
 		let s:nrrw_rgn_buf =  <sid>ParseList(s:nrrw_rgn_line)
 	endif
+	if empty(s:nrrw_rgn_buf)
+		call <sid>WarningMsg("An error occured when selecting all lines. Please report as bug")
+		unlet s:nrrw_rgn_buf
+	   return
+   endif
 	let o_lz = &lz
 	let s:o_s  = @/
 	set lz
@@ -764,7 +772,7 @@ fun! nrrwrgn#Prepare() "{{{1
 	call add(s:nrrw_rgn_line, line('.'))
 endfun
 
-fun! nrrwrgn#WidenRegion(vmode, force, close) "{{{1
+fun! nrrwrgn#WidenRegion(vmode, force, close) 
 	" a:close: original narrowed window is going to be closed
 	" so, clean up, don't renew highlighting, etc.
 	let nrw_buf  = bufnr('')
@@ -1129,16 +1137,17 @@ fun! nrrwrgn#LastNrrwRgn(bang) "{{{1
 		let s:nrrw_rgn_buf =  s:nrrw_rgn_lines['last'][0][1]
 		call nrrwrgn#NrrwRgnDoPrepare('')
 	else
-		exe "keepj" s:nrrw_rgn_lines['last'][0][1]
-		exe "keepj norm!" s:nrrw_rgn_lines['last'][0][2] . '|'
+		exe "keepj" s:nrrw_rgn_lines['last'][0][1][0]
+		exe "keepj norm!" s:nrrw_rgn_lines['last'][0][1][1] . '|'
+		" Start visual mode
 		exe "keepj norm!" s:nrrw_rgn_lines['last'][2]
-		exe "keepj" s:nrrw_rgn_lines['last'][1][1]
-		if col(s:nrrw_rgn_lines['last'][1][2]) == col('$') &&
+		exe "keepj" s:nrrw_rgn_lines['last'][1][1][0]
+		if col(s:nrrw_rgn_lines['last'][1][1][1]) == col('$') &&
 		\ s:nrrw_rgn_lines['last'][2] == ''
 			" Best guess
 			exe "keepj $"
 		else
-			exe "keepj norm!" s:nrrw_rgn_lines['last'][1][2] . '|'
+			exe "keepj norm!" s:nrrw_rgn_lines['last'][1][1][1] . '|'
 		endif
 		" Call VisualNrrwRgn()
 		call nrrwrgn#VisualNrrwRgn(visualmode(), bang)
