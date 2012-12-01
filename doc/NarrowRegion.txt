@@ -323,6 +323,9 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 4. NrrwRgn History                                          *NrrwRgn-history*
 
 
+0.30: (unreleased) {{{1
+- |NRL| throws erros, when used without having first narrowed a region
+
 0.29: Aug 20, 2012 {{{1
 - Use ! to have the narrowed buffer not opened in a new window (suggested by
   Greg Sexton thanks!, issue #8
