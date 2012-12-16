@@ -941,7 +941,7 @@ fun! nrrwrgn#WidenRegion(vmode, force, close)  "{{{1
 		if delete_last_line
 			silent! $d _
 		endif
-		if !close
+		if !close && has_key(s:nrrw_rgn_lines[instn], 'single')
 			" move back to narrowed buffer
 			noa b #
 		endif
