@@ -602,8 +602,12 @@ endfun
 
 fun! <sid>NrrwSettings(on) "{{{1
 	if a:on
-		setl noswapfile buftype=acwrite bufhidden=wipe foldcolumn=0
+		setl noswapfile buftype=acwrite foldcolumn=0
 		setl nobuflisted
+		let instn = matchstr(bufname(''), '_\zs\d\+')+0
+		if  !&hidden && !has_key(s:nrrw_rgn_lines[instn], "single")
+			setl bufhidden=wipe
+		endif
 	else
 		setl swapfile buftype= bufhidden= buflisted
 	endif
@@ -788,16 +792,16 @@ fun! nrrwrgn#WidenRegion(vmode, force, close)  "{{{1
 
 	let tab=<sid>BufInTab(orig_buf)
 	if tab != tabpagenr() && tab > 0
-		exe "tabn" tab
+		exe "noa tabn" tab
 	endif
 	let orig_win = bufwinnr(orig_buf)
 	" Should be in the right tab now!
 	if (orig_win == -1)
 		if bufexists(orig_buf)
 			" buffer not in current window, switch to it!
-			exe orig_buf "b!"
+			exe "noa" orig_buf "b!"
 			" Make sure highlighting will be removed
-			let close = 1
+			let close = (&g:hid ? 0 : 1)
 		else
 			call s:WarningMsg("Original buffer does no longer exist!".
 						\ " Aborting!")
@@ -894,12 +898,13 @@ fun! nrrwrgn#WidenRegion(vmode, force, close)  "{{{1
 		endif
 
 		" also, renew the highlighted region
-		if !close
+		if !a:close
 			call <sid>AddMatches(<sid>GeneratePattern(
 				\ s:nrrw_rgn_lines[instn].start[1:2],
 				\ s:nrrw_rgn_lines[instn].end[1:2],
 				\ s:nrrw_rgn_lines[instn].vmode),
 				\ instn)
+			noa b #
 		endif
 	" 3) :NR started selection
 	else 
@@ -926,7 +931,7 @@ fun! nrrwrgn#WidenRegion(vmode, force, close)  "{{{1
 		if s:nrrw_rgn_lines[instn].end[1] > line('$')
 			let s:nrrw_rgn_lines[instn].end[1] = line('$')
 		endif
-		if !close
+		if !a:close
 			call <sid>AddMatches(<sid>GeneratePattern(
 				\s:nrrw_rgn_lines[instn].start[1:2], 
 				\s:nrrw_rgn_lines[instn].end[1:2], 
@@ -935,6 +940,10 @@ fun! nrrwrgn#WidenRegion(vmode, force, close)  "{{{1
 		endif
 		if delete_last_line
 			silent! $d _
+		endif
+		if !close
+			" move back to narrowed buffer
+			noa b #
 		endif
 	endif
 	" Recalculate start- and endline numbers for all other Narrowed Windows.
@@ -1017,9 +1026,9 @@ fun! nrrwrgn#VisualNrrwRgn(mode, ...) "{{{1
 			enew
 			exe 'f' s:nrrw_winname . '_' . s:instn
 			call <sid>SetOptions(local_options)
-			call <sid>NrrwSettings(1)
 			" succeeded to create a single window
 			let s:nrrw_rgn_lines[s:instn].single = 1
+			call <sid>NrrwSettings(1)
 		catch /^Vim\%((\a\+)\)\=:E37/	" catch error E37
 			" Fall back and use a new window
 			" Set the highlighting
