@@ -325,6 +325,11 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 
 0.30: (unreleased) {{{1
 - |NRL| throws erros, when used without having first narrowed a region
+- |NRV!| not allowed (reported by ping, thanks!)
+- when using single window narrowing, :w would jump back to the original
+  window. Only do this, when 'hidden' is not set (reported by ping, thanks!)
+- when narrowing a region, the last visual selected region wasn't correctly
+  restored (reported by ping, thanks!)
 
 0.29: Aug 20, 2012 {{{1
 - Use ! to have the narrowed buffer not opened in a new window (suggested by
