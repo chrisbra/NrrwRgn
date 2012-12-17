@@ -173,31 +173,31 @@ fun! <sid>WriteNrrwRgn(...) "{{{1
 	endif
 endfun
 
-fun! <sid>SaveRestoreRegister(save) "{{{1
-	if a:save
+fun! <sid>SaveRestoreRegister(values) "{{{1
+	if empty(a:values)
 		" Save
-		let s:savereg  = getreg('a')
-		let s:saveregt = getregtype('a')
-		let s:fold = 0
+		let reg        = ['a', getreg('a'), getregtype('a') ]
+		let fold =  [ &fen, &l:fdm ]
 		if &fen
-			let s:fold=1
 			setl nofoldenable
-			let s:fdm = &l:fdm
 		endif
-		let s:_visual = [getpos("'<"), getpos("'>")]
+		let visual = [getpos("'<"), getpos("'>")]
+		return  [ reg, fold, visual ]
 	else
 		" Restore
-		call setreg('a', s:savereg, s:saveregt)
-		if s:fold
+		if empty(a:values)
+			call <sid>WarningMsg("Error setting options back!")
+			return
+		endif
+		call call('setreg', a:values[0])
+		if a:values[1][0]
 			setl foldenable
-			if exists("s:fdm")
-				let &l:fdm=s:fdm
-			endif
+			let &l:fdm=a:values[1][1]
 		endif
 		if v:version > 703 || (v:version == 703 && has("patch590"))
 			" settable '< and '> marks
-			call setpos("'<", s:_visual[0])
-			call setpos("'>", s:_visual[1])
+			call setpos("'<", a:values[2][0])
+			call setpos("'>", a:values[2][1])
 		endif
 	endif
 endfun!
@@ -818,7 +818,7 @@ fun! nrrwrgn#WidenRegion(vmode, force, close)  "{{{1
 	else
 		exe ':noa' . orig_win . 'wincmd w'
 	endif
-	call <sid>SaveRestoreRegister(1)
+	let _opts = <sid>SaveRestoreRegister([])
 	let wsv=winsaveview()
 	call <sid>DeleteMatches(instn)
 	if exists("b:orig_buf_ro") && b:orig_buf_ro && !a:force
@@ -965,7 +965,7 @@ fun! nrrwrgn#WidenRegion(vmode, force, close)  "{{{1
 		"  become invalid, if CleanUp is executed)
 		call <sid>CleanUpInstn(instn)
 	endif
-	call <sid>SaveRestoreRegister(0)
+	call <sid>SaveRestoreRegister(_opts)
 	let  @/=s:o_s
 	call winrestview(wsv)
 	if !close && has_key(s:nrrw_rgn_lines[instn], 'single')
@@ -1006,7 +1006,7 @@ fun! nrrwrgn#VisualNrrwRgn(mode, ...) "{{{1
 	" so you won't accidentally modify those lines,
 	" that will later be overwritten
 	let orig_buf=bufnr('')
-	call <sid>SaveRestoreRegister(1)
+	let _opts = <sid>SaveRestoreRegister([])
 
 	call <sid>CheckProtected()
 	let [ s:nrrw_rgn_lines[s:instn].start,
@@ -1072,7 +1072,7 @@ fun! nrrwrgn#VisualNrrwRgn(mode, ...) "{{{1
 	if has_key(s:nrrw_aucmd, "create")
 		exe s:nrrw_aucmd["create"]
 	endif
-	call <sid>SaveRestoreRegister(0)
+	call <sid>SaveRestoreRegister(_opts)
 
 	" restore settings
 	let &lz   = o_lz
