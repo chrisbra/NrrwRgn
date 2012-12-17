@@ -5,7 +5,7 @@
 " Last Change: Mon, 20 Aug 2012 19:34:23 +0200
 "
 " Script: http://www.vim.org/scripts/script.php?script_id=3075 
-" Copyright:   (c) 2009, 2010 by Christian Brabandt
+" Copyright:   (c) 2009, 2010, 2011, 2012, 2013 by Christian Brabandt
 "			   The VIM LICENSE applies to NrrwRgn.vim 
 "			   (see |copyright|) except use "NrrwRgn.vim" 
 "			   instead of "Vim".
@@ -688,8 +688,30 @@ fun! nrrwrgn#NrrwRgnDoPrepare(...) "{{{1
 				\ [c_s.' End NrrwRgn'.nr.c_e, '']
 	endfor
 
-	let win=<sid>NrwRgnWin()
-	exe ':noa ' win 'wincmd w'
+	if bang
+		try
+			let local_options = <sid>GetOptions(s:opts)
+			" enew fails, when no new unnamed buffer can be edited
+			enew
+			exe 'f' s:nrrw_winname . '_' . s:instn
+			call <sid>SetOptions(local_options)
+			call <sid>NrrwSettings(1)
+			" succeeded to create a single window
+			let s:nrrw_rgn_lines[s:instn].single = 1
+		catch /^Vim\%((\a\+)\)\=:E37/	" catch error E37
+			" Fall back and use a new window
+			" Set the highlighting
+			call <sid>AddMatches(<sid>GeneratePattern(
+				\s:nrrw_rgn_lines[s:instn].start[1:2], 
+				\s:nrrw_rgn_lines[s:instn].end[1:2], 
+				\'V'), s:instn)
+			let win=<sid>NrwRgnWin()
+			exe ':noa ' win 'wincmd w'
+		endtry
+	else
+		let win=<sid>NrwRgnWin()
+		exe ':noa ' win 'wincmd w'
+	endif
 	let b:orig_buf = orig_buf
 	call setline(1, buffer)
 	setl nomod
