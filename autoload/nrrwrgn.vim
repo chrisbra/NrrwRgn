@@ -71,7 +71,7 @@ fun! <sid>Init() "{{{1
 		
 endfun 
 
-fun! <sid>NrwRgnWin() "{{{1
+fun! <sid>NrrwRgnWin(bang) "{{{1
 	let local_options = <sid>GetOptions(s:opts)
 	let nrrw_winname = s:nrrw_winname . '_' . s:instn
 	let nrrw_win = bufwinnr('^'.nrrw_winname.'$')
@@ -86,8 +86,20 @@ fun! <sid>NrwRgnWin() "{{{1
 		if !exists('g:nrrw_topbot_leftright')
 			let g:nrrw_topbot_leftright = 'topleft'
 		endif
-		exe  g:nrrw_topbot_leftright s:nrrw_rgn_wdth .
-			\(s:nrrw_rgn_vert?'v':'') . "sp " . nrrw_winname
+		if !a:bang
+			exe  g:nrrw_topbot_leftright s:nrrw_rgn_wdth .
+				\(s:nrrw_rgn_vert?'v':'') . "sp " . nrrw_winname
+		else
+			try 
+				enew
+				exe 'f' s:nrrw_winname. '_'. s:instn
+			catch /^Vim\%((\a\+)\)\=:E37/	" catch error E37
+				" Fall back and use a new window
+				exe  g:nrrw_topbot_leftright s:nrrw_rgn_wdth .
+					\(s:nrrw_rgn_vert?'v':'') . "sp " . nrrw_winname
+			endtry
+		endif
+
 		" just in case, a global nomodifiable was set 
 		" disable this for the narrowed window
 		setl ma
@@ -688,30 +700,17 @@ fun! nrrwrgn#NrrwRgnDoPrepare(...) "{{{1
 				\ [c_s.' End NrrwRgn'.nr.c_e, '']
 	endfor
 
+	let win=<sid>NrrwRgnWin(bang)
 	if bang
-		try
-			let local_options = <sid>GetOptions(s:opts)
-			" enew fails, when no new unnamed buffer can be edited
-			enew
-			exe 'f' s:nrrw_winname . '_' . s:instn
-			call <sid>SetOptions(local_options)
-			call <sid>NrrwSettings(1)
-			" succeeded to create a single window
-			let s:nrrw_rgn_lines[s:instn].single = 1
-		catch /^Vim\%((\a\+)\)\=:E37/	" catch error E37
-			" Fall back and use a new window
-			" Set the highlighting
-			call <sid>AddMatches(<sid>GeneratePattern(
-				\s:nrrw_rgn_lines[s:instn].start[1:2], 
-				\s:nrrw_rgn_lines[s:instn].end[1:2], 
-				\'V'), s:instn)
-			let win=<sid>NrwRgnWin()
-			exe ':noa ' win 'wincmd w'
-		endtry
+		let s:nrrw_rgn_lines[s:instn].single = 1
 	else
-		let win=<sid>NrwRgnWin()
-		exe ':noa ' win 'wincmd w'
+		" Set highlighting
+		call <sid>AddMatches(<sid>GeneratePattern(
+			\s:nrrw_rgn_lines[s:instn].start[1:2], 
+			\s:nrrw_rgn_lines[s:instn].end[1:2], 
+			\'V'), s:instn)
 	endif
+	exe ':noa ' win 'wincmd w'
 	let b:orig_buf = orig_buf
 	call setline(1, buffer)
 	setl nomod
@@ -750,34 +749,15 @@ fun! nrrwrgn#NrrwRgn(...) range  "{{{1
 		\s:nrrw_rgn_lines[s:instn].start[1], 
 		\s:nrrw_rgn_lines[s:instn].end[1])
 	call <sid>DeleteMatches(s:instn)
+	let win=<sid>NrrwRgnWin(bang)
 	if bang
-		try
-			let local_options = <sid>GetOptions(s:opts)
-			" enew fails, when no new unnamed buffer can be edited
-			enew
-			exe 'f' s:nrrw_winname . '_' . s:instn
-			call <sid>SetOptions(local_options)
-			call <sid>NrrwSettings(1)
-			" succeeded to create a single window
-			let s:nrrw_rgn_lines[s:instn].single = 1
-		catch /^Vim\%((\a\+)\)\=:E37/	" catch error E37
-			" Fall back and use a new window
-			" Set the highlighting
-			call <sid>AddMatches(<sid>GeneratePattern(
-				\s:nrrw_rgn_lines[s:instn].start[1:2], 
-				\s:nrrw_rgn_lines[s:instn].end[1:2], 
-				\'V'), s:instn)
-			let win=<sid>NrwRgnWin()
-			exe ':noa ' win 'wincmd w'
-		endtry
+		let s:nrrw_rgn_lines[s:instn].single = 1
 	else
-		" Set the highlighting
+		" Set highlighting
 		call <sid>AddMatches(<sid>GeneratePattern(
 			\s:nrrw_rgn_lines[s:instn].start[1:2], 
 			\s:nrrw_rgn_lines[s:instn].end[1:2], 
 			\'V'), s:instn)
-		let win=<sid>NrwRgnWin()
-		exe ':noa ' win 'wincmd w'
 	endif
 	let b:orig_buf = orig_buf
 	call setline(1, a)
@@ -1049,28 +1029,9 @@ fun! nrrwrgn#VisualNrrwRgn(mode, ...) "{{{1
 		" Non-Rectangular selection
 		let s:nrrw_rgn_lines[s:instn].blockmode = 0
 	endif
+	let win=<sid>NrrwRgnWin(bang)
 	if bang
-		try
-			let local_options = <sid>GetOptions(s:opts)
-			" enew fails, when no new unnamed buffer can be edited
-			enew
-			exe 'f' s:nrrw_winname . '_' . s:instn
-			call <sid>SetOptions(local_options)
-			" succeeded to create a single window
-			let s:nrrw_rgn_lines[s:instn].single = 1
-			call <sid>NrrwSettings(1)
-		catch /^Vim\%((\a\+)\)\=:E37/	" catch error E37
-			" Fall back and use a new window
-			" Set the highlighting
-			call <sid>AddMatches(<sid>GeneratePattern(
-					\s:nrrw_rgn_lines[s:instn].start[1:2],
-					\s:nrrw_rgn_lines[s:instn].end[1:2],
-					\s:nrrw_rgn_lines[s:instn].vmode, 
-					\s:nrrw_rgn_lines[s:instn].blockmode),
-					\s:instn)
-			let win=<sid>NrwRgnWin()
-			exe ':noa ' win 'wincmd w'
-		endtry
+		let s:nrrw_rgn_lines[s:instn].single = 1
 	else
 		call <sid>AddMatches(<sid>GeneratePattern(
 				\s:nrrw_rgn_lines[s:instn].start[1:2],
@@ -1078,8 +1039,6 @@ fun! nrrwrgn#VisualNrrwRgn(mode, ...) "{{{1
 				\s:nrrw_rgn_lines[s:instn].vmode, 
 				\s:nrrw_rgn_lines[s:instn].blockmode),
 				\s:instn)
-		let win=<sid>NrwRgnWin()
-		exe ':noa ' win 'wincmd w'
 	endif
 	let b:orig_buf = orig_buf
 	let s:nrrw_rgn_lines[s:instn].orig_buf  = orig_buf
