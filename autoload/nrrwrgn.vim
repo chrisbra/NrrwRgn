@@ -81,7 +81,6 @@ fun! <sid>NrrwRgnWin(bang) "{{{1
 		" disable this for the narrowed window
 		setl ma
 		silent %d _
-		noa wincmd p
 	else
 		if !exists('g:nrrw_topbot_leftright')
 			let g:nrrw_topbot_leftright = 'topleft'
@@ -111,6 +110,7 @@ fun! <sid>NrrwRgnWin(bang) "{{{1
 		let nrrw_win = bufwinnr("")
 	endif
 	call <sid>SetOptions(local_options)
+	" We are in the narrowed buffer now!
 	return nrrw_win
 endfun
 
@@ -704,13 +704,14 @@ fun! nrrwrgn#NrrwRgnDoPrepare(...) "{{{1
 	if bang
 		let s:nrrw_rgn_lines[s:instn].single = 1
 	else
-		" Set highlighting
+		noa wincmd p
+		" Set highlighting in original window
 		call <sid>AddMatches(<sid>GeneratePattern(
 			\s:nrrw_rgn_lines[s:instn].start[1:2], 
 			\s:nrrw_rgn_lines[s:instn].end[1:2], 
 			\'V'), s:instn)
+		exe ':noa ' win 'wincmd w'
 	endif
-	exe ':noa ' win 'wincmd w'
 	let b:orig_buf = orig_buf
 	call setline(1, buffer)
 	setl nomod
@@ -753,11 +754,14 @@ fun! nrrwrgn#NrrwRgn(...) range  "{{{1
 	if bang
 		let s:nrrw_rgn_lines[s:instn].single = 1
 	else
-		" Set highlighting
+		noa wincmd p
+		" Set highlighting in original window
 		call <sid>AddMatches(<sid>GeneratePattern(
 			\s:nrrw_rgn_lines[s:instn].start[1:2], 
 			\s:nrrw_rgn_lines[s:instn].end[1:2], 
 			\'V'), s:instn)
+		" move back to narrowed window
+		noa wincmd p
 	endif
 	let b:orig_buf = orig_buf
 	call setline(1, a)
@@ -1033,12 +1037,15 @@ fun! nrrwrgn#VisualNrrwRgn(mode, ...) "{{{1
 	if bang
 		let s:nrrw_rgn_lines[s:instn].single = 1
 	else
+		" Set the highlighting
+		noa wincmd p
 		call <sid>AddMatches(<sid>GeneratePattern(
 				\s:nrrw_rgn_lines[s:instn].start[1:2],
 				\s:nrrw_rgn_lines[s:instn].end[1:2],
 				\s:nrrw_rgn_lines[s:instn].vmode, 
 				\s:nrrw_rgn_lines[s:instn].blockmode),
 				\s:instn)
+		noa wincmd p
 	endif
 	let b:orig_buf = orig_buf
 	let s:nrrw_rgn_lines[s:instn].orig_buf  = orig_buf
