@@ -16,7 +16,7 @@
 " Functions:
 
 fun! <sid>WarningMsg(msg) "{{{1
-	let msg = "NarrowRegion: " . a:msg
+	let msg = "NarrowRegion: ". a:msg
 	echohl WarningMsg
 	if exists(":unsilent") == 2
 		unsilent echomsg msg
@@ -73,10 +73,10 @@ endfun
 
 fun! <sid>NrrwRgnWin(bang) "{{{1
 	let local_options = <sid>GetOptions(s:opts)
-	let nrrw_winname = s:nrrw_winname . '_' . s:instn
+	let nrrw_winname = s:nrrw_winname. '_'. s:instn
 	let nrrw_win = bufwinnr('^'.nrrw_winname.'$')
 	if nrrw_win != -1
-		exe ":noa " . nrrw_win . 'wincmd w'
+		exe ":noa ". nrrw_win. 'wincmd w'
 		" just in case, a global nomodifiable was set 
 		" disable this for the narrowed window
 		setl ma
@@ -86,8 +86,8 @@ fun! <sid>NrrwRgnWin(bang) "{{{1
 			let g:nrrw_topbot_leftright = 'topleft'
 		endif
 		if !a:bang
-			exe  g:nrrw_topbot_leftright s:nrrw_rgn_wdth .
-				\(s:nrrw_rgn_vert?'v':'') . "sp " . nrrw_winname
+			exe  g:nrrw_topbot_leftright s:nrrw_rgn_wdth.
+				\(s:nrrw_rgn_vert?'v':''). "sp ". nrrw_winname
 		else
 			try 
 				" if hidden is set, set the original buffer to be modified, so
@@ -99,8 +99,8 @@ fun! <sid>NrrwRgnWin(bang) "{{{1
 				exe 'f' s:nrrw_winname. '_'. s:instn
 			catch /^Vim\%((\a\+)\)\=:E37/	" catch error E37
 				" Fall back and use a new window
-				exe  g:nrrw_topbot_leftright s:nrrw_rgn_wdth .
-					\(s:nrrw_rgn_vert?'v':'') . "sp " . nrrw_winname
+				exe  g:nrrw_topbot_leftright s:nrrw_rgn_wdth.
+					\(s:nrrw_rgn_vert?'v':''). "sp ". nrrw_winname
 			endtry
 		endif
 
@@ -174,14 +174,14 @@ fun! <sid>WriteNrrwRgn(...) "{{{1
 		setl nomod
 		exe ":WidenRegion"
 		if bufname('') !~# 'Narrow_Region'
-			exe ':noa' . bufwinnr(s:nrrw_winname . '_' . s:instn) . 'wincmd w'
+			exe ':noa'. bufwinnr(s:nrrw_winname. '_'. s:instn). 'wincmd w'
 		endif
 	else
 		call <sid>StoreLastNrrwRgn(nrrw_instn)
 		let winnr = bufwinnr(b:orig_buf)
 		" Best guess
 		if bufname('') =~# 'Narrow_Region' && winnr > 0
-			exe ':noa' . winnr . 'wincmd w'
+			exe ':noa'. winnr. 'wincmd w'
 		endif
 		if !exists("a:1") 
 			" close narrowed buffer
@@ -223,17 +223,17 @@ fun! <sid>NrrwRgnAuCmd(instn) "{{{1
 	" If a:instn==0, then enable auto commands
 	" else disable auto commands for a:instn
 	if !a:instn
-		exe "aug NrrwRgn" . b:nrrw_instn
+		exe "aug NrrwRgn". b:nrrw_instn
 			au!
 			au BufWriteCmd <buffer> nested :call s:WriteNrrwRgn(1)
 			au BufWinLeave,BufWipeout,BufDelete <buffer> nested
 						\ :call s:WriteNrrwRgn()
 		aug end
 	else
-		exe "aug NrrwRgn" .  a:instn
+		exe "aug NrrwRgn".  a:instn
 		au!
 		aug end
-		exe "aug! NrrwRgn" . a:instn
+		exe "aug! NrrwRgn". a:instn
 		
 		if !has_key(s:nrrw_rgn_lines, a:instn)
 			" narrowed buffer was already cleaned up
@@ -249,7 +249,7 @@ fun! <sid>NrrwRgnAuCmd(instn) "{{{1
 
 		if s:debug
 			echo printf("bufnr: %d a:instn: %d\n", bufnr(''), a:instn)
-			echo "bwipe " s:nrrw_winname . '_' . a:instn
+			echo "bwipe " s:nrrw_winname. '_'. a:instn
 		endif
 		if (has_key(s:nrrw_rgn_lines[a:instn], 'disable') &&
 		\	!s:nrrw_rgn_lines[a:instn].disable ) ||
@@ -257,7 +257,7 @@ fun! <sid>NrrwRgnAuCmd(instn) "{{{1
 			call <sid>DeleteMatches(a:instn)
 			" bwipe! throws E855 (catching does not work)
 			" but because of 'bufhidden' wipeing will happen anyways
-			"exe "bwipe! " bufnr(s:nrrw_winname . '_' . a:instn)
+			"exe "bwipe! " bufnr(s:nrrw_winname. '_'. a:instn)
 			if has_key(s:nrrw_rgn_lines[a:instn], 'single') &&
 			\  s:nrrw_rgn_lines[a:instn].single
 				" If there is only a single window open don't clean up now
@@ -325,16 +325,16 @@ fun! <sid>GeneratePattern(startl, endl, mode, ...) "{{{1
 	" (a " rectangle has been selected, but the complete lines are
 	" highlighted
 	if a:mode ==# '' && a:startl[0] > 0 && a:startl[1] > 0 && block
-		return '\%>' . (a:startl[0]-1) . 'l\&\%>' . (a:startl[1]-1) .
-			\ 'v\&\%<' . (a:endl[0]+1) . 'l'
+		return '\%>'. (a:startl[0]-1). 'l\&\%>'. (a:startl[1]-1).
+			\ 'v\&\%<'. (a:endl[0]+1). 'l'
 	elseif a:mode ==# '' && a:startl[0] > 0 && a:startl[1] > 0
-		return '\%>' . (a:startl[0]-1) . 'l\&\%>' . (a:startl[1]-1) .
-			\ 'v\&\%<' . (a:endl[0]+1) . 'l\&\%<' . (a:endl[1]+1) . 'v'
+		return '\%>'. (a:startl[0]-1). 'l\&\%>'. (a:startl[1]-1).
+			\ 'v\&\%<'. (a:endl[0]+1). 'l\&\%<'. (a:endl[1]+1). 'v'
 	elseif a:mode ==# 'v' && a:startl[0] > 0 && a:startl[1] > 0
-		return '\%>' . (a:startl[0]-1) . 'l\&\%>' . (a:startl[1]-1) .
-			\ 'v\_.*\%<' . (a:endl[0]+1) . 'l\&\%<' . (a:endl[1]+1) . 'v'
+		return '\%>'. (a:startl[0]-1). 'l\&\%>'. (a:startl[1]-1).
+			\ 'v\_.*\%<'. (a:endl[0]+1). 'l\&\%<'. (a:endl[1]+1). 'v'
 	elseif a:startl[0] > 0
-		return '\%>' . (a:startl[0]-1) . 'l\&\%<' . (a:endl[0]+1) . 'l'
+		return '\%>'. (a:startl[0]-1). 'l\&\%<'. (a:endl[0]+1). 'l'
 	else
 		return ''
 	endif
@@ -360,13 +360,13 @@ fun! <sid>Options(search) "{{{1
 		call add(reg_a,getreg('a'))
 		call add(reg_a, getregtype('a'))
 		let @a=''
-		exe "silent :g/" . '\v'.escape(a:search, '\\/') . "/-y A"
+		exe "silent :g/". '\v'.escape(a:search, '\\/'). "/-y A"
 		let b=split(@a, "\n")
 		call call('setreg', reg_a)
 		"call setreg('a', reg_a[0], reg_a[1])
 		call filter(b, 'v:val =~ "^''"')
 		" the following options should be set
-		let filter_opt='\%(modifi\%(ed\|able\)\|readonly\|noswapfile\|' .
+		let filter_opt='\%(modifi\%(ed\|able\)\|readonly\|noswapfile\|'.
 				\ 'buftype\|bufhidden\|foldcolumn\|buflisted\)'
 		call filter(b, 'v:val !~ "^''".filter_opt."''"')
 		for item in b
@@ -429,7 +429,7 @@ endfun
 fun! <sid>DeleteMatches(instn) "{{{1
     " Make sure, we are in the correct buffer
 	if bufname('') =~# 'Narrow_Region'
-		exe ':noa' . bufwinnr(b:orig_buf) . 'wincmd w'
+		exe ':noa'. bufwinnr(b:orig_buf). 'wincmd w'
 	endif
 	if exists("s:nrrw_rgn_lines[a:instn].matchid")
 		" if you call :NarrowRegion several times, without widening 
@@ -532,7 +532,7 @@ fun! <sid>WidenRegionMulti(content, instn, close) "{{{1
 		let indexs   = index(a:content, c_s.' Start NrrwRgn'.key.c_e) + 1
 		let indexe   = index(a:content, c_s.' End NrrwRgn'.key.c_e) - 1
 		if indexs <= 0 || indexe < -1
-		   call s:WarningMsg("Skipping Region " . key)
+		   call s:WarningMsg("Skipping Region ". key)
 		   continue
 		endif
 		" Adjust line numbers. Changing the original buffer, might also 
@@ -546,7 +546,7 @@ fun! <sid>WidenRegionMulti(content, instn, close) "{{{1
 		else
 			let delete_last_line=0
 		endif
-		exe ':silent :' . first . ',' . last . 'd _'
+		exe ':silent :'. first. ','. last. 'd _'
 		call append((first-1), a:content[indexs : indexe])
 		" Recalculate the start and end positions of the narrowed window
 		" so subsequent calls will adjust the region accordingly
@@ -589,7 +589,7 @@ fun! <sid>JumpToBufinTab(tab,buf) "{{{1
 	if a:tab
 		exe "noa tabn" a:tab
 	endif
-	exe ':noa ' . bufwinnr(a:buf) . 'wincmd w'
+	exe ':noa '. bufwinnr(a:buf). 'wincmd w'
 endfun
 
 fun! <sid>RecalculateLineNumbers(instn, adjust) "{{{1
@@ -648,7 +648,7 @@ endfun
 fun! <sid>ReturnComments() "{{{1
 	let cmt = <sid>ReturnCommentFT()
 	let c_s    = split(cmt)[0]
-	let c_e    = (len(split(cmt)) == 1 ? "" : " " . split(cmt)[1])
+	let c_e    = (len(split(cmt)) == 1 ? "" : " ". split(cmt)[1])
 	return [c_s, c_e]
 endfun
 
@@ -829,7 +829,7 @@ fun! nrrwrgn#WidenRegion(vmode, force, close)  "{{{1
 			return
 		endif
 	else
-		exe ':noa' . orig_win . 'wincmd w'
+		exe ':noa'. orig_win. 'wincmd w'
 	endif
 	let _opts = <sid>SaveRestoreRegister([])
 	let wsv=winsaveview()
@@ -866,7 +866,7 @@ fun! nrrwrgn#WidenRegion(vmode, force, close)  "{{{1
 	" 2) Visual Selection
 	elseif a:vmode
 		"charwise, linewise or blockwise selection 
-		call setreg('a', join(cont, "\n") . "\n",
+		call setreg('a', join(cont, "\n"). "\n",
 					\ s:nrrw_rgn_lines[instn].vmode)
 		if s:nrrw_rgn_lines[instn].vmode == 'v' &&
 			\ s:nrrw_rgn_lines[instn].end[1] -
@@ -892,11 +892,11 @@ fun! nrrwrgn#WidenRegion(vmode, force, close)  "{{{1
 			endif
 		else
 			exe "keepj" s:nrrw_rgn_lines[instn].start[1]
-			exe "keepj norm!" s:nrrw_rgn_lines[instn].start[2] . '|'
+			exe "keepj norm!" s:nrrw_rgn_lines[instn].start[2]. '|'
 			exe "keepj norm!" s:nrrw_rgn_lines[instn].vmode
 			exe "keepj" s:nrrw_rgn_lines[instn].end[1]
 			if s:nrrw_rgn_lines[instn].blockmode
-				exe "keepj norm!" s:nrrw_rgn_lines[instn].end[2] . '|'
+				exe "keepj norm!" s:nrrw_rgn_lines[instn].end[2]. '|'
 			else
 				keepj norm! $
 			endif
@@ -1154,7 +1154,7 @@ fun! nrrwrgn#LastNrrwRgn(bang) "{{{1
 		call nrrwrgn#NrrwRgnDoPrepare('')
 	else
 		exe "keepj" s:nrrw_rgn_lines['last'][0][1][0]
-		exe "keepj norm!" s:nrrw_rgn_lines['last'][0][1][1] . '|'
+		exe "keepj norm!" s:nrrw_rgn_lines['last'][0][1][1]. '|'
 		" Start visual mode
 		exe "keepj norm!" s:nrrw_rgn_lines['last'][2]
 		exe "keepj" s:nrrw_rgn_lines['last'][1][1][0]
@@ -1163,7 +1163,7 @@ fun! nrrwrgn#LastNrrwRgn(bang) "{{{1
 			" Best guess
 			exe "keepj $"
 		else
-			exe "keepj norm!" s:nrrw_rgn_lines['last'][1][1][1] . '|'
+			exe "keepj norm!" s:nrrw_rgn_lines['last'][1][1][1]. '|'
 		endif
 		" Call VisualNrrwRgn()
 		call nrrwrgn#VisualNrrwRgn(visualmode(), bang)
