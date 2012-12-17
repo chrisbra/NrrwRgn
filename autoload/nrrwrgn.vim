@@ -173,8 +173,9 @@ fun! <sid>WriteNrrwRgn(...) "{{{1
 	endif
 endfun
 
-fun! <sid>SaveRestoreRegister(mode) "{{{1
-	if a:mode
+fun! <sid>SaveRestoreRegister(save) "{{{1
+	if a:save
+		" Save
 		let s:savereg  = getreg('a')
 		let s:saveregt = getregtype('a')
 		let s:fold = 0
@@ -183,13 +184,20 @@ fun! <sid>SaveRestoreRegister(mode) "{{{1
 			setl nofoldenable
 			let s:fdm = &l:fdm
 		endif
+		let s:_visual = [getpos("'<"), getpos("'>")]
 	else
+		" Restore
 		call setreg('a', s:savereg, s:saveregt)
 		if s:fold
 			setl foldenable
 			if exists("s:fdm")
 				let &l:fdm=s:fdm
 			endif
+		endif
+		if v:version > 703 || (v:version == 703 && has("patch590"))
+			" settable '< and '> marks
+			call setpos("'<", s:_visual[0])
+			call setpos("'>", s:_visual[1])
 		endif
 	endif
 endfun!
@@ -941,10 +949,6 @@ fun! nrrwrgn#WidenRegion(vmode, force, close)  "{{{1
 		if delete_last_line
 			silent! $d _
 		endif
-		if !close && has_key(s:nrrw_rgn_lines[instn], 'single')
-			" move back to narrowed buffer
-			noa b #
-		endif
 	endif
 	" Recalculate start- and endline numbers for all other Narrowed Windows.
 	" This matters, if you narrow different regions of the same file and
@@ -964,11 +968,15 @@ fun! nrrwrgn#WidenRegion(vmode, force, close)  "{{{1
 	call <sid>SaveRestoreRegister(0)
 	let  @/=s:o_s
 	call winrestview(wsv)
+	if !close && has_key(s:nrrw_rgn_lines[instn], 'single')
+		" move back to narrowed buffer
+		noa b #
+	endif
 	" jump back to narrowed window
 	call <sid>JumpToBufinTab(orig_tab, nrw_buf)
 	setl nomod
 	if a:force
-		" execute auto command
+		" trigger auto command
 		bw
 	endif
 endfun
