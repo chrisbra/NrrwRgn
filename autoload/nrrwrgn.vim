@@ -90,6 +90,11 @@ fun! <sid>NrrwRgnWin(bang) "{{{1
 				\(s:nrrw_rgn_vert?'v':'') . "sp " . nrrw_winname
 		else
 			try 
+				" if hidden is set, set the original buffer to be modified, so
+				" that :q won't accidently quit vim
+				if &hid
+					setl modified
+				endif
 				enew
 				exe 'f' s:nrrw_winname. '_'. s:instn
 			catch /^Vim\%((\a\+)\)\=:E37/	" catch error E37
@@ -692,8 +697,10 @@ fun! nrrwrgn#NrrwRgnDoPrepare(...) "{{{1
 		let lines = s:nrrw_rgn_buf[nr]
 		let start = lines[0]
 		let end   = len(lines)==2 ? lines[1] : lines[0]
-		call <sid>AddMatches(<sid>GeneratePattern([start,0], [end,0], 'V'),
-				\s:instn)
+		if !bang
+			call <sid>AddMatches(<sid>GeneratePattern([start,0], [end,0], 'V'),
+					\s:instn)
+		endif
 		call add(buffer, c_s.' Start NrrwRgn'.nr.c_e)
 		let buffer = buffer +
 				\ getline(start,end) +
@@ -855,7 +862,7 @@ fun! nrrwrgn#WidenRegion(vmode, force, close)  "{{{1
 
 	" 1) Check: Multiselection
 	if has_key(s:nrrw_rgn_lines[instn], 'multi')
-		call <sid>WidenRegionMulti(cont, instn, close)
+		call <sid>WidenRegionMulti(cont, instn, a:close)
 	" 2) Visual Selection
 	elseif a:vmode
 		"charwise, linewise or blockwise selection 
