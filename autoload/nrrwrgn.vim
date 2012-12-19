@@ -96,6 +96,10 @@ fun! <sid>NrrwRgnWin(bang) "{{{1
 					setl modified
 				endif
 				enew
+				if bufexists(s:nrrw_winname. '_'. s:instn)
+					" avoid E95
+					exe 'bw' s:nrrw_winname. '_'. s:instn
+				endif
 				exe 'f' s:nrrw_winname. '_'. s:instn
 			catch /^Vim\%((\a\+)\)\=:E37/	" catch error E37
 				" Fall back and use a new window
@@ -258,20 +262,20 @@ fun! <sid>NrrwRgnAuCmd(instn) "{{{1
 			" bwipe! throws E855 (catching does not work)
 			" but because of 'bufhidden' wipeing will happen anyways
 			"exe "bwipe! " bufnr(s:nrrw_winname. '_'. a:instn)
-			if has_key(s:nrrw_rgn_lines[a:instn], 'single') &&
-			\  s:nrrw_rgn_lines[a:instn].single
+"			if has_key(s:nrrw_rgn_lines[a:instn], 'single') &&
+"			\  s:nrrw_rgn_lines[a:instn].single
 				" If there is only a single window open don't clean up now
 				" because we can't put the narrowed lines back, so do not
 				" clean up now. We need to clean up then later. But how?
-				return
-			endif
+"				return
+"			endif
 			call <sid>CleanUpInstn(a:instn)
 		endif
 	endif
 endfun
 
 fun! <sid>CleanUpInstn(instn) "{{{1
-	if s:instn>=1 && has_key(s:nrrw_rgn_lines, 'a:instn')
+	if s:instn>=1 && has_key(s:nrrw_rgn_lines, a:instn)
 		unlet s:nrrw_rgn_lines[a:instn]
 		let s:instn-=1
 	endif
@@ -632,6 +636,8 @@ fun! <sid>NrrwSettings(on) "{{{1
 		let instn = matchstr(bufname(''), '_\zs\d\+')+0
 		if  !&hidden && !has_key(s:nrrw_rgn_lines[instn], "single")
 			setl bufhidden=wipe
+		else
+			setl bufhidden=hide
 		endif
 	else
 		setl swapfile buftype= bufhidden= buflisted
@@ -970,21 +976,22 @@ fun! nrrwrgn#WidenRegion(force)  "{{{1
 	if exists("g:nrrw_rgn_protect") && g:nrrw_rgn_protect =~? 'n'
 		call <sid>RecalculateLineNumbers(instn, adjust_line_numbers)
 	endif
-	if close && !has_key(s:nrrw_rgn_lines[instn], 'single')
+"	if close && !has_key(s:nrrw_rgn_lines[instn], 'single')
 		" For narrowed windows that have been created using !,
 		" don't clean up yet, or else we loose all data and can't write
 		" it back later.
 		" (e.g. :NR! createas a new single window, do :sp
 		"  and you can only write one of the windows back, the other will
 		"  become invalid, if CleanUp is executed)
-		call <sid>CleanUpInstn(instn)
-	endif
+"	endif
 	call <sid>SaveRestoreRegister(_opts)
 	let  @/=s:o_s
 	call winrestview(wsv)
 	if !close && has_key(s:nrrw_rgn_lines[instn], 'single')
 		" move back to narrowed buffer
 		noa b #
+	else
+		call <sid>CleanUpInstn(instn)
 	endif
 	" jump back to narrowed window
 	call <sid>JumpToBufinTab(orig_tab, nrw_buf)
