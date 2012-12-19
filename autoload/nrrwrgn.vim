@@ -638,9 +638,8 @@ fun! <sid>NrrwSettings(on) "{{{1
 	endif
 endfun
 
-fun! <sid>SetupBufLocalCommands(visual) "{{{1
-	exe 'com! -buffer -bang WidenRegion :call nrrwrgn#WidenRegion('. a:visual.
-		\ ', <bang>0)'
+fun! <sid>SetupBufLocalCommands() "{{{1
+	com! -buffer -bang WidenRegion :call nrrwrgn#WidenRegion(<bang>0)
 	com! -buffer NRSyncOnWrite  :call nrrwrgn#ToggleSyncWrite(1)
 	com! -buffer NRNoSyncOnWrite :call nrrwrgn#ToggleSyncWrite(0)
 endfun
@@ -723,7 +722,7 @@ fun! nrrwrgn#NrrwRgnDoPrepare(...) "{{{1
 	call setline(1, buffer)
 	setl nomod
 	let b:nrrw_instn = s:instn
-	call <sid>SetupBufLocalCommands(0)
+	call <sid>SetupBufLocalCommands()
 	call <sid>NrrwRgnAuCmd(0)
 	call <sid>CleanRegions()
 	call <sid>HideNrrwRgnLines()
@@ -774,7 +773,7 @@ fun! nrrwrgn#NrrwRgn(...) range  "{{{1
 	call setline(1, a)
 	setl nomod
 	let b:nrrw_instn = s:instn
-	call <sid>SetupBufLocalCommands(0)
+	call <sid>SetupBufLocalCommands()
 	call <sid>NrrwRgnAuCmd(0)
 	if has_key(s:nrrw_aucmd, "create")
 		exe s:nrrw_aucmd["create"]
@@ -797,7 +796,7 @@ fun! nrrwrgn#Prepare() "{{{1
 	call add(s:nrrw_rgn_line, line('.'))
 endfun
 
-fun! nrrwrgn#WidenRegion(vmode, force)  "{{{1
+fun! nrrwrgn#WidenRegion(force)  "{{{1
 	" a:close: original narrowed window is going to be closed
 	" so, clean up, don't renew highlighting, etc.
 	let nrw_buf  = bufnr('')
@@ -805,6 +804,7 @@ fun! nrrwrgn#WidenRegion(vmode, force)  "{{{1
 	let orig_tab = tabpagenr()
 	let instn    = b:nrrw_instn
 	let close    = has_key(s:nrrw_rgn_lines[instn], 'single')
+	let vmode    = has_key(s:nrrw_rgn_lines[instn], 'vmode')
 	" Execute autocommands
 	if has_key(s:nrrw_aucmd, "close")
 		exe s:nrrw_aucmd["close"]
@@ -864,7 +864,7 @@ fun! nrrwrgn#WidenRegion(vmode, force)  "{{{1
 	if has_key(s:nrrw_rgn_lines[instn], 'multi')
 		call <sid>WidenRegionMulti(cont, instn)
 	" 2) Visual Selection
-	elseif a:vmode
+	elseif vmode
 		"charwise, linewise or blockwise selection 
 		call setreg('a', join(cont, "\n"). "\n",
 					\ s:nrrw_rgn_lines[instn].vmode)
@@ -925,6 +925,7 @@ fun! nrrwrgn#WidenRegion(vmode, force)  "{{{1
 				\ s:nrrw_rgn_lines[instn].end[1:2],
 				\ s:nrrw_rgn_lines[instn].vmode),
 				\ instn)
+		else
 			noa b #
 		endif
 	" 3) :NR started selection
@@ -1060,7 +1061,7 @@ fun! nrrwrgn#VisualNrrwRgn(mode, ...) "{{{1
 	let b:nrrw_instn = s:instn
 	silent 0d _
 	setl nomod
-	call <sid>SetupBufLocalCommands(1)
+	call <sid>SetupBufLocalCommands()
 	" Setup autocommands
 	call <sid>NrrwRgnAuCmd(0)
 	" Execute autocommands
