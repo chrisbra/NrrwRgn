@@ -508,8 +508,8 @@ fun! <sid>CheckRectangularRegion(reg) "{{{1
 	return 0
 endfu
 
-fun! <sid>WidenRegionMulti(content, instn, close) "{{{1
-	" a:close: if set, the original narrowed buffer will be closed,
+fun! <sid>WidenRegionMulti(content, instn) "{{{1
+	" for single narrowed windows, the original narrowed buffer will be closed,
 	" so don't renew the highlighting and clean up (later in
 	" nrrwrgn#WidenRegion)
 	if empty(s:nrrw_rgn_lines[a:instn].multi)
@@ -554,7 +554,7 @@ fun! <sid>WidenRegionMulti(content, instn, close) "{{{1
 		if last > line('$')
 			let last = line('$')
 		endif
-		if !a:close
+		if !has_key(s:nrrw_rgn_lines[a:instn].multi, 'single')
 			" original narrowed buffer is going to be closed
 			" so don't renew the matches
 			call <sid>AddMatches(<sid>GeneratePattern([first, 0 ],
@@ -638,9 +638,9 @@ fun! <sid>NrrwSettings(on) "{{{1
 	endif
 endfun
 
-fun! <sid>SetupBufLocalCommands(visual, close) "{{{1
+fun! <sid>SetupBufLocalCommands(visual) "{{{1
 	exe 'com! -buffer -bang WidenRegion :call nrrwrgn#WidenRegion('. a:visual.
-		\ ', <bang>0, '. a:close. ')'
+		\ ', <bang>0)'
 	com! -buffer NRSyncOnWrite  :call nrrwrgn#ToggleSyncWrite(1)
 	com! -buffer NRNoSyncOnWrite :call nrrwrgn#ToggleSyncWrite(0)
 endfun
@@ -723,7 +723,7 @@ fun! nrrwrgn#NrrwRgnDoPrepare(...) "{{{1
 	call setline(1, buffer)
 	setl nomod
 	let b:nrrw_instn = s:instn
-	call <sid>SetupBufLocalCommands(0, bang)
+	call <sid>SetupBufLocalCommands(0)
 	call <sid>NrrwRgnAuCmd(0)
 	call <sid>CleanRegions()
 	call <sid>HideNrrwRgnLines()
@@ -774,7 +774,7 @@ fun! nrrwrgn#NrrwRgn(...) range  "{{{1
 	call setline(1, a)
 	setl nomod
 	let b:nrrw_instn = s:instn
-	call <sid>SetupBufLocalCommands(0, bang)
+	call <sid>SetupBufLocalCommands(0)
 	call <sid>NrrwRgnAuCmd(0)
 	if has_key(s:nrrw_aucmd, "create")
 		exe s:nrrw_aucmd["create"]
@@ -797,14 +797,14 @@ fun! nrrwrgn#Prepare() "{{{1
 	call add(s:nrrw_rgn_line, line('.'))
 endfun
 
-fun! nrrwrgn#WidenRegion(vmode, force, close)  "{{{1
+fun! nrrwrgn#WidenRegion(vmode, force)  "{{{1
 	" a:close: original narrowed window is going to be closed
 	" so, clean up, don't renew highlighting, etc.
 	let nrw_buf  = bufnr('')
 	let orig_buf = b:orig_buf
 	let orig_tab = tabpagenr()
 	let instn    = b:nrrw_instn
-	let close    = a:close
+	let close    = has_key(s:nrrw_rgn_lines[instn], 'single')
 	" Execute autocommands
 	if has_key(s:nrrw_aucmd, "close")
 		exe s:nrrw_aucmd["close"]
@@ -862,7 +862,7 @@ fun! nrrwrgn#WidenRegion(vmode, force, close)  "{{{1
 
 	" 1) Check: Multiselection
 	if has_key(s:nrrw_rgn_lines[instn], 'multi')
-		call <sid>WidenRegionMulti(cont, instn, a:close)
+		call <sid>WidenRegionMulti(cont, instn)
 	" 2) Visual Selection
 	elseif a:vmode
 		"charwise, linewise or blockwise selection 
@@ -919,7 +919,7 @@ fun! nrrwrgn#WidenRegion(vmode, force, close)  "{{{1
 		endif
 
 		" also, renew the highlighted region
-		if !a:close
+		if !has_key(s:nrrw_rgn_lines[instn], 'single')
 			call <sid>AddMatches(<sid>GeneratePattern(
 				\ s:nrrw_rgn_lines[instn].start[1:2],
 				\ s:nrrw_rgn_lines[instn].end[1:2],
@@ -952,7 +952,7 @@ fun! nrrwrgn#WidenRegion(vmode, force, close)  "{{{1
 		if s:nrrw_rgn_lines[instn].end[1] > line('$')
 			let s:nrrw_rgn_lines[instn].end[1] = line('$')
 		endif
-		if !a:close
+		if !has_key(s:nrrw_rgn_lines[instn], 'single')
 			call <sid>AddMatches(<sid>GeneratePattern(
 				\s:nrrw_rgn_lines[instn].start[1:2], 
 				\s:nrrw_rgn_lines[instn].end[1:2], 
@@ -1060,7 +1060,7 @@ fun! nrrwrgn#VisualNrrwRgn(mode, ...) "{{{1
 	let b:nrrw_instn = s:instn
 	silent 0d _
 	setl nomod
-	call <sid>SetupBufLocalCommands(1,bang)
+	call <sid>SetupBufLocalCommands(1)
 	" Setup autocommands
 	call <sid>NrrwRgnAuCmd(0)
 	" Execute autocommands
