@@ -177,7 +177,7 @@ fun! <sid>WriteNrrwRgn(...) "{{{1
 		" Write the buffer back to the original buffer
 		setl nomod
 		exe ":WidenRegion"
-		if bufname('') !~# 'Narrow_Region'
+		if bufname('') !~# 'Narrow_Region' && bufwinnr(s:nrrw_winname. '_'. s:instn) > 0
 			exe ':noa'. bufwinnr(s:nrrw_winname. '_'. s:instn). 'wincmd w'
 		endif
 	else
@@ -581,6 +581,7 @@ fun! <sid>AddMatches(pattern, instn) "{{{1
 endfun
 
 fun! <sid>BufInTab(bufnr) "{{{1
+	" returns tabpage of buffer a:bufnr
 	for tab in range(1,tabpagenr('$'))
 		if !empty(filter(tabpagebuflist(tab), 'v:val == a:bufnr'))
 			return tab
@@ -593,7 +594,10 @@ fun! <sid>JumpToBufinTab(tab,buf) "{{{1
 	if a:tab
 		exe "noa tabn" a:tab
 	endif
-	exe ':noa '. bufwinnr(a:buf). 'wincmd w'
+	let win = bufwinnr(a:buf)
+	if win > 0
+		exe ':noa '. bufwinnr(a:buf). 'wincmd w'
+	endif
 endfun
 
 fun! <sid>RecalculateLineNumbers(instn, adjust) "{{{1
