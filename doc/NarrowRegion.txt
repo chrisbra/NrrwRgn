@@ -337,6 +337,7 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 - when narrowing a region, the last visual selected region wasn't correctly
   restored (reported by ping, thanks!)
 - some code cleanup
+- recursive narrowing was broken, fix it (reported by ping, thanks!)
 
 0.29: Aug 20, 2012 {{{1
 - Use ! to have the narrowed buffer not opened in a new window (suggested by
