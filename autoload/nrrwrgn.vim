@@ -241,6 +241,7 @@ fun! <sid>NrrwRgnAuCmd(instn) "{{{1
 		
 		if !has_key(s:nrrw_rgn_lines, a:instn)
 			" narrowed buffer was already cleaned up
+			call <sid>DeleteMatches(a:instn)
 			call s:WarningMsg("Window was already cleaned up. Nothing to do.")
 			return
 		endif
@@ -432,9 +433,10 @@ endfun
 
 fun! <sid>DeleteMatches(instn) "{{{1
     " Make sure, we are in the correct buffer
-	if bufname('') =~# 'Narrow_Region'
-		exe ':noa'. bufwinnr(b:orig_buf). 'wincmd w'
-	endif
+	" Not needed, prevents recursively narrowing
+"	if bufname('') =~# 'Narrow_Region'
+"		exe ':noa'. bufwinnr(b:orig_buf). 'wincmd w'
+"	endif
 	if exists("s:nrrw_rgn_lines[a:instn].matchid")
 		" if you call :NarrowRegion several times, without widening 
 		" the previous region, b:matchid might already be defined so
@@ -994,7 +996,7 @@ fun! nrrwrgn#WidenRegion(force)  "{{{1
 	if !close && has_key(s:nrrw_rgn_lines[instn], 'single')
 		" move back to narrowed buffer
 		noa b #
-	else
+	elseif close
 		call <sid>CleanUpInstn(instn)
 	endif
 	" jump back to narrowed window
