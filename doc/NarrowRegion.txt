@@ -329,6 +329,10 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 4. NrrwRgn History                                          *NrrwRgn-history*
 
 
+0.31: (unreleased)
+- NRM threw some errors (reported by pydave in
+  https://github.com/chrisbra/NrrwRgn/issues/17, thanks!)
+
 0.30: Jan 25, 2013 {{{1
 - |NRL| throws erros, when used without having first narrowed a region
 - |NRV!| not allowed (reported by ping, thanks!)
