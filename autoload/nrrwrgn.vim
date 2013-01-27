@@ -157,7 +157,8 @@ fun! <sid>ParseList(list) "{{{1
 		 " list consists only of consecutive items
 		 let result[i] = [a:list[0], a:list[-1]]
 	 endif
-	 if get(result, (i-1), 0) && result[i-1][1] != item
+	 " Make sure the last item is included in the selection
+	 if get(result, (i-1), 0)[0] && result[i-1][1] != item
 		 let result[i]=[start,item]
 	 endif
      return result
@@ -721,14 +722,6 @@ fun! nrrwrgn#NrrwRgnDoPrepare(...) "{{{1
 	let win=<sid>NrrwRgnWin(bang)
 	if bang
 		let s:nrrw_rgn_lines[s:instn].single = 1
-	else
-		noa wincmd p
-		" Set highlighting in original window
-		call <sid>AddMatches(<sid>GeneratePattern(
-			\s:nrrw_rgn_lines[s:instn].start[1:2], 
-			\s:nrrw_rgn_lines[s:instn].end[1:2], 
-			\'V'), s:instn)
-		exe ':noa ' win 'wincmd w'
 	endif
 	let b:orig_buf = orig_buf
 	call setline(1, buffer)
