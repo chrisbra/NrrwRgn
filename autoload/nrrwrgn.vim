@@ -372,7 +372,7 @@ fun! <sid>Options(search) "{{{1
 		"call setreg('a', reg_a[0], reg_a[1])
 		call filter(b, 'v:val =~ "^''"')
 		" the following options should be set
-		let filter_opt='\%(modifi\%(ed\|able\)\|readonly\|noswapfile\|'.
+		let filter_opt='\%(modifi\%(ed\|able\)\|readonly\|swapfile\|'.
 				\ 'buftype\|bufhidden\|foldcolumn\|buflisted\)'
 		call filter(b, 'v:val !~ "^''".filter_opt."''"')
 		for item in b
