@@ -329,7 +329,7 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 4. NrrwRgn History                                          *NrrwRgn-history*
 
 
-0.31: (unreleased)
+0.31: Feb 16, 2013
 - NRM threw some errors (reported by pydave in
   https://github.com/chrisbra/NrrwRgn/issues/17, thanks!)
 - don't create swapfiles (reported by ping, thanks!)
