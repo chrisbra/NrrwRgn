@@ -121,6 +121,8 @@ This plugin defines the following commands:
                             narrowed buffer behaves like an ordinary buffer
                             that you can write in the filesystem.
                             (this is the default).
+                            Note: You can still use |:WidenRegion| to write
+                            the changes back to the original buffer.
 
                                                                     *:NRL*
                 
