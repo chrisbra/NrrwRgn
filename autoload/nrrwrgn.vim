@@ -382,7 +382,7 @@ fun! <sid>Options(search) "{{{1
 	finally
 		if fnamemodify(bufname(''),':p') ==
 		   \expand("$VIMRUNTIME/doc/options.txt")
-			bwipe
+			noa bwipe
 		endif
 		exe "noa "	bufwinnr(buf) "wincmd  w"
 		return c
