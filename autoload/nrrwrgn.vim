@@ -810,11 +810,19 @@ fun! nrrwrgn#WidenRegion(force)  "{{{1
 	let instn    = b:nrrw_instn
 	let close    = has_key(s:nrrw_rgn_lines[instn], 'single')
 	let vmode    = has_key(s:nrrw_rgn_lines[instn], 'vmode')
+	" Save current state
+	let nr = changenr()
 	" Execute autocommands
 	if has_key(s:nrrw_aucmd, "close")
 		exe s:nrrw_aucmd["close"]
 	endif
 	let cont	 = getline(1,'$')
+	if has_key(s:nrrw_aucmd, "close") && nr != changenr()
+		" Restore buffer contents before the autocommand
+		" (in case the window isn't closed, the user sees
+		" the correct input)
+		exe "undo" nr
+	endif
 
 	let tab=<sid>BufInTab(orig_buf)
 	if tab != tabpagenr() && tab > 0
