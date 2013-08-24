@@ -423,7 +423,7 @@ fun! <sid>CheckProtected() "{{{1
 	if !&l:ma || &l:ro
 		let b:orig_buf_ro=1
 		call s:WarningMsg("Buffer is protected, won't be able to write".
-			\ "the changes back!")
+			\ " the changes back!")
 	else 
 	" Protect the original buffer,
 	" so you won't accidentally modify those lines,
