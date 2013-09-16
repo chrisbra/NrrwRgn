@@ -3,9 +3,8 @@
 " Version:	   0.31
 " Maintainer:  Christian Brabandt <cb@256bit.org>
 " Last Change: Sat, 16 Feb 2013 22:28:31 +0100
-"
 " Script: http://www.vim.org/scripts/script.php?script_id=3075 
-" Copyright:   (c) 2009, 2010, 2011, 2012, 2013 by Christian Brabandt
+" Copyright:   (c) 2009-2013 by Christian Brabandt
 "			   The VIM LICENSE applies to NrrwRgn.vim 
 "			   (see |copyright|) except use "NrrwRgn.vim" 
 "			   instead of "Vim".
@@ -347,6 +346,23 @@ fun! <sid>GeneratePattern(startl, endl, mode, ...) "{{{1
 endfun 
 
 fun! <sid>Options(search) "{{{1
+	" return buffer local options (generated from $VIMRUNTIME/doc/options.txt
+
+	return
+	\ ['autoindent', 'autoread', 'balloonexpr', 'binary', 'bomb',
+	\  'cindent', 'cinkeys', 'cinoptions', 'cinwords', 'commentstring',
+	\  'complete', 'completefunc', 'copyindent', 'cryptmethod', 'define',
+	\  'dictionary', 'endofline', 'equalprg', 'errorformat', 'expandtab',
+	\  'fileencoding', 'filetype', 'formatoptions', 'formatlistpat',
+	\  'formatexpr', 'iminsert', 'imsearch', 'include', 'includeexpr',
+	\  'indentexpr', 'indentkeys', 'infercase', 'key', 'keymap', 'lisp',
+	\  'makeprg', 'matchpairs', 'nrformats', 'omnifunc', 'osfiletype',
+	\  'preserveindent', 'quoteescape', 'shiftwidth', 'shortname', 'smartindent',
+	\  'softtabstop', 'spellcapcheck', 'spellfile', 'spelllang', 'suffixesadd',
+	\  'synmaxcol', 'syntax', 'tabstop', 'textwidth', 'thesaurus', 'undofile',
+	\  'wrapmargin']
+
+	" old function, only used to generate above list
 	let c=[]
 	let buf=bufnr('')
 	try
