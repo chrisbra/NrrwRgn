@@ -782,6 +782,7 @@ fun! nrrwrgn#NrrwRgn(...) range  "{{{1
 		let s:nrrw_rgn_lines[s:instn].single = 1
 	else
 		noa wincmd p
+		let s:nrrw_rgn_lines[s:instn].winnr  = winnr()
 		" Set highlighting in original window
 		call <sid>AddMatches(<sid>GeneratePattern(
 			\s:nrrw_rgn_lines[s:instn].start[1:2], 
@@ -824,6 +825,7 @@ fun! nrrwrgn#WidenRegion(force)  "{{{1
 	let orig_buf = b:orig_buf
 	let orig_tab = tabpagenr()
 	let instn    = b:nrrw_instn
+	let winnr    = get(s:nrrw_rgn_lines[instn], 'winnr', winnr())
 	let close    = has_key(s:nrrw_rgn_lines[instn], 'single')
 	let vmode    = has_key(s:nrrw_rgn_lines[instn], 'vmode')
 	" Save current state
@@ -849,6 +851,7 @@ fun! nrrwrgn#WidenRegion(force)  "{{{1
 	if (orig_win == -1)
 		if bufexists(orig_buf)
 			" buffer not in current window, switch to it!
+			exe winnr "wincmd w"
 			exe "noa" orig_buf "b!"
 			" Make sure highlighting will be removed
 			let close = (&g:hid ? 0 : 1)
@@ -1077,6 +1080,7 @@ fun! nrrwrgn#VisualNrrwRgn(mode, ...) "{{{1
 	else
 		" Set the highlighting
 		noa wincmd p
+		let s:nrrw_rgn_lines[s:instn].winnr  = winnr()
 		call <sid>AddMatches(<sid>GeneratePattern(
 				\s:nrrw_rgn_lines[s:instn].start[1:2],
 				\s:nrrw_rgn_lines[s:instn].end[1:2],

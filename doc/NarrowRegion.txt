@@ -338,6 +338,7 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
   (reported by AguirreIF https://github.com/chrisbra/NrrwRgn/issues/21,
   thanks!), instead include a fix set of option names to set when opening the
   narrowed buffer.
+- Switching buffers in the original narrowed buffer, may confuse NrrwRgn.
 
 0.31: Feb 16, 2013 {{{1
 - NRM threw some errors (reported by pydave in
