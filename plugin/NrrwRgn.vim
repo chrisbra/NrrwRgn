@@ -38,11 +38,11 @@ com! -bang NarrowWindow :NW
 com! -bang NRLast :NRL
 
 " Define the actual Commands "{{{2
-com! -range -bang NR	 :<line1>, <line2>call nrrwrgn#NrrwRgn(<q-bang>)
+com! -range -bang NR	 :<line1>, <line2>call nrrwrgn#NrrwRgn(0,<q-bang>)
 com! -range NRP  :exe ":" . <line1> . ',' . <line2> . 'call nrrwrgn#Prepare()'
-com! -bang -range NRV :call nrrwrgn#VisualNrrwRgn(visualmode(), <q-bang>)
+com! -bang -range NRV :call nrrwrgn#NrrwRgn(visualmode(), <q-bang>)
 com! NUD :call nrrwrgn#UnifiedDiff()
-com! -bang NW	 :exe ":" . line('w0') . ',' . line('w$') . "call nrrwrgn#NrrwRgn(<q-bang>)"
+com! -bang NW	 :exe ":" . line('w0') . ',' . line('w$') . "call nrrwrgn#NrrwRgn(0,<q-bang>)"
 com! -bang NRM :call nrrwrgn#NrrwRgnDoPrepare(<q-bang>)
 com! -bang NRL :call nrrwrgn#LastNrrwRgn(<q-bang>)
 
@@ -59,8 +59,8 @@ endif
 if !hasmapto('VisualNrrwRgnBang')
 	xnoremap <unique> <script> <Plug>NrrwrgnBangDo <sid>VisualNrrwBang
 endif
-xnoremap <sid>VisualNrrwRgn :<c-u>call nrrwrgn#VisualNrrwRgn(visualmode(),'')<cr>
-xnoremap <sid>VisualNrrwBang :<c-u>call nrrwrgn#VisualNrrwRgn(visualmode(),'!')<cr>
+xnoremap <sid>VisualNrrwRgn  :<c-u>call nrrwrgn#NrrwRgn(visualmode(),'')<cr>
+xnoremap <sid>VisualNrrwBang :<c-u>call nrrwrgn#NrrwRgn(visualmode(),'!')<cr>
 
 " Restore: "{{{1
 let &cpo=s:cpo
