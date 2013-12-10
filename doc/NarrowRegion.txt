@@ -342,6 +342,10 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 - Code cleanup (no more separate functions for visual and normal mode)
 - fix issue 22 (characterwise narrowing was brocken in last commit, reported
   by Matthew Boehm in https://github.com/chrisbra/NrrwRgn/issues/22, thanks!)
+- in characterwise visual selection, trailing \n is not stripped when writing
+  (reported by Matthew Boehm in https://github.com/chrisbra/NrrwRgn/23,
+  thanks!)
+- highlighting was wrong for characterwise visual selections
 
 0.31: Feb 16, 2013 {{{1
 - NRM threw some errors (reported by pydave in
