@@ -329,7 +329,7 @@ fun! <sid>GeneratePattern(startl, endl, mode, ...) "{{{1
 	" This is just a best guess, the highlighted block could still be wrong
 	" (a " rectangle has been selected, but the complete lines are
 	" highlighted
-	if a:mode ==# '' && a:startl[1] > 0 && a:startl[1] > 0 && block
+	if a:mode ==# '' && a:startl[0] > 0 && a:startl[1] > 0 && block
 		return '\%>'. (a:startl[0]-1). 'l\&\%>'. (a:startl[1]-1).
 			\ 'v\&\%<'. (a:endl[0]+1). 'l'
 	elseif a:mode ==# '' && a:startl[0] > 0 && a:startl[1] > 0
