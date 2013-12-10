@@ -947,7 +947,7 @@ fun! nrrwrgn#WidenRegion(force)  "{{{1
 					\ s:nrrw_rgn_lines[instn].vmode)
 		if s:nrrw_rgn_lines[instn].vmode == 'v' &&
 			\ s:nrrw_rgn_lines[instn].end[1] -
-			\ s:nrrw_rgn_lines[instn].start[1] + 1 == len(cont) + 1
+			\ s:nrrw_rgn_lines[instn].start[1] + 1 == len(cont)
 		   " in characterwise selection, remove trailing \n
 		   call setreg('a', substitute(@a, '\n$', '', ''), 
 			\ s:nrrw_rgn_lines[instn].vmode)
