@@ -904,7 +904,7 @@ fun! nrrwrgn#WidenRegion(force)  "{{{1
 	if (orig_win == -1)
 		if bufexists(orig_buf)
 			" buffer not in current window, switch to it!
-			exe winnr "wincmd w"
+			exe "noa" winnr "wincmd w"
 			exe "noa" orig_buf "b!"
 			" Make sure highlighting will be removed
 			let close = (&g:hid ? 0 : 1)
@@ -1106,7 +1106,7 @@ fun! nrrwrgn#UnifiedDiff() "{{{1
 			.+,$NR
 		endif
 	   " Split vertically
-	   wincmd H
+	   noa wincmd H
 	   if i==0
 		   silent! g/^-/d _
 	   else
