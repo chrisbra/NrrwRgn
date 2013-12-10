@@ -753,8 +753,9 @@ fun! nrrwrgn#NrrwRgnDoPrepare(...) "{{{1
 endfun
 
 fun! nrrwrgn#NrrwRgn(mode, ...) range  "{{{1
+	let visual = !empty(a:mode)
     " a:mode is set when using visual mode
-    if (a:mode)
+    if visual
 	" This beeps, when called from command mode
 	" e.g. by using :NRV, so using :sil!
 	" else exiting visual mode
@@ -765,7 +766,7 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  "{{{1
 	let s:o_s  = @/
 	set lz
 	call <sid>Init()
-	if (a:mode)
+	if visual
 	    let s:nrrw_rgn_lines[s:instn].vmode=a:mode
 	endif
 	" Protect the original buffer,
@@ -775,7 +776,7 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  "{{{1
 	let _opts = <sid>SaveRestoreRegister([])
 
 	call <sid>CheckProtected()
-	if (a:mode)
+	if visual
 	    let [ s:nrrw_rgn_lines[s:instn].start,
 		    \s:nrrw_rgn_lines[s:instn].end ] = <sid>RetVisRegionPos()
 	    norm! gv"ay
@@ -785,8 +786,9 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  "{{{1
 			" remove trailing "\n"
 			let @a=substitute(@a, '\n$', '', '') 
 	    endif
+		let a = split(@a, "\n")
 
-	    if a:mode == '' && <sid>CheckRectangularRegion(@a)
+	    if visual && a:mode ==# '' && <sid>CheckRectangularRegion(@a)
 			" Rectangular selection
 			let s:nrrw_rgn_lines[s:instn].blockmode = 1
 	    else
@@ -817,7 +819,7 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  "{{{1
 	    noa wincmd p
 	    let s:nrrw_rgn_lines[s:instn].winnr  = winnr()
 	    " Set highlighting in original window
-	    if a:mode
+	    if visual
 			call <sid>AddMatches(<sid>GeneratePattern(
 		    \s:nrrw_rgn_lines[s:instn].start[1:2],
 		    \s:nrrw_rgn_lines[s:instn].end[1:2],
@@ -835,7 +837,7 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  "{{{1
 	endif
 	let b:orig_buf = orig_buf
 	let s:nrrw_rgn_lines[s:instn].orig_buf  = orig_buf
-	call setline(1, a:mode ? @a : a)
+	call setline(1, a)
 	let b:nrrw_instn = s:instn
 	setl nomod
 	call <sid>SetupBufLocalCommands()
