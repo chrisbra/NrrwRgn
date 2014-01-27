@@ -2,11 +2,10 @@
 
 Author:  Christian Brabandt <cb@256bit.org>
 Version: 0.31 Sat, 16 Feb 2013 22:28:31 +0100
-Copyright: (c) 2009-2013 by Christian Brabandt
+Copyright: (c) 2009-2014 by Christian Brabandt
            The VIM LICENSE applies to NrrwRgnPlugin.vim and NrrwRgnPlugin.txt
            (see |copyright|) except use NrrwRgnPlugin instead of "Vim".
            NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
-
 
 ==============================================================================
 1. Contents                                    *NarrowRegion*  *NrrwRgnPlugin*
@@ -280,7 +279,19 @@ back into the original buffer, but it can't guarantee that this will work and
 might fail silently. Therefore, this feature is experimental!
 
 ------------------------------------------------------------------------------
-                                                     *NrrwRgn-hook*   *NR-hooks*
+
+If you are using the |:NRMulti| command and want to have the original window
+update to the position of where the cursor is in the narrowed window, you can
+set the variable g:nrrw_rgn_update_orig_win, e.g. in your |.vimrc| >
+
+   let g:nrrw_rgn_update_orig_win = '1'
+<
+Now the cursor in the original window will always update when the position
+changes in the narrowed window (using a |CursorMoved| autocommand).
+Note: that this might slow down scrolling and cursor movement a bit.
+
+----------------------------------------------------------------------------
+                                                 *NrrwRgn-hook*  *NR-hooks*
 
 NarrowRegion can execute certain commands, when creating the narrowed window
 and when closing the narrowed window. For this, you can set 2 buffer-local
@@ -310,8 +321,8 @@ and before writing the changes back, it'll execute: >
 
     :%UnArrangeCol
 
-==============================================================================
-3. NrrwRgn Feedback                                         *NrrwRgn-feedback*
+=============================================================================
+3. NrrwRgn Feedback                                        *NrrwRgn-feedback*
 
 Feedback is always welcome. If you like the plugin, please rate it at the
 vim-page:
@@ -327,7 +338,7 @@ If you like the plugin, write me an email (look in the third line for my mail
 address). And if you are really happy, vote for the plugin and consider
 looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 
-==============================================================================
+=============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
 
 
@@ -346,6 +357,7 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
   (reported by Matthew Boehm in https://github.com/chrisbra/NrrwRgn/23,
   thanks!)
 - highlighting was wrong for characterwise visual selections
+- update original window for multi narrowed regions (issue #24)
 
 0.31: Feb 16, 2013 {{{1
 - NRM threw some errors (reported by pydave in
@@ -556,7 +568,6 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 - put plugin on a public repository (http://github.com/chrisbra/NrrwRgn)
 
   }}}
-
 ==============================================================================
 Modeline:
 vim:tw=78:ts=8:ft=help:et:fdm=marker:fdl=0:norl
