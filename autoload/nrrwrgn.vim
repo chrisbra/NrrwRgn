@@ -527,18 +527,17 @@ fun! <sid>DeleteMatches(instn) "{{{1
 endfun
 
 fun! <sid>HideNrrwRgnLines() "{{{1
-	let cnc = has("Conceal")
-	let cmd='syn match NrrwRgnStart "^# Start NrrwRgn\d\+$" '.
-				\ (cnc ? 'conceal' : '')
+	let char1 = <sid>ReturnComments()[0]
+	let cmd='syn match NrrwRgnStart "^'.char1.' Start NrrwRgn\d\+$"'
 	exe cmd
-	let cmd='syn match NrrwRgnEnd "^# End NrrwRgn\d\+$" '.
-				\ (cnc ? 'conceal' : '')
+	let cmd='syn match NrrwRgnEnd "^'.char1.' End NrrwRgn\d\+$"'
 	exe cmd
-	syn region NrrwRgn start="^# Start NrrwRgn\z(\d\+\).*$"
-		\ end="^# End NrrwRgn\z1$" fold transparent
-	if cnc
-		setl conceallevel=3
-	endif
+	exe 'syn region NrrwRgn '.
+		\ ' start="^\ze'. char1.' Start NrrwRgn"'.
+		\ '  skip="'.char1.' Start NrrwRgn\(\d\+\)\_.\{-}End NrrwRgn\1$"'.
+		\ '   end="^$" fold transparent'
+	hi default link NrrwRgnStart Comment
+	hi default link NrrwRgnEnd Comment
 	setl fdm=syntax
 endfun
 
