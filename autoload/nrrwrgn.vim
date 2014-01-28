@@ -224,7 +224,7 @@ fun! <sid>SaveRestoreRegister(values) "{{{1
 endfun!
 
 fun! <sid>UpdateOrigWin() abort
-	if !get(g:, 'narrow_rgn_update_orig_win', 0)
+	if !get(g:, 'nrrw_rgn_update_orig_win', 0)
 		return
 	endif
 	if bufname('') !~# 'Narrow_Region'
