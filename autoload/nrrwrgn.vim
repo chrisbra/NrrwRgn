@@ -528,6 +528,7 @@ endfun
 
 fun! <sid>HideNrrwRgnLines() "{{{1
 	let char1 = <sid>ReturnComments()[0]
+	let char1 = escape(char1, '"\\')
 	let cmd='syn match NrrwRgnStart "^'.char1.' Start NrrwRgn\d\+$"'
 	exe cmd
 	let cmd='syn match NrrwRgnEnd "^'.char1.' End NrrwRgn\d\+$"'
