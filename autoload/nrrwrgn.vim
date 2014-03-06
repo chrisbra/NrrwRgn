@@ -182,7 +182,8 @@ fun! <sid>WriteNrrwRgn(...) "{{{1
 		endif
 	else
 		call <sid>StoreLastNrrwRgn(nrrw_instn)
-		let winnr = bufwinnr(b:orig_buf)
+		" b:orig_buf might not exists (see issue #2)
+		let winnr = (exists("b:orig_buf") ? bufwinnr(b:orig_buf) : 0)
 		" Best guess
 		if bufname('') =~# 'Narrow_Region' && winnr > 0
 			exe ':noa'. winnr. 'wincmd w'
