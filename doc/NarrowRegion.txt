@@ -362,6 +362,8 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
   use the g:nrrw_rgn_update_orig_win variable to enable
 - error when narrowed window was moved to new tab and trying to quit
   (https://github.com/chrisbra/NrrwRgn/2, reported by Mario Ricalde, thanks!)
+- better default names for the narrowed window
+  (https://github.com/chrisbra/Nrrwrgn/28, reported by Mario Ricalde, thanks!)
 
 0.31: Feb 16, 2013 {{{1
 - NRM threw some errors (reported by pydave in
