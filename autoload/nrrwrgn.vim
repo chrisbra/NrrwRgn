@@ -1117,6 +1117,9 @@ fun! nrrwrgn#WidenRegion(force)  "{{{1
 "	endif
 	call <sid>SaveRestoreRegister(_opts)
 	let  @/=s:o_s
+	if get(g:, 'nrrw_rgn_write_on_sync', 0)
+		write
+	endif
 	call winrestview(wsv)
 	if !close && has_key(s:nrrw_rgn_lines[instn], 'single')
 		" move back to narrowed buffer

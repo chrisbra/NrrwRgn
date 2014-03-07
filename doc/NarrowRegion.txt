@@ -284,11 +284,19 @@ If you are using the |:NRMulti| command and want to have the original window
 update to the position of where the cursor is in the narrowed window, you can
 set the variable g:nrrw_rgn_update_orig_win, e.g. in your |.vimrc| >
 
-   let g:nrrw_rgn_update_orig_win = '1'
+   let g:nrrw_rgn_update_orig_win = 1
 <
 Now the cursor in the original window will always update when the position
 changes in the narrowed window (using a |CursorMoved| autocommand).
 Note: that this might slow down scrolling and cursor movement a bit.
+
+------------------------------------------------------------------------------
+If you want the original file to be written, whenever the narrowed window is
+written to the original file, set the variable g:nrrw_rgn_write_on_sync, e.g.
+in your |.vimrc| >
+
+    let g:nrrw_rgn_write_on_sync = 1
+<
 
 ----------------------------------------------------------------------------
                                                  *NrrwRgn-hook*  *NR-hooks*
@@ -364,6 +372,9 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
   (https://github.com/chrisbra/NrrwRgn/2, reported by Mario Ricalde, thanks!)
 - better default names for the narrowed window
   (https://github.com/chrisbra/Nrrwrgn/28, reported by Mario Ricalde, thanks!)
+- when setting g:nrrw_rgn_write_on_sync the original file will be saved,
+  whenever the narrowed window is written back
+  (https://github.com/chrisbra/26, reported by Mario Ricalde, thanks!)
 
 0.31: Feb 16, 2013 {{{1
 - NRM threw some errors (reported by pydave in
