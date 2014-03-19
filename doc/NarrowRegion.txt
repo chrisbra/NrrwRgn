@@ -376,6 +376,7 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
   whenever the narrowed window is written back
   (https://github.com/chrisbra/26, reported by Mario Ricalde, thanks!)
 - Some more error handling when using |:WidenRegion|
+- Make sure highlighting is removed when using |:WidenRegion|
 
 0.31: Feb 16, 2013 {{{1
 - NRM threw some errors (reported by pydave in
