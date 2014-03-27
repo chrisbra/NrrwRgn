@@ -1,12 +1,11 @@
 *NrrwRgn.txt*   A Narrow Region Plugin (similar to Emacs)
 
 Author:  Christian Brabandt <cb@256bit.org>
-Version: 0.31 Sat, 16 Feb 2013 22:28:31 +0100
-Copyright: (c) 2009, 2010, 2011, 2012 by Christian Brabandt         
+Version: 0.32 Thu, 27 Mar 2014 23:16:27 +0100
+Copyright: (c) 2009-2014 by Christian Brabandt
            The VIM LICENSE applies to NrrwRgnPlugin.vim and NrrwRgnPlugin.txt
            (see |copyright|) except use NrrwRgnPlugin instead of "Vim".
            NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
-
 
 ==============================================================================
 1. Contents                                    *NarrowRegion*  *NrrwRgnPlugin*
@@ -44,7 +43,7 @@ This plugin defines the following commands:
                                                         *:NarrowRegion* *:NR*
 :[range]NR[!]
 :[range]NarrowRegion[!]     When [range] is omitted, select only the current
-                            line, else use the lines in the range given and 
+                            line, else use the lines in the range given and
                             open it in a new Scratch Window.
                             If the current line is selected and is on a folded
                             region, select the whole folded text.
@@ -56,7 +55,7 @@ This plugin defines the following commands:
                                                         *:NarrowWindow* *:NW*
 :NW[!]
 :NarrowWindow[!]            Select only the range that is visible the current
-                            window and open it in a new Scratch Window. 
+                            window and open it in a new Scratch Window.
                             Whenever you are finished modifying that region
                             simply write the buffer.
                             If ! is given, open the narrowed buffer not in a
@@ -64,7 +63,7 @@ This plugin defines the following commands:
                             with 'hidden' set).
 
                                                                 *:WidenRegion*
-:WidenRegion[!]             This command is only available in the narrowed 
+:WidenRegion[!]             This command is only available in the narrowed
                             scratch window. If the buffer has been modified,
                             the contents will be put back on the original
                             buffer. If ! is specified, the window will be
@@ -121,11 +120,13 @@ This plugin defines the following commands:
                             narrowed buffer behaves like an ordinary buffer
                             that you can write in the filesystem.
                             (this is the default).
+                            Note: You can still use |:WidenRegion| to write
+                            the changes back to the original buffer.
 
                                                                     *:NRL*
-                
+
 :NRL[!]                     Reselect the last selected region again and open
-                            in a narrowed window. 
+                            in a narrowed window.
                             If ! is given, open the narrowed buffer not in a
                             split buffer but in the current window (works best
                             with 'hidden' set).
@@ -175,7 +176,7 @@ changes but when you write your changes back, these comments will stay in your
 file. You would do it like this: >
     :v/^#/NRP
     :NRMulti
-< 
+<
 Now a Narrowed Window will open, that contains only the configuration lines.
 Each block of independent region will be separated by a string like
 
@@ -263,7 +264,7 @@ If you want to use several independent narrowed regions of the same buffer
 that you want to write at the same time, protecting the original buffer is not
 really useful. Therefore, set the g:nrrw_rgn_protect variable, e.g. in your
 |.vimrc| >
-  
+
    let g:nrrw_rgn_protect = 'n'
 <
 This can be useful if you diff different regions of the same file, and want
@@ -278,7 +279,27 @@ back into the original buffer, but it can't guarantee that this will work and
 might fail silently. Therefore, this feature is experimental!
 
 ------------------------------------------------------------------------------
-                                                                    *NR-hooks*
+
+If you are using the |:NRMulti| command and want to have the original window
+update to the position of where the cursor is in the narrowed window, you can
+set the variable g:nrrw_rgn_update_orig_win, e.g. in your |.vimrc| >
+
+   let g:nrrw_rgn_update_orig_win = 1
+<
+Now the cursor in the original window will always update when the position
+changes in the narrowed window (using a |CursorMoved| autocommand).
+Note: that this might slow down scrolling and cursor movement a bit.
+
+------------------------------------------------------------------------------
+If you want the original file to be written, whenever the narrowed window is
+written to the original file, set the variable g:nrrw_rgn_write_on_sync, e.g.
+in your |.vimrc| >
+
+    let g:nrrw_rgn_write_on_sync = 1
+<
+
+----------------------------------------------------------------------------
+                                                 *NrrwRgn-hook*  *NR-hooks*
 
 NarrowRegion can execute certain commands, when creating the narrowed window
 and when closing the narrowed window. For this, you can set 2 buffer-local
@@ -289,7 +310,7 @@ For example, suppose you have a file, containing columns separated data (CSV
 format) which you want to modify and you also have the CSV filetype plugin
 (http://www.vim.org/scripts/script.php?script_id=2830) installed and you want
 to modify the CSV data which should be visually arranged like a table in the
-narrowed window. 
+narrowed window.
 
 Therefore you want the command |:ArrangeColumn| to be executed in the new
 narrowed window upon entering it, and when writing the changes back, you want
@@ -305,11 +326,11 @@ This will execute the commands in the narrowed window: >
     :%ArrangeCol
 
 and before writing the changes back, it'll execute: >
-    
+
     :%UnArrangeCol
 
-==============================================================================
-3. NrrwRgn Feedback                                         *NrrwRgn-feedback*
+=============================================================================
+3. NrrwRgn Feedback                                        *NrrwRgn-feedback*
 
 Feedback is always welcome. If you like the plugin, please rate it at the
 vim-page:
@@ -325,11 +346,39 @@ If you like the plugin, write me an email (look in the third line for my mail
 address). And if you are really happy, vote for the plugin and consider
 looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 
-==============================================================================
+=============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
 
 
-0.31: Feb 16, 2013
+0.32 Mar 27, 2014 {{{1
+- hooks could corrupt the narrowed buffer, if it wasn't closed (reported by
+  jszakemeister https://github.com/chrisbra/NrrwRgn/issues/19, thanks!)
+- Don't parse $VIMRUNTIME/doc/options.txt for finding out buffer-local options
+  (reported by AguirreIF https://github.com/chrisbra/NrrwRgn/issues/21,
+  thanks!), instead include a fix set of option names to set when opening the
+  narrowed buffer.
+- Switching buffers in the original narrowed buffer, may confuse NrrwRgn.
+- Code cleanup (no more separate functions for visual and normal mode)
+- fix issue 22 (characterwise narrowing was brocken in last commit, reported
+  by Matthew Boehm in https://github.com/chrisbra/NrrwRgn/issues/22, thanks!)
+- in characterwise visual selection, trailing \n is not stripped when writing
+  (reported by Matthew Boehm in https://github.com/chrisbra/NrrwRgn/23,
+  thanks!)
+- highlighting was wrong for characterwise visual selections
+- update original window for multi narrowed regions (
+  https://github.com/chrisbra/NrrwRgn/24, reported by Dane Summers, thanks!),
+  use the g:nrrw_rgn_update_orig_win variable to enable
+- error when narrowed window was moved to new tab and trying to quit
+  (https://github.com/chrisbra/NrrwRgn/2, reported by Mario Ricalde, thanks!)
+- better default names for the narrowed window
+  (https://github.com/chrisbra/Nrrwrgn/28, reported by Mario Ricalde, thanks!)
+- when setting g:nrrw_rgn_write_on_sync the original file will be saved,
+  whenever the narrowed window is written back
+  (https://github.com/chrisbra/26, reported by Mario Ricalde, thanks!)
+- Some more error handling when using |:WidenRegion|
+- Make sure highlighting is removed when using |:WidenRegion|
+
+0.31: Feb 16, 2013 {{{1
 - NRM threw some errors (reported by pydave in
   https://github.com/chrisbra/NrrwRgn/issues/17, thanks!)
 - don't create swapfiles (reported by ping, thanks!)
@@ -391,7 +440,7 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 0.23: Oct 24, 2011 {{{1
 
 - (wrongly uploaded to vim.org)
-  
+
 0.22: Oct 24, 2011 {{{1
 
 - Allow customization via the use of hooks (|NR-hooks|)
@@ -493,7 +542,7 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
   bufnr(), so it should work without problems for several buffers)
 - switch from script local variables to buffer local variables, so narrowing
   for several buffers should work.
-- set 'winfixheight' for narrowed window 
+- set 'winfixheight' for narrowed window
 - Added command :NRV (suggested by Charles Campbell, thanks!)
 - added error handling, in case :NRV is called, without a selected region
 - take care of beeps, when calling :NRV
@@ -524,7 +573,7 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 
 - Highlight narrowed region in the original buffer
 - Save and Restore search-register
-- Provide shortcut commands |:NR| 
+- Provide shortcut commands |:NR|
 - Provide command |:NW| and |:NarrowWindow|
 - Make plugin autoloadable
 - Enable GLVS (see |:GLVS|)
@@ -538,7 +587,6 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 - put plugin on a public repository (http://github.com/chrisbra/NrrwRgn)
 
   }}}
-
 ==============================================================================
 Modeline:
 vim:tw=78:ts=8:ft=help:et:fdm=marker:fdl=0:norl
