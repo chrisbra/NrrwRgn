@@ -85,9 +85,10 @@ fun! <sid>NrrwRgnWin(bang) "{{{1
 		if !exists('g:nrrw_topbot_leftright')
 			let g:nrrw_topbot_leftright = 'topleft'
 		endif
+		let cmd=printf(':noa %s %d%s %s', g:nrrw_topbot_leftright, s:nrrw_rgn_wdth,
+				\ (s:nrrw_rgn_vert ? 'vsp' : 'sp'), nrrw_winname)
 		if !a:bang
-			exe  g:nrrw_topbot_leftright s:nrrw_rgn_wdth.
-				\(s:nrrw_rgn_vert?'v':''). "sp ". nrrw_winname
+			exe cmd
 		else
 			try 
 				" if hidden is set, set the original buffer to be modified, so
@@ -103,8 +104,7 @@ fun! <sid>NrrwRgnWin(bang) "{{{1
 				exe 'f' s:nrrw_winname. '_'. s:instn
 			catch /^Vim\%((\a\+)\)\=:E37/	" catch error E37
 				" Fall back and use a new window
-				exe  g:nrrw_topbot_leftright s:nrrw_rgn_wdth.
-					\(s:nrrw_rgn_vert?'v':''). "sp ". nrrw_winname
+				exe cmd
 			endtry
 		endif
 
