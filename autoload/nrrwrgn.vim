@@ -419,8 +419,7 @@ fun! <sid>Options(search) "{{{1
 	\  'makeprg', 'matchpairs', 'nrformats', 'omnifunc', 'osfiletype',
 	\  'preserveindent', 'quoteescape', 'shiftwidth', 'shortname', 'smartindent',
 	\  'softtabstop', 'spellcapcheck', 'spellfile', 'spelllang', 'suffixesadd',
-	\  'synmaxcol', 'syntax', 'tabstop', 'textwidth', 'thesaurus', 'undofile',
-	\  'wrapmargin']
+	\  'synmaxcol', 'syntax', 'tabstop', 'textwidth', 'thesaurus', 'wrapmargin']
 
 	" old function, only used to generate above list
 	let c=[]
@@ -449,7 +448,7 @@ fun! <sid>Options(search) "{{{1
 		call filter(b, 'v:val =~ "^''"')
 		" the following options should be set
 		let filter_opt='\%(modifi\%(ed\|able\)\|readonly\|swapfile\|'.
-				\ 'buftype\|bufhidden\|foldcolumn\|buflisted\)'
+				\ 'buftype\|bufhidden\|foldcolumn\|buflisted\|undofile\)'
 		call filter(b, 'v:val !~ "^''".filter_opt."''"')
 		for item in b
 			let item=substitute(item, '''', '', 'g')
