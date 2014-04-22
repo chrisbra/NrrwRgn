@@ -71,7 +71,6 @@ fun! <sid>Init() "{{{1
 endfun 
 
 fun! <sid>NrrwRgnWin(bang) "{{{1
-	let local_options = <sid>GetOptions(s:opts)
 	let bufname = substitute(expand('%:t:r'), ' ', '_', 'g')[0:8]
 	let nrrw_winname = s:nrrw_winname. '_'. bufname . '_'. s:instn
 	let nrrw_win = bufwinnr('^'.nrrw_winname.'$')
@@ -118,7 +117,6 @@ fun! <sid>NrrwRgnWin(bang) "{{{1
 		call <sid>NrrwSettings(1)
 		let nrrw_win = bufwinnr("")
 	endif
-	call <sid>SetOptions(local_options)
 	" We are in the narrowed buffer now!
 	return nrrw_win
 endfun
@@ -809,6 +807,7 @@ fun! nrrwrgn#NrrwRgnDoPrepare(...) "{{{1
 				\ [c_s.' End NrrwRgn'.nr.c_e, '']
 	endfor
 
+	let local_options = <sid>GetOptions(s:opts)
 	let win=<sid>NrrwRgnWin(bang)
 	if bang
 		let s:nrrw_rgn_lines[s:instn].single = 1
@@ -819,6 +818,7 @@ fun! nrrwrgn#NrrwRgnDoPrepare(...) "{{{1
 	let b:nrrw_instn = s:instn
 	call <sid>SetupBufLocalCommands()
 	call <sid>NrrwRgnAuCmd(0)
+	call <sid>SetOptions(local_options)
 	call <sid>CleanRegions()
 	call <sid>HideNrrwRgnLines()
 
@@ -885,6 +885,7 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  "{{{1
 		    \ s:nrrw_rgn_lines[s:instn].end[1])
 	endif
 	call <sid>DeleteMatches(s:instn)
+	let local_options = <sid>GetOptions(s:opts)
 	let win=<sid>NrrwRgnWin(bang)
 	if bang
 	    let s:nrrw_rgn_lines[s:instn].single = 1
@@ -922,6 +923,7 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  "{{{1
 	if has_key(s:nrrw_aucmd, "close")
 		let b:nrrw_aucmd_close = s:nrrw_aucmd["close"]
 	endif
+	call <sid>SetOptions(local_options)
 	call <sid>SaveRestoreRegister(_opts)
 
 	" restore settings
