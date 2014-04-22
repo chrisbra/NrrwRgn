@@ -52,7 +52,7 @@ $mech->get("http://www.vim.org/scripts/script.php?script_id=$sid");
 $mech->follow_link(text => 'upload new version');
 $mech->form_name("script");
 $mech->field(script_file => $file);
-$mech->field(vim_version => 7.3);
+$mech->field(vim_version => 7.4);
 $mech->field(script_version => $scriptversion);
 $mech->field(version_comment => $versioncomment);
 $mech->click_button(value => "upload");
