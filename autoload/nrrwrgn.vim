@@ -71,7 +71,7 @@ fun! <sid>Init() "{{{1
 endfun 
 
 fun! <sid>NrrwRgnWin(bang) "{{{1
-	let bufname = substitute(expand('%:t:r'), ' ', '_', 'g')[0:8]
+	let bufname = matchstr(substitute(expand('%:t:r'), ' ', '_', 'g'), '^.\{0,8}')
 	let nrrw_winname = s:nrrw_winname. '_'. bufname . '_'. s:instn
 	let nrrw_win = bufwinnr('^'.nrrw_winname.'$')
 	if nrrw_win != -1
