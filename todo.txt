@@ -1,5 +1,7 @@
 (issues to work on, in the order of importance):
 
+- New Mapping. The motion over which one moves will be opened in a narrowed window.
+
 - Use nrrwrgn#NrrwRgnStatus() to make a nice statusline for e.g. vim-airline
 
 - When disabling Narrowing using :NRN and one quits the buffer,
