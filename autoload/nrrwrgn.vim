@@ -128,9 +128,7 @@ fun! <sid>CleanRegions() "{{{1
 endfun
 
 fun! <sid>CompareNumbers(a1,a2) "{{{1
-	return (a:a1+0) == (a:a2+0) ? 0
-		\ : (a:a1+0) > (a:a2+0) ? 1
-		\ : -1
+	return (a:a1+0) == (a:a2+0) ? 0 : (a:a1+0) > (a:a2+0) ? 1 : -1
 endfun
 
 fun! <sid>ParseList(list) "{{{1
@@ -197,7 +195,7 @@ endfun
 fun! <sid>SaveRestoreRegister(values) "{{{1
 	if empty(a:values)
 		" Save
-		let reg        = ['a', getreg('a'), getregtype('a') ]
+		let reg  =  ['a', getreg('a'), getregtype('a') ]
 		let fold =  [ &fen, &l:fdm ]
 		if &fen
 			setl nofoldenable
@@ -206,10 +204,6 @@ fun! <sid>SaveRestoreRegister(values) "{{{1
 		return  [ reg, fold, visual ]
 	else
 		" Restore
-		if empty(a:values)
-			call <sid>WarningMsg("Error setting options back!")
-			return
-		endif
 		call call('setreg', a:values[0])
 		if a:values[1][0]
 			setl foldenable
@@ -224,6 +218,8 @@ fun! <sid>SaveRestoreRegister(values) "{{{1
 endfun!
 
 fun! <sid>UpdateOrigWin() abort
+	" Tries to keep the original windo in the same viewport, that
+	" is currently being edited in the narrowed window
 	if !get(g:, 'nrrw_rgn_update_orig_win', 0)
 		return
 	endif
