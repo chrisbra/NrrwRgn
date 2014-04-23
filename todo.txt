@@ -1,7 +1,6 @@
-- When switching buffers using :b in the window, that was narrowed, the highlighting is keept.
-- Implement MultiEditing for :NRM
-  (see https://github.com/felixr/vim-multiedit/blob/master/plugin/multiedit.vim
-   and http://blog.felixriedel.com/2012/06/multi-editing-in-vim/)
+(issues to work on, in the order of importance):
+
+- Use nrrwrgn#NrrwRgnStatus() to make a nice statusline for e.g. vim-airline
 
 - When disabling Narrowing using :NRN and one quits the buffer,
   should the highlighting be removed? (it doesn't yet)
@@ -12,3 +11,11 @@
   * Narrowing several independent regions with setting the g:nrrw_rgn_protect
     variable
   * Multi line narrowing
+
+- Implement MultiEditing for :NRM
+  (see https://github.com/felixr/vim-multiedit/blob/master/plugin/multiedit.vim
+   and http://blog.felixriedel.com/2012/06/multi-editing-in-vim/)
+
+### Resolved
+- When switching buffers using :b in the window, that was narrowed, the highlighting is keept.
+  (should be resolved)
