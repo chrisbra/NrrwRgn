@@ -15,6 +15,7 @@ Copyright: (c) 2009-2014 by Christian Brabandt
         2.1   NrrwRgn Howto..............................: |NR-HowTo|
         2.2   NrrwRgn Multi..............................: |NR-multi-example|
         2.3   NrrwRgn Configuration......................: |NrrwRgn-config|
+        2.4   NrrwRgn public functions...................: |NrrwRgn-func|
         3.  NrrwRgn Feedback.............................: |NrrwRgn-feedback|
         4.  NrrwRgn History..............................: |NrrwRgn-history|
 
@@ -329,6 +330,28 @@ and before writing the changes back, it'll execute: >
 
     :%UnArrangeCol
 
+2.4 NrrwRgn functions                                    *NrrwRgn-func*
+---------------------
+The NrrwRgn plugin defines a public function in its namespace that can be used
+to query its status.
+                                                        *nrrwrgn#NrrwRgnStatus()*
+nrrwrgn#NrrwRgnStatus()
+    Returns a dict with the following keys:
+        'shortname':    The displayed buffer name
+        'fullname':     The complete buffer name of the original buffer
+        'multi':        1 if it is a multi narrowed window (|:NRMulti|),
+                        0 otherwise.
+        'startl':       List of start lines for a multi narrowed window
+                        (only present, if 'multi' is 1)
+        'endl':         List of end lines for a multi narrowed window
+                        (only present, if 'multi' is 1)
+        'start':        Start position (only present if 'multi' is 0)
+        'end':          End position (only present if 'multi' is 0)
+        'visual':       Visual Mode, if it the narrowed window was started
+                        from a visual selected region (empty otherwise).
+        'enabled':      Whether syncing the buffer is enabled (|:NRS|)
+                            
+    If not executed in a narrowed window, returns an empty dict.
 =============================================================================
 3. NrrwRgn Feedback                                        *NrrwRgn-feedback*
 
@@ -353,6 +376,9 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 0.33 (unreleased) {{{1
 - set local options later, so that FileType autocommands don't trigger to
   early
+- make sure, shortening the buffer name handles multibyte characters
+  correctly.
+- new public function |nrrwrgn#NrrwRgnStatus()|
 0.32 Mar 27, 2014 {{{1
 - hooks could corrupt the narrowed buffer, if it wasn't closed (reported by
   jszakemeister https://github.com/chrisbra/NrrwRgn/issues/19, thanks!)

@@ -1003,7 +1003,7 @@ fun! nrrwrgn#WidenRegion(force)  "{{{1
 		call <sid>JumpToBufinTab(orig_tab, nrw_buf, instn)
 		return
 	endif
-	if !&l:ma && !( exists("b:orig_buf_ro") && b:orig_buf_ro)
+	if !&l:ma && !(exists("b:orig_buf_ro") && b:orig_buf_ro)
 		setl ma
 	endif
 	" This is needed to adjust all other narrowed regions
@@ -1252,6 +1252,40 @@ fun! nrrwrgn#LastNrrwRgn(bang) "{{{1
 		call nrrwrgn#NrrwRgn(visualmode(), bang)
 	endif
 endfu
+fun! nrrwrgn#NrrwRgnStatus() "{{{1
+	if !exists("b:nrrw_instn")
+		return {}
+	else
+		let dict={}
+		try
+			let cur = copy(s:nrrw_rgn_lines[b:nrrw_instn])
+			if has_key(cur, 'multi')
+				let multi = cur.multi
+			else
+				let multi = []
+			endif
+			let dict.shortname = bufname('')
+			let dict.fullname  = fnamemodify(expand(bufname(cur.orig_buf)),':p')
+			let dict.multi     = has_key(cur, 'multi')
+			if has_key(cur, 'multi')
+				let dict.startl= map(copy(multi), 'v:val[0]')
+				let dict.endl  = map(copy(multi), 'v:val[1]')
+			else
+				let dict.start = cur.start
+				let dict.end   = cur.end
+			endif
+			let dict.matchid   = cur.matchid
+			let dict.visual    = has_key(cur, 'vmode') ? cur.vmode : ''
+			let dict.enabled   = has_key(cur, 'disable') ? !cur.disable : 0
+			unlet cur
+		catch
+			" oh oh, something is wrong...
+			return {}
+		endtry
+		return dict
+	endif
+endfu
+
 " Debugging options "{{{1
 fun! nrrwrgn#Debug(enable) "{{{1
 	if (a:enable)
