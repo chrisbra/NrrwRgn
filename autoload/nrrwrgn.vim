@@ -1272,7 +1272,7 @@ fun! nrrwrgn#NrrwRgnStatus() "{{{1
 			endif
 			let dict.matchid   = cur.matchid
 			let dict.visual    = has_key(cur, 'vmode') ? cur.vmode : ''
-			let dict.enabled   = has_key(cur, 'disable') ? !cur.disable : 0
+			let dict.enabled   = has_key(cur, 'disable') ? (cur.disable ? 0 : 1) : 1
 			let dict.instn     = b:nrrw_instn
 			unlet cur
 		catch
