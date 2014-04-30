@@ -1261,7 +1261,12 @@ fun! nrrwrgn#NrrwRgnStatus() "{{{1
 				let multi = []
 			endif
 			let dict.shortname = bufname('')
-			let dict.fullname  = fnamemodify(expand(bufname(cur.orig_buf)),':p')
+			let bufname=bufname(cur.orig_buf)
+			if !empty(bufname)
+				let dict.fullname  = fnamemodify(expand(bufname(cur.orig_buf)),':p')
+			else
+				let dict.fullname  = 'UNKNOWN'
+			endif
 			let dict.multi     = has_key(cur, 'multi')
 			if has_key(cur, 'multi')
 				let dict.startl= map(copy(multi), 'v:val[0]')
