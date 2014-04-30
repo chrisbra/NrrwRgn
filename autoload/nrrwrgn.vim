@@ -1265,7 +1265,7 @@ fun! nrrwrgn#NrrwRgnStatus() "{{{1
 			if !empty(bufname)
 				let dict.fullname  = fnamemodify(expand(bufname(cur.orig_buf)),':p')
 			else
-				let dict.fullname  = 'UNKNOWN'
+				let dict.fullname  = '[No Name]' " vim default
 			endif
 			let dict.multi     = has_key(cur, 'multi')
 			if has_key(cur, 'multi')
