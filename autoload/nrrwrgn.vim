@@ -1282,8 +1282,9 @@ fun! nrrwrgn#NrrwRgnStatus() "{{{1
 			unlet cur
 		catch
 			" oh oh, something is wrong...
-			return {}
+			let dict={}
 		endtry
+		lockvar dict
 		return dict
 	endif
 endfu
