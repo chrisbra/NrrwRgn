@@ -16,24 +16,26 @@ Once installed, take a look at the help at `:h NrrwRgn`
 
 Here is a short overview of the functionality provided by the plugin:
 ####Ex commands:
-    :NR		    - Open the selected region in a new narrowed window
-    :NW		    - Open the current visual window in a new narrowed window
-    :WidenRegion    - (In the narrowed window) write the changes back to the original buffer.
-    :NRV	    - Open the narrowed window for the region that was last visually selected.
-    :NUD	    - (In a unified diff) open the selected diff in 2 Narrowed windows
-    :NRP	    - Mark a region for a Multi narrowed window
-    :NRM	    - Create a new Multi narrowed window (after :NRP)
-    :NRS	    - Enable Syncing the buffer content back (default on)
-    :NRN	    - Disable Syncing the buffer content back
-    :NRL	    - Reselect the last selected region and open it again in a narrowed window
+    :NR		 - Open the selected region in a new narrowed window
+    :NW		 - Open the current visual window in a new narrowed window
+    :WidenRegion - (In the narrowed window) write the changes back to the original buffer.
+    :NRV	 - Open the narrowed window for the region that was last visually selected.
+    :NUD	 - (In a unified diff) open the selected diff in 2 Narrowed windows
+    :NRP	 - Mark a region for a Multi narrowed window
+    :NRM	 - Create a new Multi narrowed window (after :NRP)
+    :NRS	 - Enable Syncing the buffer content back (default on)
+    :NRN	 - Disable Syncing the buffer content back
+    :NRL	 - Reselect the last selected region and open it again in a narrowed window
 ####Visual mode commands:
-    \nr		    - Open the current visual selection in a new narrowed window
+    \nr		 - Open the current visual selection in a new narrowed window
 ####Scripting Functions:
-    nrrwrgn#NrrwRgnStatus()   - Return a dict with all the status information for the current narrowed window
+    nrrwrgn#NrrwRgnStatus()   - Return a dict with all the status information for the current window
 
 ####Similar Work
 [narrow_region](http://www.vim.org/scripts/script.php?script_id=2038)
+
 [narrow](http://www.vim.org/scripts/script.php?script_id=2097)
+
 [narrow](http://www.vim.org/scripts/script.php?script_id=2446)
 
 ###License & Copyright
