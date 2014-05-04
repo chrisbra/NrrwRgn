@@ -144,6 +144,9 @@ default is set to '\', unless you have set it to something different (see
 |<Leader>| for information how to change this) and the selected range will
 open in a new scratch buffer. This key combination only works in |Visual-mode|
 
+(Alternatively, you can use the normal mode mapping <Leader>nr and the region
+over which you move will be opened in a new Narrowed window).
+
 When finished, simply write that Narrowed Region window, from which you want
 to take the modifications in your original file.
 
@@ -379,6 +382,8 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 - make sure, shortening the buffer name handles multibyte characters
   correctly.
 - new public function |nrrwrgn#NrrwRgnStatus()|
+- <Leader>nr also mapped as operator function (so the region over which you
+  move will be opened in the narrowed window
 0.32 Mar 27, 2014 {{{1
 - hooks could corrupt the narrowed buffer, if it wasn't closed (reported by
   jszakemeister https://github.com/chrisbra/NrrwRgn/issues/19, thanks!)

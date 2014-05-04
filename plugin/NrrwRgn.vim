@@ -30,6 +30,24 @@ endif
 " ----------------------------------------------------------------------------
 " Public Interface: {{{1
 
+" plugin functions "{{{2
+fun! <sid>NrrwRgnOp(type, ...) " {{{3
+	" used for operator function mapping
+	let sel_save = &selection
+	let &selection = "inclusive"
+	if a:0  " Invoked from Visual mode, use '< and '> marks.
+		sil exe "normal! `<" . a:type . "`>y"
+	elseif a:type == 'line'
+		sil exe "normal! '[V']y"
+	elseif a:type == 'block'
+		sil exe "normal! `[\<C-V>`]y"
+	else
+		sil exe "normal! `[v`]y"
+	endif
+	call nrrwrgn#NrrwRgn(visualmode(), '')
+	let &selection = sel_save
+endfu
+
 " Define the Command aliases "{{{2
 com! -range -bang NRPrepare :<line1>,<line2>NRP<bang>
 com! -range NarrowRegion :<line1>,<line2>NR
@@ -49,18 +67,23 @@ com! -bang NRL :call nrrwrgn#LastNrrwRgn(<q-bang>)
 " Define the Mapping: "{{{2
 if !hasmapto('<Plug>NrrwrgnDo')
 	xmap <unique> <Leader>nr <Plug>NrrwrgnDo
+	nmap <unique> <Leader>nr <Plug>NrrwrgnDo
 endif
 if !hasmapto('<Plug>NrrwrgnBangDo')
 	xmap <unique> <Leader>Nr <Plug>NrrwrgnBangDo
 endif
 if !hasmapto('VisualNrrwRgn')
 	xnoremap <unique> <script> <Plug>NrrwrgnDo <sid>VisualNrrwRgn
+	nnoremap <unique> <script> <Plug>NrrwrgnDo <sid>VisualNrrwRgn
 endif
 if !hasmapto('VisualNrrwRgnBang')
 	xnoremap <unique> <script> <Plug>NrrwrgnBangDo <sid>VisualNrrwBang
 endif
 xnoremap <sid>VisualNrrwRgn  :<c-u>call nrrwrgn#NrrwRgn(visualmode(),'')<cr>
 xnoremap <sid>VisualNrrwBang :<c-u>call nrrwrgn#NrrwRgn(visualmode(),'!')<cr>
+
+" operator function
+nnoremap <sid>VisualNrrwRgn :set opfunc=<sid>NrrwRgnOp<cr>g@
 
 " Restore: "{{{1
 let &cpo=s:cpo
