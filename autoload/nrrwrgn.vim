@@ -382,6 +382,10 @@ fun! <sid>GeneratePattern(startl, endl, mode, ...) "{{{1
 		return '\%>'. (a:startl[0]-1). 'l\&\%>'. (a:startl[1]-1).
 			\ 'v\&\%<'. (a:endl[0]+1). 'l\&\%<'. (a:endl[1]+1). 'v'
 	elseif a:mode ==# 'v' && a:startl[0] > 0 && a:startl[1] > 0
+		" Easy way: a:startl[0] == a:endl[0]
+		if a:startl[0] == a:endl[0]
+			return '\%'.a:startl[0]. 'l\%>'.(a:startl[1]-1).'c.*\%<'.(a:endl[1]+1).'c'
+		else
 		" Need to generate concat 3 patterns:
 		"  1) from startline, startcolumn till end of line
 		"  2) all lines between startline and end line
@@ -392,6 +396,7 @@ fun! <sid>GeneratePattern(startl, endl, mode, ...) "{{{1
 		return  '\%(\%'.  (a:startl[0]). 'l\%>'.   (a:startl[1]-1). 'v.*\)\|'.
 			\	'\%(\%>'. (a:startl[0]). 'l\%<'.   (a:endl[0]).     'l.*\)\|'.
 			\   '\%(\%'.  (a:endl[0]).   'l.*\%<'. (a:endl[1]+1).   'v\)'
+	endif
 	elseif a:startl[0] > 0
 		return '\%>'. (a:startl[0]-1). 'l\&\%<'. (a:endl[0]+1). 'l'
 	else
