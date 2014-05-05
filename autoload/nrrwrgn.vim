@@ -836,18 +836,11 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  "{{{1
 	    noa wincmd p
 	    let s:nrrw_rgn_lines[s:instn].winnr  = winnr()
 	    " Set highlighting in original window
-	    if visual
-			call <sid>AddMatches(<sid>GeneratePattern(
-		    \s:nrrw_rgn_lines[s:instn].start[1:2],
-		    \s:nrrw_rgn_lines[s:instn].end[1:2],
-		    \s:nrrw_rgn_lines[s:instn].vmode),
-		    \s:instn)
-	    else
-			call <sid>AddMatches(<sid>GeneratePattern(
-		    \s:nrrw_rgn_lines[s:instn].start[1:2], 
-		    \s:nrrw_rgn_lines[s:instn].end[1:2], 
-		    \'V'), s:instn)
-	    endif
+		call <sid>AddMatches(<sid>GeneratePattern(
+		\s:nrrw_rgn_lines[s:instn].start[1:2],
+		\s:nrrw_rgn_lines[s:instn].end[1:2],
+		\(visual ? s:nrrw_rgn_lines[s:instn].vmode : 'V')),
+		\s:instn)
 		if _opts[1][0]
 			" reset folding
 			setl foldenable
