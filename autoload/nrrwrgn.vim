@@ -276,7 +276,13 @@ fun! <sid>NrrwRgnAuCmd(instn) "{{{1
 			au BufWinLeave,BufWipeout,BufDelete <buffer> nested
 						\ :call s:WriteNrrwRgn()
 			au CursorMoved <buffer> :call s:UpdateOrigWin()
-		aug end
+			" When switching buffer in the original buffer,
+			" make sure the highlighting of the narrowed buffer will
+			" be removed"
+			exe "au BufWinLeave <buffer=".b:orig_buf.
+			  \ "> if <sid>HasMatchID(".b:nrrw_instn.")|call <sid>DeleteMatches(".
+			  \ b:nrrw_instn.")|endif"
+			aug end
 	else
 		exe "aug NrrwRgn".  a:instn
 		au!
@@ -303,7 +309,10 @@ fun! <sid>NrrwRgnAuCmd(instn) "{{{1
 		if (has_key(s:nrrw_rgn_lines[a:instn], 'disable') &&
 		\	!s:nrrw_rgn_lines[a:instn].disable ) ||
 		\   !has_key(s:nrrw_rgn_lines[a:instn], 'disable')
+			" Skip to original window and remove highlighting
+			exe "noa" s:nrrw_rgn_lines[a:instn].winnr "wincmd w"
 			call <sid>DeleteMatches(a:instn)
+			noa wincmd p
 			" bwipe! throws E855 (catching does not work)
 			" but because of 'bufhidden' wipeing will happen anyways
 			"exe "bwipe! " bufnr(s:nrrw_winname. '_'. a:instn)
@@ -635,12 +644,9 @@ fun! <sid>BufInTab(bufnr) "{{{1
 	return 0
 endfun
 
-fun! <sid>JumpToBufinTab(tab,buf,instn) "{{{1
+fun! <sid>JumpToBufinTab(tab,buf) "{{{1
 	if a:tab
 		exe "noa tabn" a:tab
-	endif
-	if <sid>HasMatchID(a:instn)
-		call <sid>DeleteMatches(a:instn)
 	endif
 	let win = bufwinnr(a:buf)
 	if win > 0
@@ -923,8 +929,7 @@ fun! nrrwrgn#WidenRegion(force)  "{{{1
 			" Make sure highlighting will be removed
 			let close = (&g:hid ? 0 : 1)
 		else
-			call s:WarningMsg("Original buffer does no longer exist!".
-						\ " Aborting!")
+			call s:WarningMsg("Original buffer does no longer exist! Aborting!")
 			return
 		endif
 	else
@@ -933,13 +938,13 @@ fun! nrrwrgn#WidenRegion(force)  "{{{1
 	let _opts = <sid>SaveRestoreRegister([])
 	let wsv=winsaveview()
 	" Removing matches only works in the right window. So need to check,
-	" the matchid actually exists, if not, remove try to remove it later.
+	" the matchid actually exists, if not, try to remove it later.
 	if <sid>HasMatchID(instn)
 		call <sid>DeleteMatches(instn)
 	endif
 	if exists("b:orig_buf_ro") && b:orig_buf_ro && !a:force
 		call s:WarningMsg("Original buffer protected. Can't write changes!")
-		call <sid>JumpToBufinTab(orig_tab, nrw_buf, instn)
+		call <sid>JumpToBufinTab(orig_tab, nrw_buf)
 		return
 	endif
 	if !&l:ma && !(exists("b:orig_buf_ro") && b:orig_buf_ro)
@@ -1070,7 +1075,7 @@ fun! nrrwrgn#WidenRegion(force)  "{{{1
 		call <sid>CleanUpInstn(instn)
 	endif
 	" jump back to narrowed window
-	call <sid>JumpToBufinTab(orig_tab, nrw_buf, instn)
+	call <sid>JumpToBufinTab(orig_tab, nrw_buf)
 	setl nomod
 	if a:force
 		" trigger auto command
