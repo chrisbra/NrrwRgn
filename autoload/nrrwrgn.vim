@@ -953,9 +953,7 @@ fun! nrrwrgn#WidenRegion(force)  "{{{1
 					\s:nrrw_rgn_lines[instn].start[1])
 	endif
 
-
 	" Now copy the content back into the original buffer
-
 	" 1) Check: Multiselection
 	if has_key(s:nrrw_rgn_lines[instn], 'multi')
 		call <sid>WidenRegionMulti(cont, instn)
