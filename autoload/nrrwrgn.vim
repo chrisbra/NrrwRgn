@@ -855,6 +855,11 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  "{{{1
 		    \s:nrrw_rgn_lines[s:instn].end[1:2], 
 		    \'V'), s:instn)
 	    endif
+		if _opts[1][0]
+			" reset folding
+			setl foldenable
+			let &l:fdm=_opts[1][1]
+		endif
 		" move back to narrowed window
 		noa wincmd p
 	endif
