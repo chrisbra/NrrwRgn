@@ -823,7 +823,6 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  "{{{1
 	    let last  = a:lastline
 	    let s:nrrw_rgn_lines[s:instn].start = [ 0, first, 0, 0 ]
 	    let s:nrrw_rgn_lines[s:instn].end	= [ 0, last , 0, 0 ]
-	    let s:nrrw_rgn_lines[s:instn].orig_buf  = orig_buf
 	    let a=getline(s:nrrw_rgn_lines[s:instn].start[1],
 		    \ s:nrrw_rgn_lines[s:instn].end[1])
 	endif
