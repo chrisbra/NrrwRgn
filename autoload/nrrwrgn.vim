@@ -60,12 +60,10 @@ fun! <sid>Init() "{{{1
 	let s:nrrw_winname='NrrwRgn'
 
 	" Customization
-	let s:nrrw_rgn_vert = (exists("g:nrrw_rgn_vert") ? g:nrrw_rgn_vert : 0)
-	let s:nrrw_rgn_wdth = (exists("g:nrrw_rgn_wdth") ? g:nrrw_rgn_wdth : 20)
-	let s:nrrw_rgn_hl	= (exists("g:nrrw_rgn_hl")	 ? g:nrrw_rgn_hl   :
-							\ "WildMenu")
-	let s:nrrw_rgn_nohl = (exists("g:nrrw_rgn_nohl") ? g:nrrw_rgn_nohl : 0)
-
+	let s:nrrw_rgn_vert = get(g:, 'nrrw_rgn_vert', 0)
+	let s:nrrw_rgn_wdth = get(g:, 'nrrw_rgn_wdth', 20)
+	let s:nrrw_rgn_hl	= get(g:, 'nrrw_rgn_hl', 'WildMenu')
+	let s:nrrw_rgn_nohl = get(g:, 'nrrw_rgn_nohl', 0)
 	let s:debug         = (exists("s:debug") ? s:debug : 0)
 	if v:version < 704
 		call s:WarningMsg('NrrwRgn needs Vim > 7.4 or it might not work correctly')
@@ -466,6 +464,7 @@ fun! <sid>GetOptions(opt) "{{{1
 			try
 				exe "let result[item]=&l:".item
 			catch
+				" no-op, just silence the error
 			endtry
 		endfor
 	endif
