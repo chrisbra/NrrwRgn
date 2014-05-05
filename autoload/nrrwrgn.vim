@@ -67,7 +67,9 @@ fun! <sid>Init() "{{{1
 	let s:nrrw_rgn_nohl = (exists("g:nrrw_rgn_nohl") ? g:nrrw_rgn_nohl : 0)
 
 	let s:debug         = (exists("s:debug") ? s:debug : 0)
-		
+	if v:version < 704
+		call s:WarningMsg('NrrwRgn needs Vim > 7.4 or it might not work correctly')
+	endif
 endfun 
 
 fun! <sid>NrrwRgnWin(bang) "{{{1
@@ -209,11 +211,8 @@ fun! <sid>SaveRestoreRegister(values) "{{{1
 			setl foldenable
 			let &l:fdm=a:values[1][1]
 		endif
-		if v:version > 703 || (v:version == 703 && has("patch590"))
-			" settable '< and '> marks
-			call setpos("'<", a:values[2][0])
-			call setpos("'>", a:values[2][1])
-		endif
+		call setpos("'<", a:values[2][0])
+		call setpos("'>", a:values[2][1])
 	endif
 endfun!
 
@@ -358,12 +357,7 @@ fun! <sid>StoreLastNrrwRgn(instn) "{{{1
 endfu
 
 fun! <sid>RetVisRegionPos() "{{{1
-	if v:version > 703 || (v:version == 703 && has("patch590"))
-		return [ getpos("'<"), getpos("'>") ]
-	else
-		return [ getpos("'<")[0:1] + [virtcol("'<"), 0],
-			\    getpos("'>")[0:1] + [virtcol("'>"), 0] ]
-	endif
+	return [ getpos("'<"), getpos("'>") ]
 endfun
 
 fun! <sid>GeneratePattern(startl, endl, mode, ...) "{{{1
@@ -853,7 +847,7 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  "{{{1
 	call <sid>CheckProtected()
 	if visual
 	    let [ s:nrrw_rgn_lines[s:instn].start,
-		    \s:nrrw_rgn_lines[s:instn].end ] = <sid>RetVisRegionPos()
+		    \ s:nrrw_rgn_lines[s:instn].end ] = <sid>RetVisRegionPos()
 	    norm! gv"ay
 	    if len(split(@a, "\n", 1)) != 
 			\ (s:nrrw_rgn_lines[s:instn].end[1] -
@@ -1033,34 +1027,19 @@ fun! nrrwrgn#WidenRegion(force)  "{{{1
 		   call setreg('a', substitute(@a, '\n$', '', ''), 
 			\ s:nrrw_rgn_lines[instn].vmode)
 		endif
-		if v:version > 703 || (v:version == 703 && has("patch590"))
-			" settable '< and '> marks
-			let _v = []
-			" store actual values
-			let _v = [getpos("'<"), getpos("'>"), [visualmode(1)]]
-			" set the mode for the gv command
-			exe "norm! ". s:nrrw_rgn_lines[instn].vmode."\<ESC>"
-			call setpos("'<", s:nrrw_rgn_lines[instn].start)
-			call setpos("'>", s:nrrw_rgn_lines[instn].end)
-			exe 'norm! gv"aP'
-			if !empty(_v[2][0]) && (_v[2][0] != visualmode())
-				exe 'norm!' _v[2][0]. "\<ESC>"
-				call setpos("'<", _v[0])
-				call setpos("'>", _v[1])
-			endif
-		else
-			exe "keepj" s:nrrw_rgn_lines[instn].start[1]
-			exe "keepj norm!" s:nrrw_rgn_lines[instn].start[2]. '|'
-			exe "keepj norm!" s:nrrw_rgn_lines[instn].vmode
-			exe "keepj" s:nrrw_rgn_lines[instn].end[1]
-			if s:nrrw_rgn_lines[instn].blockmode
-				exe "keepj norm!" s:nrrw_rgn_lines[instn].end[2]. '|'
-			else
-				keepj norm! $
-			endif
-			" overwrite the visually selected region with the contents from
-			" the narrowed buffer
-			norm! "aP
+		" settable '< and '> marks
+		let _v = []
+		" store actual values
+		let _v = [getpos("'<"), getpos("'>"), [visualmode(1)]]
+		" set the mode for the gv command
+		exe "norm! ". s:nrrw_rgn_lines[instn].vmode."\<ESC>"
+		call setpos("'<", s:nrrw_rgn_lines[instn].start)
+		call setpos("'>", s:nrrw_rgn_lines[instn].end)
+		exe 'norm! gv"aP'
+		if !empty(_v[2][0]) && (_v[2][0] != visualmode())
+			exe 'norm!' _v[2][0]. "\<ESC>"
+			call setpos("'<", _v[0])
+			call setpos("'>", _v[1])
 		endif
 		" Recalculate the start and end positions of the narrowed window
 		" so subsequent calls will adjust the region accordingly

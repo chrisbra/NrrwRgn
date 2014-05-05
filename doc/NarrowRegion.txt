@@ -384,6 +384,8 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 - new public function |nrrwrgn#NrrwRgnStatus()|
 - <Leader>nr also mapped as operator function (so the region over which you
   move will be opened in the narrowed window
+- highlighting wrong when char-selecting within a line
+- needs Vim 7.4
 0.32 Mar 27, 2014 {{{1
 - hooks could corrupt the narrowed buffer, if it wasn't closed (reported by
   jszakemeister https://github.com/chrisbra/NrrwRgn/issues/19, thanks!)
