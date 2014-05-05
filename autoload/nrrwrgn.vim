@@ -71,6 +71,7 @@ fun! <sid>Init() "{{{1
 endfun 
 
 fun! <sid>NrrwRgnWin(bang) "{{{1
+	" Create new scratch window
 	let bufname = matchstr(substitute(expand('%:t:r'), ' ', '_', 'g'), '^.\{0,8}')
 	let nrrw_winname = s:nrrw_winname. '_'. bufname . '_'. s:instn
 	let nrrw_win = bufwinnr('^'.nrrw_winname.'$')
@@ -328,8 +329,7 @@ endfu
 fun! <sid>StoreLastNrrwRgn(instn) "{{{1
 	" Only store the last region, when the narrowed instance is still valid
 	if !has_key(s:nrrw_rgn_lines, a:instn)
-		call <sid>WarningMsg("Error storing the last Narrowed Window,".
-					\ "it's invalid!")
+		call <sid>WarningMsg("Error storing the last Narrowed Window, it's invalid!")
 		return
 	endif
 
@@ -358,19 +358,13 @@ fun! <sid>RetVisRegionPos() "{{{1
 	return [ getpos("'<"), getpos("'>") ]
 endfun
 
-fun! <sid>GeneratePattern(startl, endl, mode, ...) "{{{1
-	if exists("a:1") && a:1
-		let block = 0
-	else
-		let block = 1
-	endif
+fun! <sid>GeneratePattern(startl, endl, mode) "{{{1
 	" This is just a best guess, the highlighted block could still be wrong
-	" (a " rectangle has been selected, but the complete lines are
-	" highlighted
-	if a:mode ==# '' && a:startl[0] > 0 && a:startl[1] > 0 && block
-		return '\%>'. (a:startl[0]-1). 'l\&\%>'. (a:startl[1]-1).
-			\ 'c\&\%<'. (a:endl[0]+1). 'l'
-	elseif a:mode ==# '' && a:startl[0] > 0 && a:startl[1] > 0
+	" There are basically two ways, highlighting works in block mode:
+	"	1) only highlight the block
+	"	2) highlighty from the beginnning until the end of lines (happens,
+	"	   intermediate lines are shorter than block width)
+	if a:mode ==# '' && a:startl[0] > 0 && a:startl[1] > 0
 		return '\%>'. (a:startl[0]-1). 'l\&\%>'. (a:startl[1]-1).
 			\ 'c\&\%<'. (a:endl[0]+1). 'l\&\%<'. (a:endl[1]+1). 'c'
 	elseif a:mode ==# 'v' && a:startl[0] > 0 && a:startl[1] > 0
@@ -489,12 +483,11 @@ fun! <sid>CheckProtected() "{{{1
 	let b:orig_buf_ro=0
 	if !&l:ma || &l:ro
 		let b:orig_buf_ro=1
-		call s:WarningMsg("Buffer is protected, won't be able to write".
-			\ " the changes back!")
+		call s:WarningMsg("Buffer is protected, won't be able to write the changes back!")
 	else 
-	" Protect the original buffer,
-	" so you won't accidentally modify those lines,
-	" that might later be overwritten
+		" Protect the original buffer,
+		" so you won't accidentally modify those lines,
+		" that might later be overwritten
 		setl noma
 	endif
 endfun
@@ -512,11 +505,6 @@ fun! <sid>HasMatchID(instn) "{{{1
 endfun
 
 fun! <sid>DeleteMatches(instn) "{{{1
-    " Make sure, we are in the correct buffer
-	" Not needed, prevents recursively narrowing
-"	if bufname('') =~# 'Narrow_Region'
-"		exe ':noa'. bufwinnr(b:orig_buf). 'wincmd w'
-"	endif
 	if exists("s:nrrw_rgn_lines[a:instn].matchid")
 		" if you call :NarrowRegion several times, without widening 
 		" the previous region, b:matchid might already be defined so
@@ -568,31 +556,6 @@ fun! <sid>ReturnCommentFT() "{{{1
 		return '#'
 	endif
 endfun
-
-fun! <sid>CheckRectangularRegion(reg) "{{{1
-	" Check whether the region that was pasted into
-	" register a:reg has always the same length
-	" This is needed, to be able to select the correct region
-	" when writing back the changes.
-	let result={}
-	let list=split(a:reg, "\n")
-	call map(list, 'substitute(v:val, ".", "x", "g")')
-	let llen = len(list)/2
-	call map(list, 'len(v:val)')
-	for item in list
-		if has_key(result, item)
-			let result[item] += 1
-		else
-			let result[item] = 1
-		endif
-	endfor
-	for [key, value] in items(result)
-		if value > llen
-			return 1
-		endif
-	endfor
-	return 0
-endfu
 
 fun! <sid>WidenRegionMulti(content, instn) "{{{1
 	" for single narrowed windows, the original narrowed buffer will be closed,
@@ -855,14 +818,6 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  "{{{1
 			let @a=substitute(@a, '\n$', '', '') 
 	    endif
 		let a = split(@a, "\n")
-
-	    if visual && a:mode ==# '' && <sid>CheckRectangularRegion(@a)
-			" Rectangular selection
-			let s:nrrw_rgn_lines[s:instn].blockmode = 1
-	    else
-			" Non-Rectangular selection
-			let s:nrrw_rgn_lines[s:instn].blockmode = 0
-		endif
 	else
 	    let first = a:firstline
 	    let last  = a:lastline
@@ -892,8 +847,7 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  "{{{1
 			call <sid>AddMatches(<sid>GeneratePattern(
 		    \s:nrrw_rgn_lines[s:instn].start[1:2],
 		    \s:nrrw_rgn_lines[s:instn].end[1:2],
-		    \s:nrrw_rgn_lines[s:instn].vmode, 
-		    \s:nrrw_rgn_lines[s:instn].blockmode),
+		    \s:nrrw_rgn_lines[s:instn].vmode),
 		    \s:instn)
 	    else
 			call <sid>AddMatches(<sid>GeneratePattern(
