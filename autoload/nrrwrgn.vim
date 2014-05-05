@@ -821,12 +821,6 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  "{{{1
 	else
 	    let first = a:firstline
 	    let last  = a:lastline
-	    " If first line is in a closed fold,
-	    " include complete fold in Narrowed window
-	    if first == last && foldclosed(first) != -1
-		    let first = foldclosed(first)
-		    let last  = foldclosedend(last)
-	    endif
 	    let s:nrrw_rgn_lines[s:instn].start = [ 0, first, 0, 0 ]
 	    let s:nrrw_rgn_lines[s:instn].end	= [ 0, last , 0, 0 ]
 	    let s:nrrw_rgn_lines[s:instn].orig_buf  = orig_buf
