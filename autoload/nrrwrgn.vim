@@ -377,12 +377,12 @@ fun! <sid>GeneratePattern(startl, endl, mode, ...) "{{{1
 	" highlighted
 	if a:mode ==# '' && a:startl[0] > 0 && a:startl[1] > 0 && block
 		return '\%>'. (a:startl[0]-1). 'l\&\%>'. (a:startl[1]-1).
-			\ 'v\&\%<'. (a:endl[0]+1). 'l'
+			\ 'c\&\%<'. (a:endl[0]+1). 'l'
 	elseif a:mode ==# '' && a:startl[0] > 0 && a:startl[1] > 0
 		return '\%>'. (a:startl[0]-1). 'l\&\%>'. (a:startl[1]-1).
-			\ 'v\&\%<'. (a:endl[0]+1). 'l\&\%<'. (a:endl[1]+1). 'v'
+			\ 'c\&\%<'. (a:endl[0]+1). 'l\&\%<'. (a:endl[1]+1). 'c'
 	elseif a:mode ==# 'v' && a:startl[0] > 0 && a:startl[1] > 0
-		" Easy way: a:startl[0] == a:endl[0]
+		" Easy way: match within a line
 		if a:startl[0] == a:endl[0]
 			return '\%'.a:startl[0]. 'l\%>'.(a:startl[1]-1).'c.*\%<'.(a:endl[1]+1).'c'
 		else
@@ -393,10 +393,10 @@ fun! <sid>GeneratePattern(startl, endl, mode, ...) "{{{1
 		"
 		" example: Start at line 1 col. 6 until line 3 column 12:
 		" \%(\%1l\%>6v.*\)\|\(\%>1l\%<3l.*\)\|\(\%3l.*\%<12v\)
-		return  '\%(\%'.  (a:startl[0]). 'l\%>'.   (a:startl[1]-1). 'v.*\)\|'.
+		return  '\%(\%'.  (a:startl[0]). 'l\%>'.   (a:startl[1]-1). 'c.*\)\|'.
 			\	'\%(\%>'. (a:startl[0]). 'l\%<'.   (a:endl[0]).     'l.*\)\|'.
-			\   '\%(\%'.  (a:endl[0]).   'l.*\%<'. (a:endl[1]+1).   'v\)'
-	endif
+			\   '\%(\%'.  (a:endl[0]).   'l.*\%<'. (a:endl[1]+1).   'c\)'
+		endif
 	elseif a:startl[0] > 0
 		return '\%>'. (a:startl[0]-1). 'l\&\%<'. (a:endl[0]+1). 'l'
 	else
