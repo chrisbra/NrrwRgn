@@ -862,13 +862,13 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  "{{{1
 	setl nomod
 	call <sid>SetupBufLocalCommands()
 	call <sid>NrrwRgnAuCmd(0)
+	call <sid>SetOptions(local_options)
 	if has_key(s:nrrw_aucmd, "create")
 		exe s:nrrw_aucmd["create"]
 	endif
 	if has_key(s:nrrw_aucmd, "close")
 		let b:nrrw_aucmd_close = s:nrrw_aucmd["close"]
 	endif
-	call <sid>SetOptions(local_options)
 	call <sid>SaveRestoreRegister(_opts)
 
 	" restore settings
