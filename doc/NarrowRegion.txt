@@ -207,14 +207,40 @@ variable g:nrrw_rgn_vert to 1 in your |.vimrc| >
 
     let g:nrrw_rgn_vert = 1
 <
+(default: 0)
 ------------------------------------------------------------------------------
 
 If you'd like to specify a certain width/height for you scratch buffer, then
 set the variable g:nrrw_rgn_wdth in your |.vimrc| . This variable defines the
-width or the nr of columns, if you have also set g:nrrw_rgn_vert. >
+height or the nr of columns, if you have also set g:nrrw_rgn_vert. >
 
     let g:nrrw_rgn_wdth = 30
 <
+(default: 20)
+------------------------------------------------------------------------------
+
+It is possible to specify an increment value, by which the narrowed window can
+be increased. This is allows to easily toggle between the normal narrowed
+window size and an even increased size (think of zooming). 
+
+By default, the narrowed window will be increased by 10 lines or columns if
+(g:nrrw_rgn_vert is also set [see above]). To change it, set in your
+|.vimrc| >
+
+    let g:nrrw_rgn_incr = 30
+<
+(default: 10)
+------------------------------------------------------------------------------
+
+If you'd like to change the key combination that toggles incrementing the
+Narrowed Window size, you can put this in your |.vimrc| >
+
+   nmap <F3> <Plug>NrrwrgnWinIncr
+<
+(default: <Leader><Space>)
+
+This will let you use the <F3> key to toggle the window size of the Narrowed
+Window. Note: This mapping is only in the narrowed window active.
 ------------------------------------------------------------------------------
 
 By default, NarrowRegion highlights the region that has been selected
@@ -225,11 +251,14 @@ result, you could put that in your |.vimrc| >
 
     let g:nrrw_rgn_hl = 'Search'
 <
+(default: WildMenu)
+
 If you want to turn off the highlighting (because this can be distracting), you
 can set the global variable g:nrrw_rgn_nohl to 1 in your |.vimrc| >
 
     let g:nrrw_rgn_nohl = 1
 <
+(default: 0)
 ------------------------------------------------------------------------------
 
 If you'd like to change the key combination that starts the Narrowed Window
@@ -241,6 +270,7 @@ This will let <F3> open the Narrow-Window, but only if you have pressed it in
 Visual Mode. It doesn't really make sense to map this combination to any other
 mode, unless you want it to Narrow your last visually selected range.
 
+(default: <Leader>nr)
 ------------------------------------------------------------------------------
 
 If you'd like to specify the options that you want to have set for the
@@ -263,6 +293,7 @@ define the g:nrrw_topbot_leftright variable to your taste, e.g. >
 Now, all narrowed windows will appear below the original window. If not
 specified, the narrowed window will appear above/left of the original window.
 
+(default: topleft)
 ------------------------------------------------------------------------------
 
 If you want to use several independent narrowed regions of the same buffer
@@ -283,6 +314,7 @@ tries hard to adjust the highlighting and regions as you write your changes
 back into the original buffer, but it can't guarantee that this will work and
 might fail silently. Therefore, this feature is experimental!
 
+(default: y)
 ------------------------------------------------------------------------------
 
 If you are using the |:NRMulti| command and want to have the original window
@@ -295,6 +327,7 @@ Now the cursor in the original window will always update when the position
 changes in the narrowed window (using a |CursorMoved| autocommand).
 Note: that this might slow down scrolling and cursor movement a bit.
 
+(default: 0)
 ------------------------------------------------------------------------------
 If you want the original file to be written, whenever the narrowed window is
 written to the original file, set the variable g:nrrw_rgn_write_on_sync, e.g.
@@ -302,7 +335,7 @@ in your |.vimrc| >
 
     let g:nrrw_rgn_write_on_sync = 1
 <
-
+(default: 0)
 ----------------------------------------------------------------------------
                                                  *NrrwRgn-hook*  *NR-hooks*
 
@@ -391,6 +424,8 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
   thanks!)
 - Execute hooks after the options for the narrowed window have been set
   (issue #29, reported by fmorales, thanks!)
+- <Leader><Space> Toggles the Narrowed Window Size (idea by David Fishburn,
+  thanks!)
 0.32 Mar 27, 2014 {{{1
 - hooks could corrupt the narrowed buffer, if it wasn't closed (reported by
   jszakemeister https://github.com/chrisbra/NrrwRgn/issues/19, thanks!)

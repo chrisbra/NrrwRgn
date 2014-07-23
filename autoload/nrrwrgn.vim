@@ -708,6 +708,28 @@ fun! <sid>SetupBufLocalCommands() "{{{1
 	com! -buffer NRNoSyncOnWrite :call nrrwrgn#ToggleSyncWrite(0)
 endfun
 
+fun! <sid>SetupBufLocalMaps() "{{{1
+	if !hasmapto('<Plug>NrrwrgnWinIncr', 'n')
+		nmap <buffer><unique> <Leader><Space> <Plug>NrrwrgnWinIncr
+	endif
+	if !hasmapto('NrrwRgnIncr')
+		nmap <buffer><unique> <Plug>NrrwrgnWinIncr NrrwRgnIncr
+	endif
+	nnoremap <buffer><silent><script><expr> NrrwRgnIncr <sid>IncrementWindowSize()
+endfun
+
+fun! <sid>IncrementWindowSize() "{{{1
+	let nrrw_rgn_incr = get(g:, 'nrrw_rgn_incr', 10)
+	if s:nrrw_rgn_vert
+		let cmd = printf("%s %d", ':vert resize'
+			\ (winwidth(0) > s:nrrw_rgn_wdth ? s:nrrw_rgn_wdth : (s:nrrw_rgn_wdth + nrrw_rgn_incr)))
+	else
+		let cmd = printf("%s %d", ':resize',
+			\ (winheight(0) > s:nrrw_rgn_wdth ? s:nrrw_rgn_wdth : (s:nrrw_rgn_wdth + nrrw_rgn_incr)))
+	endif
+	return cmd."\<cr>"
+endfun
+
 fun! <sid>ReturnComments() "{{{1
 	let cmt = <sid>ReturnCommentFT()
 	let c_s    = split(cmt)[0]
@@ -780,6 +802,7 @@ fun! nrrwrgn#NrrwRgnDoPrepare(...) "{{{1
 	setl nomod
 	let b:nrrw_instn = s:instn
 	call <sid>SetupBufLocalCommands()
+	call <sid>SetupBufLocalMaps()
 	call <sid>NrrwRgnAuCmd(0)
 	call <sid>SetOptions(local_options)
 	call <sid>CleanRegions()
@@ -861,6 +884,7 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  "{{{1
 	let b:nrrw_instn = s:instn
 	setl nomod
 	call <sid>SetupBufLocalCommands()
+	call <sid>SetupBufLocalMaps()
 	call <sid>NrrwRgnAuCmd(0)
 	call <sid>SetOptions(local_options)
 	if has_key(s:nrrw_aucmd, "create")
