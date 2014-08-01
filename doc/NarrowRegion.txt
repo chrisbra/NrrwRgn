@@ -367,6 +367,10 @@ and before writing the changes back, it'll execute: >
 
     :%UnArrangeCol
 
+Note: These hooks are executed in the narrowed window (i.e. after creating the
+narrowed window and its content and before writing the changes back to the
+original buffer).
+
 2.4 NrrwRgn functions                                    *NrrwRgn-func*
 ---------------------
 The NrrwRgn plugin defines a public function in its namespace that can be used
