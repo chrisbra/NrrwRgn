@@ -45,13 +45,7 @@ fun! <sid>Init() "{{{1
 			let s:instn+=1
 		endw
 	endif
-	let s:nrrw_aucmd = {}
-	if exists("b:nrrw_aucmd_create")
-		let s:nrrw_aucmd["create"] = b:nrrw_aucmd_create
-	endif
-	if exists("b:nrrw_aucmd_close")
-		let s:nrrw_aucmd["close"] = b:nrrw_aucmd_close
-	endif
+	call <sid>SetupHooks()
 	if !exists("s:nrrw_rgn_lines")
 		let s:nrrw_rgn_lines = {}
 	endif
@@ -69,6 +63,21 @@ fun! <sid>Init() "{{{1
 		call s:WarningMsg('NrrwRgn needs Vim > 7.4 or it might not work correctly')
 	endif
 endfun 
+
+fun! <sid>SetupHooks()
+	if !exists("s:nrrw_aucmd")
+		let s:nrrw_aucmd = {}
+	endif
+	if exists("b:nrrw_aucmd_create")
+		let s:nrrw_aucmd["create"] = b:nrrw_aucmd_create
+	endif
+	if exists("b:nrrw_aucmd_close")
+		let s:nrrw_aucmd["close"] = b:nrrw_aucmd_close
+	endif
+	if get(g:, 'nrrw_rgn_write_on_sync', 0)
+		let b:nrrw_aucmd_written = get(b:, 'nrrw_aucmd_written', ''). '|:w'
+	endif
+endfun
 
 fun! <sid>NrrwRgnWin(bang) "{{{1
 	" Create new scratch window
@@ -1088,8 +1097,9 @@ fun! nrrwrgn#WidenRegion(force)  "{{{1
 "	endif
 	call <sid>SaveRestoreRegister(_opts)
 	let  @/=s:o_s
-	if get(g:, 'nrrw_rgn_write_on_sync', 0)
-		write
+	" Execute "written" autocommands in the original buffer
+	if exists("b:nrrw_aucmd_written")
+		exe b:nrrw_aucmd_written
 	endif
 	call winrestview(wsv)
 	if !close && has_key(s:nrrw_rgn_lines[instn], 'single')
