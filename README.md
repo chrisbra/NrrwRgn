@@ -38,6 +38,8 @@ Here is a short overview of the functionality provided by the plugin:
 
 [narrow](http://www.vim.org/scripts/script.php?script_id=2446)
 
+[ViewPort](http://www.vim.org/scripts/script.php?script_id=4296)
+
 ###License & Copyright
 
 © 2009-2014 by Christian Brabandt. The Vim License applies. See `:h license`
