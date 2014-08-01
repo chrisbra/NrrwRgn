@@ -328,14 +328,6 @@ changes in the narrowed window (using a |CursorMoved| autocommand).
 Note: that this might slow down scrolling and cursor movement a bit.
 
 (default: 0)
-------------------------------------------------------------------------------
-If you want the original file to be written, whenever the narrowed window is
-written to the original file, set the variable g:nrrw_rgn_write_on_sync, e.g.
-in your |.vimrc| >
-
-    let g:nrrw_rgn_write_on_sync = 1
-<
-(default: 0)
 ----------------------------------------------------------------------------
                                                  *NrrwRgn-hook*  *NR-hooks*
 
@@ -443,6 +435,8 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
   thanks!)
 - New hook b:nrrw_aucmd_written, to be executed, whenever the narrowed info
   has been written back into the original buffer.
+- g:nrrw_rgn_write_on_sync is being deprecated in favor of using the newly
+  "written" hook
 0.32 Mar 27, 2014 {{{1
 - hooks could corrupt the narrowed buffer, if it wasn't closed (reported by
   jszakemeister https://github.com/chrisbra/NrrwRgn/issues/19, thanks!)
