@@ -32,13 +32,10 @@ Here is a short overview of the functionality provided by the plugin:
     nrrwrgn#NrrwRgnStatus()   - Return a dict with all the status information for the current window
 
 ####Similar Work
-[narrow_region](http://www.vim.org/scripts/script.php?script_id=2038)
-
-[narrow](http://www.vim.org/scripts/script.php?script_id=2097)
-
-[narrow](http://www.vim.org/scripts/script.php?script_id=2446)
-
-[ViewPort](http://www.vim.org/scripts/script.php?script_id=4296)
+[narrow_region](http://www.vim.org/scripts/script.php?script_id=2038)<br/>
+[narrow](http://www.vim.org/scripts/script.php?script_id=2097)<br/>
+[narrow](http://www.vim.org/scripts/script.php?script_id=2446)<br/>
+[ViewPort](http://www.vim.org/scripts/script.php?script_id=4296)<br/>
 
 ###License & Copyright
 
