@@ -777,6 +777,7 @@ fun! nrrwrgn#NrrwRgnDoPrepare(...) "{{{1
 	let s:nrrw_rgn_lines[s:instn].end		= []
 	let s:nrrw_rgn_lines[s:instn].multi     = s:nrrw_rgn_buf
 	let s:nrrw_rgn_lines[s:instn].orig_buf  = orig_buf
+	let s:nrrw_rgn_lines[s:instn].winnr  = winnr()
 	call <sid>DeleteMatches(s:instn)
 
 	let nr=0
