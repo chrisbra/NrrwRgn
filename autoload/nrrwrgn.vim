@@ -1220,7 +1220,7 @@ fun! nrrwrgn#NrrwRgnStatus() "{{{1
 	else
 		let dict={}
 		try
-			let cur = copy(s:nrrw_rgn_lines[b:nrrw_instn])
+			let cur = deepcopy(s:nrrw_rgn_lines[b:nrrw_instn])
 			if has_key(cur, 'multi')
 				let multi = cur.multi
 			else
