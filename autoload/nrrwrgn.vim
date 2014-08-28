@@ -188,6 +188,7 @@ fun! <sid>WriteNrrwRgn(...) "{{{1
 		if bufname('') !~# 'NrrwRgn' && bufwinnr(s:nrrw_winname. '_'. s:instn) > 0
 			exe ':noa'. bufwinnr(s:nrrw_winname. '_'. s:instn). 'wincmd w'
 		endif
+		" prevent E315
 		call winrestview(_wsv)
 	else
 		call <sid>StoreLastNrrwRgn(nrrw_instn)
@@ -1111,9 +1112,13 @@ fun! nrrwrgn#WidenRegion(force)  "{{{1
 	elseif close
 		call <sid>CleanUpInstn(instn)
 	endif
+	let bufnr = bufnr('')
 	" jump back to narrowed window
 	call <sid>JumpToBufinTab(orig_tab, nrw_buf)
-	setl nomod
+	if bufnr('') != bufnr
+		" do not set the original buffer unmodified
+		setl nomod
+	endif
 	if a:force
 		" trigger auto command
 		bw
