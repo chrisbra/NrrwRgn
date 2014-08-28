@@ -182,11 +182,13 @@ fun! <sid>WriteNrrwRgn(...) "{{{1
 	endif
 	if &l:mod && exists("a:1") && a:1
 		" Write the buffer back to the original buffer
+		let _wsv = winsaveview()
 		setl nomod
 		exe ":WidenRegion"
 		if bufname('') !~# 'NrrwRgn' && bufwinnr(s:nrrw_winname. '_'. s:instn) > 0
 			exe ':noa'. bufwinnr(s:nrrw_winname. '_'. s:instn). 'wincmd w'
 		endif
+		call winrestview(_wsv)
 	else
 		call <sid>StoreLastNrrwRgn(nrrw_instn)
 		" b:orig_buf might not exists (see issue #2)
