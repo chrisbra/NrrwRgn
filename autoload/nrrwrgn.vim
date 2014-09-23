@@ -133,7 +133,6 @@ endfun
 
 fun! <sid>CleanRegions() "{{{1
 	 let s:nrrw_rgn_line=[]
-	 unlet! s:nrrw_rgn_last
 	 unlet! s:nrrw_rgn_buf
 endfun
 
@@ -912,11 +911,6 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  "{{{1
 	let &lz   = o_lz
 endfun
 fun! nrrwrgn#Prepare() "{{{1
-	let ltime = localtime()
-	if  (!exists("s:nrrw_rgn_last") || s:nrrw_rgn_last + 10 < ltime)
-		let s:nrrw_rgn_last = ltime
-		let s:nrrw_rgn_line = []
-	endif
 	if !exists("s:nrrw_rgn_line") | let s:nrrw_rgn_line=[] | endif
 	call add(s:nrrw_rgn_line, line('.'))
 endfun
