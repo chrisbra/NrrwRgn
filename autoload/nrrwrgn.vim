@@ -723,7 +723,7 @@ endfun
 
 fun! <sid>SetupBufLocalMaps() "{{{1
 	if !hasmapto('<Plug>NrrwrgnWinIncr', 'n')
-		nmap <buffer><unique> <Leader><Space> <Plug>NrrwrgnWinIncr
+		nmap <buffer> <Leader><Space> <Plug>NrrwrgnWinIncr
 	endif
 	if !hasmapto('NrrwRgnIncr')
 		nmap <buffer><unique> <Plug>NrrwrgnWinIncr NrrwRgnIncr
@@ -734,7 +734,7 @@ endfun
 fun! <sid>IncrementWindowSize() "{{{1
 	let nrrw_rgn_incr = get(g:, 'nrrw_rgn_incr', 10)
 	if s:nrrw_rgn_vert
-		let cmd = printf("%s %d", ':vert resize'
+		let cmd = printf("%s %d", ':vert resize',
 			\ (winwidth(0) > s:nrrw_rgn_wdth ? s:nrrw_rgn_wdth : (s:nrrw_rgn_wdth + nrrw_rgn_incr)))
 	else
 		let cmd = printf("%s %d", ':resize',
