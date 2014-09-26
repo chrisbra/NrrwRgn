@@ -912,8 +912,10 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  "{{{1
 	" restore settings
 	let &lz   = o_lz
 endfun
-fun! nrrwrgn#Prepare() "{{{1
-	if !exists("s:nrrw_rgn_line") | let s:nrrw_rgn_line=[] | endif
+fun! nrrwrgn#Prepare(bang) "{{{1
+	if !exists("s:nrrw_rgn_line") || !empty(a:bang)
+		let s:nrrw_rgn_line=[] 
+	endif
 	call add(s:nrrw_rgn_line, line('.'))
 endfun
 
