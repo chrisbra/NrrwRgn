@@ -226,7 +226,7 @@ fun! <sid>SaveRestoreRegister(values) "{{{1
 		call setpos("'<", a:values[2][0])
 		call setpos("'>", a:values[2][1])
 	endif
-endfun!
+endfun
 
 fun! <sid>UpdateOrigWin() abort
 	" Tries to keep the original windo in the same viewport, that

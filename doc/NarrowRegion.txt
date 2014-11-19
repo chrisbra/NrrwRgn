@@ -441,6 +441,8 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 - error when calling Incr Function, Make it override over global mapping.
   (issue #31, reported by zc he https://github.com/chrisbra/NrrwRgn/issues/31, thanks!)
 - |:NRP| didn't work as documented (reported by David Fishburn, thanks!)
+- fix small syntax error in autoload file (issue #32, reported by itchyny
+  (https://github.com/chrisbra/NrrwRgn/issues/32, thanks!)
 
 0.32 Mar 27, 2014 {{{1
 - hooks could corrupt the narrowed buffer, if it wasn't closed (reported by
