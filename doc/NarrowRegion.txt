@@ -443,6 +443,8 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 - |:NRP| didn't work as documented (reported by David Fishburn, thanks!)
 - fix small syntax error in autoload file (issue #32, reported by itchyny
   (https://github.com/chrisbra/NrrwRgn/issues/32, thanks!)
+- check, that dict key is available before accessing it (issue #33, reported by SirCorion
+  (https://github.com/chrisbra/NrrwRgn/issues/33, thanks!)
 
 0.32 Mar 27, 2014 {{{1
 - hooks could corrupt the narrowed buffer, if it wasn't closed (reported by

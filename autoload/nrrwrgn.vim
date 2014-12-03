@@ -319,23 +319,14 @@ fun! <sid>NrrwRgnAuCmd(instn) "{{{1
 			echo printf("bufnr: %d a:instn: %d\n", bufnr(''), a:instn)
 			echo "bwipe " s:nrrw_winname. '_'. a:instn
 		endif
-		if (has_key(s:nrrw_rgn_lines[a:instn], 'disable') &&
+		if ((has_key(s:nrrw_rgn_lines[a:instn], 'disable') &&
 		\	!s:nrrw_rgn_lines[a:instn].disable ) ||
-		\   !has_key(s:nrrw_rgn_lines[a:instn], 'disable')
+		\   !has_key(s:nrrw_rgn_lines[a:instn], 'disable') &&
+		\    has_key(s:nrrw_rgn_lines[a:instn], 'winnr'))
 			" Skip to original window and remove highlighting
 			exe "noa" s:nrrw_rgn_lines[a:instn].winnr "wincmd w"
 			call <sid>DeleteMatches(a:instn)
 			noa wincmd p
-			" bwipe! throws E855 (catching does not work)
-			" but because of 'bufhidden' wipeing will happen anyways
-			"exe "bwipe! " bufnr(s:nrrw_winname. '_'. a:instn)
-"			if has_key(s:nrrw_rgn_lines[a:instn], 'single') &&
-"			\  s:nrrw_rgn_lines[a:instn].single
-				" If there is only a single window open don't clean up now
-				" because we can't put the narrowed lines back, so do not
-				" clean up now. We need to clean up then later. But how?
-"				return
-"			endif
 			call <sid>CleanUpInstn(a:instn)
 		endif
 	endif
