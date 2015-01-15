@@ -5,9 +5,9 @@ plugin/NrrwRgn.vim	[[[1
 91
 " NrrwRgn.vim - Narrow Region plugin for Vim
 " -------------------------------------------------------------
-" Version:	   0.32
+" Version:	   0.33
 " Maintainer:  Christian Brabandt <cb@256bit.org>
-" Last Change: Thu, 27 Mar 2014 23:16:27 +0100
+" Last Change: Thu, 15 Jan 2015 20:52:29 +0100
 "
 " Script: http://www.vim.org/scripts/script.php?script_id=3075
 " Copyright:   (c) 2009, 2010 by Christian Brabandt
@@ -16,7 +16,7 @@ plugin/NrrwRgn.vim	[[[1
 "			   instead of "Vim".
 "			   No warranty, express or implied.
 "	 *** ***   Use At-Your-Own-Risk!   *** ***
-" GetLatestVimScripts: 3075 32 :AutoInstall: NrrwRgn.vim
+" GetLatestVimScripts: 3075 33 :AutoInstall: NrrwRgn.vim
 "
 " Init: {{{1
 let s:cpo= &cpo
@@ -98,9 +98,9 @@ autoload/nrrwrgn.vim	[[[1
 1291
 " nrrwrgn.vim - Narrow Region plugin for Vim
 " -------------------------------------------------------------
-" Version:	   0.32
+" Version:	   0.33
 " Maintainer:  Christian Brabandt <cb@256bit.org>
-" Last Change: Thu, 27 Mar 2014 23:16:27 +0100
+" Last Change: Thu, 15 Jan 2015 20:52:29 +0100
 " Script: http://www.vim.org/scripts/script.php?script_id=3075 
 " Copyright:   (c) 2009-2013 by Christian Brabandt
 "			   The VIM LICENSE applies to NrrwRgn.vim 
@@ -108,7 +108,7 @@ autoload/nrrwrgn.vim	[[[1
 "			   instead of "Vim".
 "			   No warranty, express or implied.
 "	 *** ***   Use At-Your-Own-Risk!   *** ***
-" GetLatestVimScripts: 3075 32 :AutoInstall: NrrwRgn.vim
+" GetLatestVimScripts: 3075 33 :AutoInstall: NrrwRgn.vim
 "
 " Functions:
 
@@ -1392,7 +1392,7 @@ doc/NarrowRegion.txt	[[[1
 *NrrwRgn.txt*   A Narrow Region Plugin (similar to Emacs)
 
 Author:  Christian Brabandt <cb@256bit.org>
-Version: 0.32 Thu, 27 Mar 2014 23:16:27 +0100
+Version: 0.33 Thu, 15 Jan 2015 20:52:29 +0100
 Copyright: (c) 2009-2014 by Christian Brabandt
            The VIM LICENSE applies to NrrwRgnPlugin.vim and NrrwRgnPlugin.txt
            (see |copyright|) except use NrrwRgnPlugin instead of "Vim".
@@ -1807,7 +1807,7 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 =============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
 
-0.33 (unreleased) {{{1
+0.33: Jan 16, 2015 {{{1
 - set local options later, so that FileType autocommands don't trigger to
   early
 - make sure, shortening the buffer name handles multibyte characters
