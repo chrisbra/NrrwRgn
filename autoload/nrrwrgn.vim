@@ -4,7 +4,7 @@
 " Maintainer:  Christian Brabandt <cb@256bit.org>
 " Last Change: Thu, 15 Jan 2015 20:52:29 +0100
 " Script: http://www.vim.org/scripts/script.php?script_id=3075 
-" Copyright:   (c) 2009-2013 by Christian Brabandt
+" Copyright:   (c) 2009-2015 by Christian Brabandt
 "			   The VIM LICENSE applies to NrrwRgn.vim 
 "			   (see |copyright|) except use "NrrwRgn.vim" 
 "			   instead of "Vim".

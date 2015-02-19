@@ -95,7 +95,7 @@ let &cpo=s:cpo
 unlet s:cpo
 " vim: ts=4 sts=4 fdm=marker com+=l\:\"
 autoload/nrrwrgn.vim	[[[1
-1291
+1295
 " nrrwrgn.vim - Narrow Region plugin for Vim
 " -------------------------------------------------------------
 " Version:	   0.33
@@ -984,6 +984,10 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  "{{{1
 	let b:orig_buf = orig_buf
 	let s:nrrw_rgn_lines[s:instn].orig_buf  = orig_buf
 	call setline(1, a)
+	if !s:nrrw_rgn_vert && len(a) < s:nrrw_rgn_wdth
+		" Resize narrowed window to size of buffer
+		exe "sil resize" len(a)+1
+	endif
 	let b:nrrw_instn = s:instn
 	setl nomod
 	call <sid>SetupBufLocalCommands()
@@ -1388,7 +1392,7 @@ endfun
 " Modeline {{{1
 " vim: ts=4 sts=4 fdm=marker com+=l\:\" fdl=0
 doc/NarrowRegion.txt	[[[1
-688
+692
 *NrrwRgn.txt*   A Narrow Region Plugin (similar to Emacs)
 
 Author:  Christian Brabandt <cb@256bit.org>
@@ -1807,6 +1811,10 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 =============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
 
+0.34: (unreleased) {{{1
+- merge Github Pull #34 (https://github.com/chrisbra/NrrwRgn/pull/34, by
+  Pyrohh, thanks!)
+
 0.33: Jan 16, 2015 {{{1
 - set local options later, so that FileType autocommands don't trigger to
   early
@@ -1837,7 +1845,7 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 - check, that dict key is available before accessing it (issue #33, reported by SirCorion
   (https://github.com/chrisbra/NrrwRgn/issues/33, thanks!)
 
-0.32 Mar 27, 2014 {{{1
+0.32: Mar 27, 2014 {{{1
 - hooks could corrupt the narrowed buffer, if it wasn't closed (reported by
   jszakemeister https://github.com/chrisbra/NrrwRgn/issues/19, thanks!)
 - Don't parse $VIMRUNTIME/doc/options.txt for finding out buffer-local options

@@ -2,7 +2,7 @@
 
 Author:  Christian Brabandt <cb@256bit.org>
 Version: 0.33 Thu, 15 Jan 2015 20:52:29 +0100
-Copyright: (c) 2009-2014 by Christian Brabandt
+Copyright: (c) 2009-2015 by Christian Brabandt
            The VIM LICENSE applies to NrrwRgnPlugin.vim and NrrwRgnPlugin.txt
            (see |copyright|) except use NrrwRgnPlugin instead of "Vim".
            NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
