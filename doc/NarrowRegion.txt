@@ -217,6 +217,8 @@ height or the nr of columns, if you have also set g:nrrw_rgn_vert. >
     let g:nrrw_rgn_wdth = 30
 <
 (default: 20)
+Note: if the newly created narrowed window is smaller than this, it will be
+resized to fit, to not leave unwanted space around.
 ------------------------------------------------------------------------------
 
 It is possible to specify an increment value, by which the narrowed window can
@@ -416,6 +418,12 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 =============================================================================
 4. NrrwRgn History                                          *NrrwRgn-history*
 
+0.34: (unreleased) {{{1
+- merge Github Pull #34 (https://github.com/chrisbra/NrrwRgn/pull/34, by
+  Pyrohh, thanks!)
+- resize narrowed window to actual size, this won't leave the a lot of 
+  empty lines in the narrowed window.
+
 0.33: Jan 16, 2015 {{{1
 - set local options later, so that FileType autocommands don't trigger to
   early
@@ -446,7 +454,7 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 - check, that dict key is available before accessing it (issue #33, reported by SirCorion
   (https://github.com/chrisbra/NrrwRgn/issues/33, thanks!)
 
-0.32 Mar 27, 2014 {{{1
+0.32: Mar 27, 2014 {{{1
 - hooks could corrupt the narrowed buffer, if it wasn't closed (reported by
   jszakemeister https://github.com/chrisbra/NrrwRgn/issues/19, thanks!)
 - Don't parse $VIMRUNTIME/doc/options.txt for finding out buffer-local options
