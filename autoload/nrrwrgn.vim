@@ -915,7 +915,7 @@ fun! nrrwrgn#Prepare(bang) "{{{1
 endfun
 
 fun! nrrwrgn#WidenRegion(force)  "{{{1
-	" a:close: original narrowed window is going to be closed
+	" a:force: original narrowed window is going to be closed
 	" so, clean up, don't renew highlighting, etc.
 	let nrw_buf  = bufnr('')
 	let orig_buf = b:orig_buf
@@ -1007,8 +1007,7 @@ fun! nrrwrgn#WidenRegion(force)  "{{{1
 			\ s:nrrw_rgn_lines[instn].end[1] -
 			\ s:nrrw_rgn_lines[instn].start[1] + 1 == len(cont)
 		   " in characterwise selection, remove trailing \n
-		   call setreg('a', substitute(@a, '\n$', '', ''), 
-			\ s:nrrw_rgn_lines[instn].vmode)
+		   call setreg('a', substitute(@a, '\n$', '', ''), 'v')
 		endif
 		" settable '< and '> marks
 		let _v = []
@@ -1049,8 +1048,6 @@ fun! nrrwrgn#WidenRegion(force)  "{{{1
 				\ s:nrrw_rgn_lines[instn].end[1:2],
 				\ s:nrrw_rgn_lines[instn].vmode),
 				\ instn)
-		else
-			noa b #
 		endif
 	" 3) :NR started selection
 	else 

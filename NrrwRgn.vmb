@@ -2,15 +2,14 @@
 UseVimball
 finish
 plugin/NrrwRgn.vim	[[[1
-91
+90
 " NrrwRgn.vim - Narrow Region plugin for Vim
 " -------------------------------------------------------------
 " Version:	   0.33
 " Maintainer:  Christian Brabandt <cb@256bit.org>
 " Last Change: Thu, 15 Jan 2015 20:52:29 +0100
-"
 " Script: http://www.vim.org/scripts/script.php?script_id=3075
-" Copyright:   (c) 2009, 2010 by Christian Brabandt
+" Copyright:   (c) 2009-2015 by Christian Brabandt
 "			   The VIM LICENSE applies to histwin.vim
 "			   (see |copyright|) except use "NrrwRgn.vim"
 "			   instead of "Vim".
@@ -95,14 +94,14 @@ let &cpo=s:cpo
 unlet s:cpo
 " vim: ts=4 sts=4 fdm=marker com+=l\:\"
 autoload/nrrwrgn.vim	[[[1
-1295
+1292
 " nrrwrgn.vim - Narrow Region plugin for Vim
 " -------------------------------------------------------------
 " Version:	   0.33
 " Maintainer:  Christian Brabandt <cb@256bit.org>
 " Last Change: Thu, 15 Jan 2015 20:52:29 +0100
 " Script: http://www.vim.org/scripts/script.php?script_id=3075 
-" Copyright:   (c) 2009-2013 by Christian Brabandt
+" Copyright:   (c) 2009-2015 by Christian Brabandt
 "			   The VIM LICENSE applies to NrrwRgn.vim 
 "			   (see |copyright|) except use "NrrwRgn.vim" 
 "			   instead of "Vim".
@@ -1013,7 +1012,7 @@ fun! nrrwrgn#Prepare(bang) "{{{1
 endfun
 
 fun! nrrwrgn#WidenRegion(force)  "{{{1
-	" a:close: original narrowed window is going to be closed
+	" a:force: original narrowed window is going to be closed
 	" so, clean up, don't renew highlighting, etc.
 	let nrw_buf  = bufnr('')
 	let orig_buf = b:orig_buf
@@ -1105,8 +1104,7 @@ fun! nrrwrgn#WidenRegion(force)  "{{{1
 			\ s:nrrw_rgn_lines[instn].end[1] -
 			\ s:nrrw_rgn_lines[instn].start[1] + 1 == len(cont)
 		   " in characterwise selection, remove trailing \n
-		   call setreg('a', substitute(@a, '\n$', '', ''), 
-			\ s:nrrw_rgn_lines[instn].vmode)
+		   call setreg('a', substitute(@a, '\n$', '', ''), 'v')
 		endif
 		" settable '< and '> marks
 		let _v = []
@@ -1147,8 +1145,6 @@ fun! nrrwrgn#WidenRegion(force)  "{{{1
 				\ s:nrrw_rgn_lines[instn].end[1:2],
 				\ s:nrrw_rgn_lines[instn].vmode),
 				\ instn)
-		else
-			noa b #
 		endif
 	" 3) :NR started selection
 	else 
@@ -1392,12 +1388,12 @@ endfun
 " Modeline {{{1
 " vim: ts=4 sts=4 fdm=marker com+=l\:\" fdl=0
 doc/NarrowRegion.txt	[[[1
-692
+699
 *NrrwRgn.txt*   A Narrow Region Plugin (similar to Emacs)
 
 Author:  Christian Brabandt <cb@256bit.org>
 Version: 0.33 Thu, 15 Jan 2015 20:52:29 +0100
-Copyright: (c) 2009-2014 by Christian Brabandt
+Copyright: (c) 2009-2015 by Christian Brabandt
            The VIM LICENSE applies to NrrwRgnPlugin.vim and NrrwRgnPlugin.txt
            (see |copyright|) except use NrrwRgnPlugin instead of "Vim".
            NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
@@ -1612,6 +1608,8 @@ height or the nr of columns, if you have also set g:nrrw_rgn_vert. >
     let g:nrrw_rgn_wdth = 30
 <
 (default: 20)
+Note: if the newly created narrowed window is smaller than this, it will be
+resized to fit, to not leave unwanted space around.
 ------------------------------------------------------------------------------
 
 It is possible to specify an increment value, by which the narrowed window can
@@ -1814,6 +1812,11 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 0.34: (unreleased) {{{1
 - merge Github Pull #34 (https://github.com/chrisbra/NrrwRgn/pull/34, by
   Pyrohh, thanks!)
+- resize narrowed window to actual size, this won't leave the a lot of 
+  empty lines in the narrowed window.
+- don't switch erroneously to the narrowed window on writing (issue #35
+  https://github.com/chrisbra/NrrwRgn/issues/34, reported by Yclept Nemo
+  thanks!)
 
 0.33: Jan 16, 2015 {{{1
 - set local options later, so that FileType autocommands don't trigger to
