@@ -181,7 +181,7 @@ fun! <sid>WriteNrrwRgn(...) "{{{1
 		call s:WarningMsg("Original buffer does no longer exist! Aborting!")
 		return
 	endif
-	if &l:mod && exists("a:1") && a:1
+	if exists("a:1") && a:1
 		" Write the buffer back to the original buffer
 		let _wsv = winsaveview()
 		setl nomod

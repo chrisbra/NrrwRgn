@@ -426,6 +426,9 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 - don't switch erroneously to the narrowed window on writing (issue #35
   https://github.com/chrisbra/NrrwRgn/issues/34, reported by Yclept Nemo
   thanks!)
+- Always write the narrowed scratch window back on |:w| instead of only when
+  it was modified (https://github.com/chrisbra/NrrwRgn/issues/37, reported by
+  Konfekt, thanks!)
 
 0.33: Jan 16, 2015 {{{1
 - set local options later, so that FileType autocommands don't trigger to

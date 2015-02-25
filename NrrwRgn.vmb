@@ -10,7 +10,7 @@ plugin/NrrwRgn.vim	[[[1
 " Last Change: Thu, 15 Jan 2015 20:52:29 +0100
 " Script: http://www.vim.org/scripts/script.php?script_id=3075
 " Copyright:   (c) 2009-2015 by Christian Brabandt
-"			   The VIM LICENSE applies to histwin.vim
+"			   The VIM LICENSE applies to NrrwRgn.vim
 "			   (see |copyright|) except use "NrrwRgn.vim"
 "			   instead of "Vim".
 "			   No warranty, express or implied.
@@ -278,7 +278,7 @@ fun! <sid>WriteNrrwRgn(...) "{{{1
 		call s:WarningMsg("Original buffer does no longer exist! Aborting!")
 		return
 	endif
-	if &l:mod && exists("a:1") && a:1
+	if exists("a:1") && a:1
 		" Write the buffer back to the original buffer
 		let _wsv = winsaveview()
 		setl nomod
@@ -1388,7 +1388,7 @@ endfun
 " Modeline {{{1
 " vim: ts=4 sts=4 fdm=marker com+=l\:\" fdl=0
 doc/NarrowRegion.txt	[[[1
-699
+702
 *NrrwRgn.txt*   A Narrow Region Plugin (similar to Emacs)
 
 Author:  Christian Brabandt <cb@256bit.org>
@@ -1817,6 +1817,9 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 - don't switch erroneously to the narrowed window on writing (issue #35
   https://github.com/chrisbra/NrrwRgn/issues/34, reported by Yclept Nemo
   thanks!)
+- Always write the narrowed scratch window back on |:w| instead of only when
+  it was modified (https://github.com/chrisbra/NrrwRgn/issues/37, reported by
+  Konfekt, thanks!)
 
 0.33: Jan 16, 2015 {{{1
 - set local options later, so that FileType autocommands don't trigger to
