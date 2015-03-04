@@ -220,8 +220,7 @@ fun! <sid>SaveRestoreRegister(values) "{{{1
 		" Restore
 		call call('setreg', a:values[0])
 		if a:values[1][0]
-			setl foldenable
-			let &l:fdm=a:values[1][1]
+			let [&l:fen, &l:fdm]=a:values[1]
 		endif
 		call setpos("'<", a:values[2][0])
 		call setpos("'>", a:values[2][1])
@@ -508,8 +507,8 @@ endfun
 fun! <sid>HasMatchID(instn) "{{{1
 	if exists("s:nrrw_rgn_lines[a:instn].matchid")
 		let id = s:nrrw_rgn_lines[a:instn].matchid
-		for match in getmatches()
-			if match(id, match.id) > -1
+		for val in getmatches()
+			if match(id, val.id) > -1
 				return 1
 			endif
 		endfor
@@ -549,25 +548,7 @@ fun! <sid>HideNrrwRgnLines() "{{{1
 endfun
 
 fun! <sid>ReturnCommentFT() "{{{1
-	" Vim
-	if &l:ft=="vim"
-		return '"'
-	" Perl, PHP, Ruby, Python, Sh
-	elseif &l:ft=~'^\(perl\|php\|ruby\|python\|sh\)$'
-	    return '#'
-	" C, C++
-	elseif &l:ft=~'^\(c\%(pp\)\?\|java\)'
-		return '/* */'
-	" HTML, XML
-	elseif &l:ft=~'^\(ht\|x\)ml\?$'
-		return '<!-- -->'
-	" LaTex
-	elseif &l:ft=~'^\(la\)tex'
-		return '%'
-	else
-		" Fallback
-		return '#'
-	endif
+	return substitute(&l:commentstring, '%s', ' ', '')
 endfun
 
 fun! <sid>WidenRegionMulti(content, instn) "{{{1
@@ -688,7 +669,6 @@ fun! <sid>RecalculateLineNumbers(instn, adjust) "{{{1
 				\'V'), instn)
 		endif
 	endfor
-
 endfun
 
 fun! <sid>NrrwSettings(on) "{{{1
@@ -736,8 +716,8 @@ endfun
 
 fun! <sid>ReturnComments() "{{{1
 	let cmt = <sid>ReturnCommentFT()
-	let c_s    = split(cmt)[0]
-	let c_e    = (len(split(cmt)) == 1 ? "" : " ". split(cmt)[1])
+	let c_s = split(cmt)[0]
+	let c_e = (len(split(cmt)) == 1 ? "" : " ". split(cmt)[1])
 	return [c_s, c_e]
 endfun
 
@@ -780,7 +760,6 @@ fun! nrrwrgn#NrrwRgnDoPrepare(...) "{{{1
 
 	let keys = keys(s:nrrw_rgn_buf)
 	call sort(keys, (s:numeric_sort ? 'n' : "<sid>CompareNumbers"))
-	"for [ nr,lines] in items(s:nrrw_rgn_buf)
 	let [c_s, c_e] =  <sid>ReturnComments()
 	for nr in keys
 		let lines = s:nrrw_rgn_buf[nr]
