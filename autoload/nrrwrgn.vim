@@ -886,7 +886,7 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  "{{{1
 	let b:orig_buf = orig_buf
 	let s:nrrw_rgn_lines[s:instn].orig_buf  = orig_buf
 	call setline(1, a)
-	if !s:nrrw_rgn_vert && len(a) < s:nrrw_rgn_wdth
+	if !bang && !s:nrrw_rgn_vert && len(a) < s:nrrw_rgn_wdth
 		" Resize narrowed window to size of buffer
 		exe "sil resize" len(a)+1
 	endif
