@@ -267,7 +267,7 @@ Example, to increase the narrowed window by 30 lines or columns if
 
     let g:nrrw_rgn_incr = 30
 <
-(default: 10, if g:nrrw_rgn_resize is "absolute")
+(default: 10, if g:nrrw_rgn_resize_window is "absolute")
 
 Note: When using the '!' attribute for narrowing (e.g. the selection will be
 opened in a new window that takes the complete screen size), no resizeing will
