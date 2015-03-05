@@ -222,17 +222,56 @@ resized to fit, to not leave unwanted space around (not for single narrowed
 windows, e.g. when the '!' attribute was used).
 ------------------------------------------------------------------------------
 
+Resizing the narrowed window can happen either by some absolute values or by a
+relative percentage. The variable g:nrrw_rgn_resize_window determines what
+kind of resize will occur. If it is set to "absolute", the resizing will be
+done by absolute lines or columns (depending on whether a horizontal or
+vertical split has been done). If it is set to "relative" the window will be
+resized by a percentage.  Set it like this in your |.vimrc| >
+
+    let g:nrrw_rgn_resize_window = 'absolute'
+<
+(default: absolute)
+
+The percentages for increasing the window size can further be specified by
+seting the following variables:
+
+For horizontal splits set the g:nrrw_rgn_h_rel_min and g:nrrw_rgn_h_rel_max
+For vertical splits, the variables g:nrrw_rgn_w_rel_min and
+g:nrrw_rgn_w_rel_max specify the percentage by which to increase the window.
+
+(
+default:
+g:nrrw_rgn_h_rel_min: 10
+g:nrrw_rgn_h_rel_max: 80
+g:nrrw_rgn_w_rel_min: 50
+g:nrrw_rgn_w_rel_max: 80
+)
+
+------------------------------------------------------------------------------
+
 It is possible to specify an increment value, by which the narrowed window can
 be increased. This is allows to easily toggle between the normal narrowed
 window size and an even increased size (think of zooming). 
 
-By default, the narrowed window will be increased by 10 lines or columns if
-(g:nrrw_rgn_vert is also set [see above]). To change it, set in your
-|.vimrc| >
+You can either specify a relative or absolute zooming value. An absolute
+resize will happen, if the variable g:nrrw_rgn_resize_window is set to
+"absolute" or it is unset (see above).
+
+If absolute resizing should happen you have to either specify columns, if the
+Narrowed window is a vertical split window or lines, if a horizontal split has
+been done.
+
+Example, to increase the narrowed window by 30 lines or columns if
+(g:nrrw_rgn_vert is also set [see above]), set in your |.vimrc| >
 
     let g:nrrw_rgn_incr = 30
 <
-(default: 10)
+(default: 10, if g:nrrw_rgn_resize is "absolute")
+
+Note: When using the '!' attribute for narrowing (e.g. the selection will be
+opened in a new window that takes the complete screen size), no resizeing will
+happen
 ------------------------------------------------------------------------------
 
 If you'd like to change the key combination that toggles incrementing the
@@ -244,6 +283,14 @@ Narrowed Window size, you can put this in your |.vimrc| >
 
 This will let you use the <F3> key to toggle the window size of the Narrowed
 Window. Note: This mapping is only in the narrowed window active.
+
+The amount of how much to increase can be further refined by setting the
+g:nrrw_rgn_incr for an absolute increase of by setting the variables
+g:nrrw_rgn_h_rel_min, g:nrrw_rgn_h_rel_max, g:nrrw_rgn_w_rel_min and
+g:nrrw_rgn_w_rel_max (see above)
+
+Whether an absolute or relative increase will be performed, is determined by
+the g:nrrw_rgn_resize_window variable (see above).
 ------------------------------------------------------------------------------
 
 By default, NarrowRegion highlights the region that has been selected

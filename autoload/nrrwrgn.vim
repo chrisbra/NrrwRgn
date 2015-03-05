@@ -699,19 +699,89 @@ fun! <sid>SetupBufLocalMaps() "{{{1
 	if !hasmapto('NrrwRgnIncr')
 		nmap <buffer><unique> <Plug>NrrwrgnWinIncr NrrwRgnIncr
 	endif
-	nnoremap <buffer><silent><script><expr> NrrwRgnIncr <sid>IncrementWindowSize()
+	nnoremap <buffer><silent><script><expr> NrrwRgnIncr <sid>ToggleWindowSize()
 endfun
 
-fun! <sid>IncrementWindowSize() "{{{1
-	let nrrw_rgn_incr = get(g:, 'nrrw_rgn_incr', 10)
-	if s:nrrw_rgn_vert
-		let cmd = printf("%s %d", ':vert resize',
-			\ (winwidth(0) > s:nrrw_rgn_wdth ? s:nrrw_rgn_wdth : (s:nrrw_rgn_wdth + nrrw_rgn_incr)))
-	else
-		let cmd = printf("%s %d", ':resize',
-			\ (winheight(0) > s:nrrw_rgn_wdth ? s:nrrw_rgn_wdth : (s:nrrw_rgn_wdth + nrrw_rgn_incr)))
+fun! <sid>IsAbsPos(pos) "{{{1
+    return a:pos =~ 'to\%[pleft]\|bo\%[tright]'
+endfu
+
+fun! <sid>GetVSizes(win,lines) abort "{{{1
+    if <sid>IsAbsPos(get(g:, 'nrrw_topbot_leftright', ''))
+        let lines_parent = &lines
+    else
+        let lines_parent = winheight(a:win)
 	endif
-	return cmd."\<cr>"
+	let size_min = get(g:, 'nrrw_rgn_size_min', 10)
+	let size_max = get(g:, 'nrrw_rgn_size_max', lines_parent)
+	if has("float")
+		let ratio = 1.0*a:lines/lines_parent
+		if ratio < size_min/100.0
+			let ratio = size_min
+		elseif ratio > size_max/100.0
+			let ratio = size_max
+		endif
+		let h_rel_max = get(g:, 'nrrw_rgn_h_rel_max', 80)
+		let size_max = min([lines_parent, float2nr(ceil(h_rel_max/100.0*lines_parent))])
+		let size_min = min([lines_parent, float2nr(ceil(ratio*lines_parent))])
+	else
+		" If Vim is compiled without float?
+		" Currently: no-op
+		return [lines_parent, lines_parent]
+	endif
+    return [size_min, size_max]
+endfu
+
+fun! <sid>GetHSizes(win) abort "{{{1
+    if <sid>IsAbsPos(get(g:, 'nrrw_topbot_leftright', ''))
+        let columns_parent = &columns
+    else
+        let columns_parent = winwidth(a:win)
+	endif
+	let w_rel_max = get(g:, 'nrrw_rgn_w_rel_max', 80)
+	let w_rel_min = get(g:, 'nrrw_rgn_w_rel_min', 50)
+	if has("float")
+		let size_max = min([columns_parent, float2nr(ceil(w_rel_max/100.0*columns_parent))])
+		let size_min = min([columns_parent, float2nr(ceil(w_rel_min/100.0*columns_parent))])
+	else
+		" If Vim is compiled without float?
+		" Currently: no-op
+		return [columns_parent, columns_parent]
+	endif
+    return [size_min, size_max]
+endfu
+
+fun! <sid>GetSizes(current_win, lines) abort "{{{1
+	return (s:nrrw_rgn_vert ? <sid>GetHSizes(a:current_win) : <sid>GetVSizes(a:current_win, a:lines))
+endfu
+
+fun! <sid>ResizeWindow(size) "{{{1
+	let prefix = (s:nrrw_rgn_vert ? ':vert ': ''). ':resize'
+	let cmd = printf("%s %d", prefix, a:size)
+	return cmd
+endfu
+
+fun! <sid>ToggleWindowSize() "{{{1
+	" Should only be called from the narrowed window!
+	if has_key(s:nrrw_rgn_lines[b:nrrw_instn], 'single') && s:nrrw_rgn_lines[b:nrrw_instn].single
+		call <sid>WarningMsg("Resizing window for single windows not supported!")
+		return ''
+	endif
+    let [size_min, size_max] = <sid>GetSizes(winnr(), line('$'))
+	let size_cur = (s:nrrw_rgn_vert ? winwidth(0) : winheight(0))
+    " window size or contents have changed
+	let size_new = (size_cur == size_min ? size_max : size_min)
+	" g:nrrw_rgn_incr has priority over the relative sizs
+	if get(g:, 'nrrw_rgn_resize_window', 'absolute') is? 'absolute'
+		let nrrw_rgn_incr = get(g:, 'nrrw_rgn_incr', 10)
+	elseif get(g:, 'nrrw_rgn_resize_window', 'absolute') is? 'relative'
+		let nrrw_rgn_incr = get(g:, 'nrrw_rgn_incr', 10)
+	else
+		call <sid>WarningMsg("g:nrrw_rgn_resize_window can only be one of [relative|absolute]!")
+		return ''
+	endif
+	let nrrw_rgn_incr = get(g:, 'nrrw_rgn_incr', size_new)
+	return <sid>ResizeWindow(nrrw_rgn_incr)."\n"
 endfun
 
 fun! <sid>ReturnComments() "{{{1
@@ -721,6 +791,18 @@ fun! <sid>ReturnComments() "{{{1
 	return [c_s, c_e]
 endfun
 
+fun! <sid>AdjustWindowSize(bang) "{{{1
+	" Resize window
+	if !a:bang && !s:nrrw_rgn_vert
+		if get(g:, 'nrrw_rgn_resize_window', 'absolute') is? "absolute" && len(a) < s:nrrw_rgn_wdth
+			" Resize narrowed window to size of buffer
+			exe "sil resize" len(a)+1
+		elseif get(g:, 'nrrw_rgn_resize_window', 'absolute') is? "relative" 
+			" size narrowed window by percentage
+			exe <sid>ResizeWindow(<sid>GetSizes(winnr(), line('$'))[0])
+		endif
+	endif
+endfu
 fun! nrrwrgn#NrrwRgnDoPrepare(...) "{{{1
 	let bang = (a:0 > 0 && !empty(a:1))
 	if !exists("s:nrrw_rgn_line")
@@ -777,12 +859,11 @@ fun! nrrwrgn#NrrwRgnDoPrepare(...) "{{{1
 
 	let local_options = <sid>GetOptions(s:opts)
 	let win=<sid>NrrwRgnWin(bang)
-	if bang
-		let s:nrrw_rgn_lines[s:instn].single = 1
-	endif
+	let s:nrrw_rgn_lines[s:instn].single = bang
 	let b:orig_buf = orig_buf
 	let s:nrrw_rgn_lines[s:instn].winnr  = bufwinnr(orig_buf)
 	call setline(1, buffer)
+	call <sid>AdjustWindowSize(bang)
 	setl nomod
 	let b:nrrw_instn = s:instn
 	call <sid>SetupBufLocalCommands()
@@ -865,10 +946,7 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  "{{{1
 	let b:orig_buf = orig_buf
 	let s:nrrw_rgn_lines[s:instn].orig_buf  = orig_buf
 	call setline(1, a)
-	if !bang && !s:nrrw_rgn_vert && len(a) < s:nrrw_rgn_wdth
-		" Resize narrowed window to size of buffer
-		exe "sil resize" len(a)+1
-	endif
+	call <sid>AdjustWindowSize(bang)
 	let b:nrrw_instn = s:instn
 	setl nomod
 	call <sid>SetupBufLocalCommands()
@@ -1246,7 +1324,7 @@ fun! nrrwrgn#NrrwRgnStatus() "{{{1
 endfu
 
 " Debugging options "{{{1
-fun! nrrwrgn#Debug(enable) "{{{1
+fun! nrrwrgn#Debug(enable) "{{{2
 	if (a:enable)
 		let s:debug=1
 		fun! <sid>NrrwRgnDebug() "{{{2
