@@ -791,12 +791,12 @@ fun! <sid>ReturnComments() abort "{{{1
 	return [c_s, c_e]
 endfun
 
-fun! <sid>AdjustWindowSize(bang) abort "{{{1
+fun! <sid>AdjustWindowSize(bang, size) abort "{{{1
 	" Resize window
 	if !a:bang && !s:nrrw_rgn_vert
-		if get(g:, 'nrrw_rgn_resize_window', 'absolute') is? "absolute" && len(a) < s:nrrw_rgn_wdth
+		if get(g:, 'nrrw_rgn_resize_window', 'absolute') is? "absolute" && len(a:size) < s:nrrw_rgn_wdth
 			" Resize narrowed window to size of buffer
-			exe "sil resize" len(a)+1
+			exe "sil resize" len(a:size)+1
 		elseif get(g:, 'nrrw_rgn_resize_window', 'absolute') is? "relative" 
 			" size narrowed window by percentage
 			exe <sid>ResizeWindow(<sid>GetSizes(winnr(), line('$'))[0])
@@ -863,7 +863,7 @@ fun! nrrwrgn#NrrwRgnDoPrepare(...) abort "{{{1
 	let b:orig_buf = orig_buf
 	let s:nrrw_rgn_lines[s:instn].winnr  = bufwinnr(orig_buf)
 	call setline(1, buffer)
-	call <sid>AdjustWindowSize(bang)
+	call <sid>AdjustWindowSize(bang, buffer)
 	setl nomod
 	let b:nrrw_instn = s:instn
 	call <sid>SetupBufLocalCommands()
@@ -946,7 +946,7 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  abort "{{{1
 	let b:orig_buf = orig_buf
 	let s:nrrw_rgn_lines[s:instn].orig_buf  = orig_buf
 	call setline(1, a)
-	call <sid>AdjustWindowSize(bang)
+	call <sid>AdjustWindowSize(bang, a)
 	let b:nrrw_instn = s:instn
 	setl nomod
 	call <sid>SetupBufLocalCommands()
