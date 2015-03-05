@@ -218,7 +218,8 @@ height or the nr of columns, if you have also set g:nrrw_rgn_vert. >
 <
 (default: 20)
 Note: if the newly created narrowed window is smaller than this, it will be
-resized to fit, to not leave unwanted space around.
+resized to fit, to not leave unwanted space around (not for single narrowed
+windows, e.g. when the '!' attribute was used).
 ------------------------------------------------------------------------------
 
 It is possible to specify an increment value, by which the narrowed window can
@@ -429,6 +430,8 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 - Always write the narrowed scratch window back on |:w| instead of only when
   it was modified (https://github.com/chrisbra/NrrwRgn/issues/37, reported by
   Konfekt, thanks!)
+- Do not resize window, if :NR! was used (patch by leonidborisenko from
+  https://github.com/chrisbra/NrrwRgn/pull/38 thanks!)
 
 0.33: Jan 16, 2015 {{{1
 - set local options later, so that FileType autocommands don't trigger to
