@@ -323,7 +323,11 @@ fun! <sid>NrrwRgnAuCmd(instn) abort "{{{1
 		\   !has_key(s:nrrw_rgn_lines[a:instn], 'disable') &&
 		\    has_key(s:nrrw_rgn_lines[a:instn], 'winnr'))
 			" Skip to original window and remove highlighting
-			exe "noa" s:nrrw_rgn_lines[a:instn].winnr "wincmd w"
+			if bufwinnr(s:nrrw_rgn_lines[a:instn].winnr) == -1
+				exe "noa ". s:nrrw_rgn_lines[a:instn].orig_buf. "b"
+			else
+				exe "noa ". bufwinnr(s:nrrw_rgn_lines[a:instn].winnr). "wincmd w"
+			endif
 			call <sid>DeleteMatches(a:instn)
 			noa wincmd p
 			call <sid>CleanUpInstn(a:instn)
