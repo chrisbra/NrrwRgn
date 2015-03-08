@@ -196,7 +196,10 @@ fun! <sid>WriteNrrwRgn(...) abort "{{{1
 		" b:orig_buf might not exists (see issue #2)
 		let winnr = (exists("b:orig_buf") ? bufwinnr(b:orig_buf) : 0)
 		" Best guess
-		if bufname('') =~# 'NrrwRgn' && winnr > 0
+		if bufname('') =~# 'NrrwRgn' && winnr == -1 && exists("b:orig_buf") &&
+					\ bufexists(b:orig_buf)
+			exe ':noa '. b:orig_buf. 'b'
+		elseif bufname('') =~# 'NrrwRgn' && winnr > 0
 			exe ':noa'. winnr. 'wincmd w'
 		endif
 		if !exists("a:1") 
@@ -323,13 +326,15 @@ fun! <sid>NrrwRgnAuCmd(instn) abort "{{{1
 		\   !has_key(s:nrrw_rgn_lines[a:instn], 'disable') &&
 		\    has_key(s:nrrw_rgn_lines[a:instn], 'winnr'))
 			" Skip to original window and remove highlighting
-			if bufwinnr(s:nrrw_rgn_lines[a:instn].winnr) == -1
+			if bufwinnr(s:nrrw_rgn_lines[a:instn].orig_buf) == -1
 				exe "noa ". s:nrrw_rgn_lines[a:instn].orig_buf. "b"
 			else
 				exe "noa ". bufwinnr(s:nrrw_rgn_lines[a:instn].winnr). "wincmd w"
 			endif
 			call <sid>DeleteMatches(a:instn)
-			noa wincmd p
+			if winnr('$') > 1
+				noa wincmd p
+			endif
 			call <sid>CleanUpInstn(a:instn)
 		endif
 	endif
