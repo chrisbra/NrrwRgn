@@ -61,6 +61,7 @@ fun! <sid>Init() abort "{{{1
 	let s:nrrw_rgn_hl	= get(g:, 'nrrw_rgn_hl', 'WildMenu')
 	let s:nrrw_rgn_nohl = get(g:, 'nrrw_rgn_nohl', 0)
 	let s:debug         = (exists("s:debug") ? s:debug : 0)
+	let s:float         = has("float")
 	if v:version < 704
 		call s:WarningMsg('NrrwRgn needs Vim > 7.4 or it might not work correctly')
 	endif
@@ -723,7 +724,7 @@ fun! <sid>GetVSizes(win,lines) abort "{{{1
 	endif
 	let size_min = get(g:, 'nrrw_rgn_rel_min', 10)
 	let size_max = get(g:, 'nrrw_rgn_rel_max', lines_parent)
-	if has("float")
+	if s:float
 		let ratio = 1.0*a:lines/lines_parent
 		if ratio < size_min/100.0
 			let ratio = size_min
@@ -733,9 +734,16 @@ fun! <sid>GetVSizes(win,lines) abort "{{{1
 		let size_max = min([lines_parent, float2nr(ceil(size_max/100.0*lines_parent))])
 		let size_min = min([lines_parent, float2nr(ceil(ratio*lines_parent))])
 	else
+		let ratio = <sid>Nrrw_divnear(a:lines*100, lines_parent)
+		if ratio < size_min
+			let ratio = size_min
+		elseif ratio > size_max
+			let ratio = size_max
+		endif
+		let size_max = min([lines_parent, <sid>Nrrw_divceil(size_max*lines_parent, 100)])
+		let size_min = min([lines_parent, <sid>Nrrw_divceil(ratio*lines_parent, 100)])
 		" If Vim is compiled without float?
 		" Currently: no-op
-		return [lines_parent, lines_parent]
 	endif
     return [size_min, size_max]
 endfu
@@ -748,13 +756,12 @@ fun! <sid>GetHSizes(win) abort "{{{1
 	endif
 	let w_rel_max = get(g:, 'nrrw_rgn_rel_max', 80)
 	let w_rel_min = get(g:, 'nrrw_rgn_rel_min', 10)
-	if has("float")
+	if s:float
 		let size_max = min([columns_parent, float2nr(ceil(w_rel_max/100.0*columns_parent))])
 		let size_min = min([columns_parent, float2nr(ceil(w_rel_min/100.0*columns_parent))])
 	else
-		" If Vim is compiled without float?
-		" Currently: no-op
-		return [columns_parent, columns_parent]
+		let size_max = min([lines_parent, <sid>Nrrw_divceil(w_rel_max*lines_parent, 100)])
+		let size_min = min([lines_parent, <sid>Nrrw_divceil(ratio*lines_parent, 100)])
 	endif
     return [size_min, size_max]
 endfu
@@ -810,6 +817,18 @@ fun! <sid>AdjustWindowSize(bang, size) abort "{{{1
 			exe <sid>ResizeWindow(<sid>GetSizes(winnr(), line('$'))[0])
 		endif
 	endif
+endfu
+fun! <sid>Nrrw_divnear(n, d) abort "{{{1
+    let m = n % d
+    let q = n / d
+    let r = m*2 >= d ? 1 : 0
+    return q+r
+endfu
+
+fun! <sid>Nrrw_divceil(n, d) abort "{{{1
+    let q = n / d
+    let r = q*d == n ? 0 : 1
+    return q + r
 endfu
 fun! nrrwrgn#NrrwRgnDoPrepare(...) abort "{{{1
 	let bang = (a:0 > 0 && !empty(a:1))
