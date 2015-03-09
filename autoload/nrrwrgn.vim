@@ -721,8 +721,8 @@ fun! <sid>GetVSizes(win,lines) abort "{{{1
     else
         let lines_parent = winheight(a:win)
 	endif
-	let size_min = get(g:, 'nrrw_rgn_h_rel_min', 10)
-	let size_max = get(g:, 'nrrw_rgn_h_rel_max', lines_parent)
+	let size_min = get(g:, 'nrrw_rgn_rel_min', 10)
+	let size_max = get(g:, 'nrrw_rgn_rel_max', lines_parent)
 	if has("float")
 		let ratio = 1.0*a:lines/lines_parent
 		if ratio < size_min/100.0
@@ -746,8 +746,8 @@ fun! <sid>GetHSizes(win) abort "{{{1
     else
         let columns_parent = winwidth(a:win)
 	endif
-	let w_rel_max = get(g:, 'nrrw_rgn_w_rel_max', 80)
-	let w_rel_min = get(g:, 'nrrw_rgn_w_rel_min', 50)
+	let w_rel_max = get(g:, 'nrrw_rgn_rel_max', 80)
+	let w_rel_min = get(g:, 'nrrw_rgn_rel_min', 10)
 	if has("float")
 		let size_max = min([columns_parent, float2nr(ceil(w_rel_max/100.0*columns_parent))])
 		let size_min = min([columns_parent, float2nr(ceil(w_rel_min/100.0*columns_parent))])

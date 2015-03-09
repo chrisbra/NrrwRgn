@@ -236,17 +236,9 @@ resized by a percentage.  Set it like this in your |.vimrc| >
 The percentages for increasing the window size can further be specified by
 seting the following variables:
 
-For horizontal splits set the g:nrrw_rgn_h_rel_min and g:nrrw_rgn_h_rel_max
-For vertical splits, the variables g:nrrw_rgn_w_rel_min and
-g:nrrw_rgn_w_rel_max specify the percentage by which to increase the window.
-
-(
 default:
-g:nrrw_rgn_h_rel_min: 10
-g:nrrw_rgn_h_rel_max: 80
-g:nrrw_rgn_w_rel_min: 50
-g:nrrw_rgn_w_rel_max: 80
-)
+g:nrrw_rgn_rel_min: 10
+g:nrrw_rgn_rel_max: 80
 
 ------------------------------------------------------------------------------
 
@@ -286,8 +278,7 @@ Window. Note: This mapping is only in the narrowed window active.
 
 The amount of how much to increase can be further refined by setting the
 g:nrrw_rgn_incr for an absolute increase of by setting the variables
-g:nrrw_rgn_h_rel_min, g:nrrw_rgn_h_rel_max, g:nrrw_rgn_w_rel_min and
-g:nrrw_rgn_w_rel_max (see above)
+g:nrrw_rgn_rel_min and g:nrrw_rgn_rel_max
 
 Whether an absolute or relative increase will be performed, is determined by
 the g:nrrw_rgn_resize_window variable (see above).
