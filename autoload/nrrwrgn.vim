@@ -721,8 +721,8 @@ fun! <sid>GetVSizes(win,lines) abort "{{{1
     else
         let lines_parent = winheight(a:win)
 	endif
-	let size_min = get(g:, 'nrrw_rgn_size_min', 10)
-	let size_max = get(g:, 'nrrw_rgn_size_max', lines_parent)
+	let size_min = get(g:, 'nrrw_rgn_h_rel_min', 10)
+	let size_max = get(g:, 'nrrw_rgn_h_rel_max', lines_parent)
 	if has("float")
 		let ratio = 1.0*a:lines/lines_parent
 		if ratio < size_min/100.0
@@ -730,8 +730,7 @@ fun! <sid>GetVSizes(win,lines) abort "{{{1
 		elseif ratio > size_max/100.0
 			let ratio = size_max
 		endif
-		let h_rel_max = get(g:, 'nrrw_rgn_h_rel_max', 80)
-		let size_max = min([lines_parent, float2nr(ceil(h_rel_max/100.0*lines_parent))])
+		let size_max = min([lines_parent, float2nr(ceil(size_max/100.0*lines_parent))])
 		let size_min = min([lines_parent, float2nr(ceil(ratio*lines_parent))])
 	else
 		" If Vim is compiled without float?
