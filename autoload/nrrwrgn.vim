@@ -61,6 +61,8 @@ fun! <sid>Init() abort "{{{1
 	let s:nrrw_rgn_hl	= get(g:, 'nrrw_rgn_hl', 'WildMenu')
 	let s:nrrw_rgn_nohl = get(g:, 'nrrw_rgn_nohl', 0)
 	let s:debug         = (exists("s:debug") ? s:debug : 0)
+    let s:float         = has('float')
+    let s:syntax        = has('syntax')
 	if v:version < 704
 		call s:WarningMsg('NrrwRgn needs Vim > 7.4 or it might not work correctly')
 	endif
@@ -702,9 +704,26 @@ fun! <sid>SetupBufLocalMaps() abort "{{{1
 	nnoremap <buffer><silent><script><expr> NrrwRgnIncr <sid>ToggleWindowSize()
 endfun
 
+fun! <sid>NrrwDivNear(n, d) abort "{{{1
+    let m = a:n % a:d
+    let q = a:n / a:d
+    let r = m*2 >= a:d ? 1 : 0
+    return q + r
+endfun
+
+fun! <sid>NrrwDivCeil(n, d) abort "{{{1
+    let q = a:n / a:d
+    let r = q*a:d == a:n ? 0 : 1
+    return q + r
+endfun
+
 fun! <sid>IsAbsPos(pos) abort "{{{1
-    return a:pos =~ 'to\%[pleft]\|bo\%[tright]'
-endfu
+    if s:syntax
+        return a:pos =~ 'to\%[pleft]\|bo\%[tright]'
+    else
+        return len(a:pos) >= 2 && ('topleft' =~ '^' . a:pos || 'botright' =~ '^' . a:pos)
+    endif
+endfun
 
 fun! <sid>GetVSizes(win,lines) abort "{{{1
     if <sid>IsAbsPos(get(g:, 'nrrw_topbot_leftright', ''))
@@ -712,22 +731,28 @@ fun! <sid>GetVSizes(win,lines) abort "{{{1
     else
         let lines_parent = winheight(a:win)
 	endif
-	let size_min = get(g:, 'nrrw_rgn_size_min', 10)
-	let size_max = get(g:, 'nrrw_rgn_size_max', lines_parent)
-	if has("float")
+	if s:float
+        let nrrw_rgn_rel_max = get(g:, 'nrrw_rgn_rel_max', 80)/100.0
+        let nrrw_rgn_rel_min = get(g:, 'nrrw_rgn_rel_min', 10)/100.0
 		let ratio = 1.0*a:lines/lines_parent
-		if ratio < size_min/100.0
-			let ratio = size_min
-		elseif ratio > size_max/100.0
-			let ratio = size_max
+		if ratio < nrrw_rgn_rel_min
+			let ratio = nrrw_rgn_rel_min
+		elseif ratio > nrrw_rgn_rel_max
+			let ratio = nrrw_rgn_rel_max
 		endif
-		let h_rel_max = get(g:, 'nrrw_rgn_h_rel_max', 80)
-		let size_max = min([lines_parent, float2nr(ceil(h_rel_max/100.0*lines_parent))])
+		let size_max = min([lines_parent, float2nr(ceil(nrrw_rgn_rel_max*lines_parent))])
 		let size_min = min([lines_parent, float2nr(ceil(ratio*lines_parent))])
 	else
-		" If Vim is compiled without float?
-		" Currently: no-op
-		return [lines_parent, lines_parent]
+        let nrrw_rgn_rel_max = get(g:, 'nrrw_rgn_rel_max', 80)
+        let nrrw_rgn_rel_min = get(g:, 'nrrw_rgn_rel_min', 10)
+        let percentage = <sid>NrrwDivNear(a:lines*100, lines_parent)
+        if percentage < nrrw_rgn_rel_min
+            let percentage = nrrw_rgn_rel_min
+        elseif percentage > nrrw_rgn_rel_max
+            let percentage = nrrw_rgn_rel_max
+        endif
+        let size_max = min([lines_parent, <sid>NrrwDivCeil(nrrw_rgn_rel_max*lines_parent, 100)])
+        let size_min = min([lines_parent, <sid>NrrwDivCeil(percentage*lines_parent, 100)])
 	endif
     return [size_min, size_max]
 endfu
@@ -738,15 +763,14 @@ fun! <sid>GetHSizes(win) abort "{{{1
     else
         let columns_parent = winwidth(a:win)
 	endif
-	let w_rel_max = get(g:, 'nrrw_rgn_w_rel_max', 80)
-	let w_rel_min = get(g:, 'nrrw_rgn_w_rel_min', 50)
-	if has("float")
-		let size_max = min([columns_parent, float2nr(ceil(w_rel_max/100.0*columns_parent))])
-		let size_min = min([columns_parent, float2nr(ceil(w_rel_min/100.0*columns_parent))])
+	let nrrw_rgn_rel_max = get(g:, 'nrrw_rgn_w_rel_max', 80)
+	let nrrw_rgn_rel_min = get(g:, 'nrrw_rgn_w_rel_min', 50)
+	if s:float
+		let size_max = min([columns_parent, float2nr(ceil(nrrw_rgn_rel_max/100.0*columns_parent))])
+		let size_min = min([columns_parent, float2nr(ceil(nrrw_rgn_rel_min/100.0*columns_parent))])
 	else
-		" If Vim is compiled without float?
-		" Currently: no-op
-		return [columns_parent, columns_parent]
+		let size_max = min([columns_parent, <sid>NrrwDivCeil(nrrw_rgn_rel_max*columns_parent, 100)])
+		let size_min = min([columns_parent, <sid>NrrwDivCeil(nrrw_rgn_rel_min*columns_parent, 100))])
 	endif
     return [size_min, size_max]
 endfu
@@ -771,7 +795,7 @@ fun! <sid>ToggleWindowSize() abort "{{{1
 	let size_cur = (s:nrrw_rgn_vert ? winwidth(0) : winheight(0))
     " window size or contents have changed
 	let size_new = (size_cur == size_min ? size_max : size_min)
-	" g:nrrw_rgn_incr has priority over the relative sizs
+	" g:nrrw_rgn_incr has priority over the relative sizes
 	if get(g:, 'nrrw_rgn_resize_window', 'absolute') is? 'absolute'
 		let nrrw_rgn_incr = get(g:, 'nrrw_rgn_incr', 10)
 	elseif get(g:, 'nrrw_rgn_resize_window', 'absolute') is? 'relative'
