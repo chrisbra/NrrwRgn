@@ -791,7 +791,8 @@ fun! <sid>ToggleWindowSize() abort "{{{1
 		call <sid>WarningMsg("Resizing window for single windows not supported!")
 		return ''
 	endif
-    let [size_min, size_max] = <sid>GetSizes(winnr(), line('$'))
+    let nrrw_rgn_pad = get(g:, 'nrrw_rgn_pad', 0)
+    let [size_min, size_max] = <sid>GetSizes(winnr(), line('$') + nrrw_rgn_pad)
 	let size_cur = (s:nrrw_rgn_vert ? winwidth(0) : winheight(0))
     " window size or contents have changed
 	let size_new = (size_cur == size_min ? size_max : size_min)
@@ -818,12 +819,13 @@ endfun
 fun! <sid>AdjustWindowSize(bang) abort "{{{1
 	" Resize window
 	if !a:bang && !s:nrrw_rgn_vert
+        let nrrw_rgn_pad = get(g:, 'nrrw_rgn_pad', 0)
 		if get(g:, 'nrrw_rgn_resize_window', 'absolute') is? "absolute" && len(a) < s:nrrw_rgn_wdth
 			" Resize narrowed window to size of buffer
-			exe "sil resize" len(a)+1
+			exe "sil resize" len(a) + nrrw_rgn_pad
 		elseif get(g:, 'nrrw_rgn_resize_window', 'absolute') is? "relative" 
 			" size narrowed window by percentage
-			exe <sid>ResizeWindow(<sid>GetSizes(winnr(), line('$'))[0])
+			exe <sid>ResizeWindow(<sid>GetSizes(winnr(), line('$') + nrrw_rgn_pad)[0])
 		endif
 	endif
 endfu
