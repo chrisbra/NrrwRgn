@@ -286,18 +286,18 @@ fun! <sid>NrrwRgnAuCmd(instn) abort "{{{1
 	" else disable auto commands for a:instn
 	if !a:instn
 		exe "aug NrrwRgn". b:nrrw_instn
-			au!
-			au BufWriteCmd <buffer> nested :call s:WriteNrrwRgn(1)
-			au BufWinLeave,BufWipeout,BufDelete <buffer> nested
-						\ :call s:WriteNrrwRgn()
-			au CursorMoved <buffer> :call s:UpdateOrigWin()
-			" When switching buffer in the original buffer,
-			" make sure the highlighting of the narrowed buffer will
-			" be removed"
-			exe "au BufWinLeave <buffer=".b:orig_buf.
-			  \ "> if <sid>HasMatchID(".b:nrrw_instn.")|call <sid>DeleteMatches(".
-			  \ b:nrrw_instn.")|endif"
-			aug end
+		au!
+		au BufWriteCmd <buffer> nested :call s:WriteNrrwRgn(1)
+		au BufWinLeave,BufWipeout,BufDelete <buffer> nested
+					\ :call s:WriteNrrwRgn()
+		au CursorMoved <buffer> :call s:UpdateOrigWin()
+		" When switching buffer in the original buffer,
+		" make sure the highlighting of the narrowed buffer will
+		" be removed"
+		exe "au BufWinLeave <buffer=".b:orig_buf.
+			\ "> if <sid>HasMatchID(".b:nrrw_instn.")|call <sid>DeleteMatches(".
+			\ b:nrrw_instn.")|endif"
+		aug end
 	else
 		exe "aug NrrwRgn".  a:instn
 		au!
