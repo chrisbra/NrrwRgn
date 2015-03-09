@@ -763,8 +763,8 @@ fun! <sid>GetHSizes(win) abort "{{{1
     else
         let columns_parent = winwidth(a:win)
 	endif
-	let nrrw_rgn_rel_max = get(g:, 'nrrw_rgn_w_rel_max', 80)
-	let nrrw_rgn_rel_min = get(g:, 'nrrw_rgn_w_rel_min', 50)
+	let nrrw_rgn_rel_max = get(g:, 'nrrw_rgn_rel_max', 80)
+	let nrrw_rgn_rel_min = get(g:, 'nrrw_rgn_rel_min', 50)
 	if s:float
 		let size_max = min([columns_parent, float2nr(ceil(nrrw_rgn_rel_max/100.0*columns_parent))])
 		let size_min = min([columns_parent, float2nr(ceil(nrrw_rgn_rel_min/100.0*columns_parent))])
