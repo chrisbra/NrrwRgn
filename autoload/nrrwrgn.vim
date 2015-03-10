@@ -825,17 +825,17 @@ endfun
 
 fun! <sid>AdjustWindowSize(bang, size) abort "{{{1
 	" Resize window
-	if !a:bang && !s:nrrw_rgn_vert
+	if !a:bang
+		let nrrw_rgn_absolute = get(g:, 'nrrw_rgn_resize_window', 'absolute') is? "absolute" ? 1 : 0
 		let nrrw_rgn_pad = get(g:, 'nrrw_rgn_pad', 0)
-		if get(g:, 'nrrw_rgn_resize_window', 'absolute') is? "absolute" && len(a:size) < s:nrrw_rgn_wdth
+		if nrrw_rgn_absolute && !s:nrrw_rgn_vert && len(a:size) < s:nrrw_rgn_wdth
 			" Resize narrowed window to size of buffer
 			exe "sil resize" len(a:size)+nrrw_rgn_pad
-		elseif get(g:, 'nrrw_rgn_resize_window', 'absolute') is? "relative"
-			" size narrowed window by percentage
+		else
 			exe <sid>ResizeWindow(<sid>GetSizes(winnr(), line('$') + nrrw_rgn_pad)[0])
 		endif
 	endif
-endfu
+endfun
 
 fun! nrrwrgn#NrrwRgnDoPrepare(...) abort "{{{1
 	let bang = (a:0 > 0 && !empty(a:1))
