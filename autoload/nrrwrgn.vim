@@ -198,13 +198,14 @@ fun! <sid>WriteNrrwRgn(...) abort "{{{1
 		" b:orig_buf might not exists (see issue #2)
 		let winnr = (exists("b:orig_buf") ? bufwinnr(b:orig_buf) : 0)
 		" Best guess
-		if bufname('') =~# 'NrrwRgn' && winnr > 0
+		if bufname('') =~# 'NrrwRgn' && winnr == -1 && exists("b:orig_buf") &&
+					\ bufexists(b:orig_buf)
+			exe ':noa '. b:orig_buf. 'b'
+		elseif bufname('') =~# 'NrrwRgn' && winnr > 0
 			exe ':noa'. winnr. 'wincmd w'
 		endif
-		if !exists("a:1") 
-			" close narrowed buffer
-			call <sid>NrrwRgnAuCmd(nrrw_instn)
-		endif
+		" close narrowed buffer
+		call <sid>NrrwRgnAuCmd(nrrw_instn)
 	endif
 endfun
 
@@ -285,18 +286,18 @@ fun! <sid>NrrwRgnAuCmd(instn) abort "{{{1
 	" else disable auto commands for a:instn
 	if !a:instn
 		exe "aug NrrwRgn". b:nrrw_instn
-			au!
-			au BufWriteCmd <buffer> nested :call s:WriteNrrwRgn(1)
-			au BufWinLeave,BufWipeout,BufDelete <buffer> nested
-						\ :call s:WriteNrrwRgn()
-			au CursorMoved <buffer> :call s:UpdateOrigWin()
-			" When switching buffer in the original buffer,
-			" make sure the highlighting of the narrowed buffer will
-			" be removed"
-			exe "au BufWinLeave <buffer=".b:orig_buf.
-			  \ "> if <sid>HasMatchID(".b:nrrw_instn.")|call <sid>DeleteMatches(".
-			  \ b:nrrw_instn.")|endif"
-			aug end
+		au!
+		au BufWriteCmd <buffer> nested :call s:WriteNrrwRgn(1)
+		au BufWinLeave,BufWipeout,BufDelete <buffer> nested
+					\ :call s:WriteNrrwRgn()
+		au CursorMoved <buffer> :call s:UpdateOrigWin()
+		" When switching buffer in the original buffer,
+		" make sure the highlighting of the narrowed buffer will
+		" be removed"
+		exe "au BufWinLeave <buffer=".b:orig_buf.
+			\ "> if <sid>HasMatchID(".b:nrrw_instn.")|call <sid>DeleteMatches(".
+			\ b:nrrw_instn.")|endif"
+		aug end
 	else
 		exe "aug NrrwRgn".  a:instn
 		au!
@@ -325,9 +326,17 @@ fun! <sid>NrrwRgnAuCmd(instn) abort "{{{1
 		\   !has_key(s:nrrw_rgn_lines[a:instn], 'disable') &&
 		\    has_key(s:nrrw_rgn_lines[a:instn], 'winnr'))
 			" Skip to original window and remove highlighting
-			exe "noa" s:nrrw_rgn_lines[a:instn].winnr "wincmd w"
+			if bufnr('') != s:nrrw_rgn_lines[a:instn].orig_buf
+				if bufwinnr(s:nrrw_rgn_lines[a:instn].orig_buf) == -1
+					exe "noa ". s:nrrw_rgn_lines[a:instn].orig_buf. "b"
+				else
+					exe "noa ". bufwinnr(s:nrrw_rgn_lines[a:instn].orig_buf). "wincmd w"
+				endif
+			endif
 			call <sid>DeleteMatches(a:instn)
-			noa wincmd p
+			if winnr('$') > 1
+				noa wincmd p
+			endif
 			call <sid>CleanUpInstn(a:instn)
 		endif
 	endif
@@ -800,12 +809,11 @@ fun! <sid>ToggleWindowSize() abort "{{{1
 	if get(g:, 'nrrw_rgn_resize_window', 'absolute') is? 'absolute'
 		let nrrw_rgn_incr = get(g:, 'nrrw_rgn_incr', 10)
 	elseif get(g:, 'nrrw_rgn_resize_window', 'absolute') is? 'relative'
-		let nrrw_rgn_incr = get(g:, 'nrrw_rgn_incr', 10)
+		let nrrw_rgn_incr = size_new
 	else
 		call <sid>WarningMsg("g:nrrw_rgn_resize_window can only be one of [relative|absolute]!")
 		return ''
 	endif
-	let nrrw_rgn_incr = get(g:, 'nrrw_rgn_incr', size_new)
 	return <sid>ResizeWindow(nrrw_rgn_incr)."\n"
 endfun
 
@@ -816,19 +824,20 @@ fun! <sid>ReturnComments() abort "{{{1
 	return [c_s, c_e]
 endfun
 
-fun! <sid>AdjustWindowSize(bang) abort "{{{1
+fun! <sid>AdjustWindowSize(bang, size) abort "{{{1
 	" Resize window
 	if !a:bang && !s:nrrw_rgn_vert
         let nrrw_rgn_pad = get(g:, 'nrrw_rgn_pad', 0)
-		if get(g:, 'nrrw_rgn_resize_window', 'absolute') is? "absolute" && len(a) < s:nrrw_rgn_wdth
+		if get(g:, 'nrrw_rgn_resize_window', 'absolute') is? "absolute" && len(a:size) < s:nrrw_rgn_wdth
 			" Resize narrowed window to size of buffer
-			exe "sil resize" len(a) + nrrw_rgn_pad
+			exe "sil resize" len(a:size)+nrrw_rgn_pad
 		elseif get(g:, 'nrrw_rgn_resize_window', 'absolute') is? "relative" 
 			" size narrowed window by percentage
 			exe <sid>ResizeWindow(<sid>GetSizes(winnr(), line('$') + nrrw_rgn_pad)[0])
 		endif
 	endif
 endfu
+
 fun! nrrwrgn#NrrwRgnDoPrepare(...) abort "{{{1
 	let bang = (a:0 > 0 && !empty(a:1))
 	if !exists("s:nrrw_rgn_line")
@@ -889,7 +898,7 @@ fun! nrrwrgn#NrrwRgnDoPrepare(...) abort "{{{1
 	let b:orig_buf = orig_buf
 	let s:nrrw_rgn_lines[s:instn].winnr  = bufwinnr(orig_buf)
 	call setline(1, buffer)
-	call <sid>AdjustWindowSize(bang)
+	call <sid>AdjustWindowSize(bang, buffer)
 	setl nomod
 	let b:nrrw_instn = s:instn
 	call <sid>SetupBufLocalCommands()
@@ -972,7 +981,7 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  abort "{{{1
 	let b:orig_buf = orig_buf
 	let s:nrrw_rgn_lines[s:instn].orig_buf  = orig_buf
 	call setline(1, a)
-	call <sid>AdjustWindowSize(bang)
+	call <sid>AdjustWindowSize(bang, a)
 	let b:nrrw_instn = s:instn
 	setl nomod
 	call <sid>SetupBufLocalCommands()

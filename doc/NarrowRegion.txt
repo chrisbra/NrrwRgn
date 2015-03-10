@@ -217,9 +217,12 @@ height or the nr of columns, if you have also set g:nrrw_rgn_vert. >
     let g:nrrw_rgn_wdth = 30
 <
 (default: 20)
+
 Note: if the newly created narrowed window is smaller than this, it will be
-resized to fit, to not leave unwanted space around (not for single narrowed
-windows, e.g. when the '!' attribute was used).
+resized to fit (plus an additional padding that can be specified using the
+g:nrrw_rgn_pad variable (default: 0), to not leave unwanted space around (not
+for single narrowed windows, e.g. when the '!' attribute was used).
+
 ------------------------------------------------------------------------------
 
 Resizing the narrowed window can happen either by some absolute values or by a
@@ -236,17 +239,9 @@ resized by a percentage.  Set it like this in your |.vimrc| >
 The percentages for increasing the window size can further be specified by
 seting the following variables:
 
-For horizontal splits set the g:nrrw_rgn_h_rel_min and g:nrrw_rgn_h_rel_max
-For vertical splits, the variables g:nrrw_rgn_w_rel_min and
-g:nrrw_rgn_w_rel_max specify the percentage by which to increase the window.
-
-(
 default:
-g:nrrw_rgn_h_rel_min: 10
-g:nrrw_rgn_h_rel_max: 80
-g:nrrw_rgn_w_rel_min: 50
-g:nrrw_rgn_w_rel_max: 80
-)
+g:nrrw_rgn_rel_min: 10 (50 for vertical splits)
+g:nrrw_rgn_rel_max: 80
 
 ------------------------------------------------------------------------------
 
@@ -267,7 +262,7 @@ Example, to increase the narrowed window by 30 lines or columns if
 
     let g:nrrw_rgn_incr = 30
 <
-(default: 10, if g:nrrw_rgn_resize is "absolute")
+(default: 10, if g:nrrw_rgn_resize_window is "absolute")
 
 Note: When using the '!' attribute for narrowing (e.g. the selection will be
 opened in a new window that takes the complete screen size), no resizeing will
@@ -286,8 +281,7 @@ Window. Note: This mapping is only in the narrowed window active.
 
 The amount of how much to increase can be further refined by setting the
 g:nrrw_rgn_incr for an absolute increase of by setting the variables
-g:nrrw_rgn_h_rel_min, g:nrrw_rgn_h_rel_max, g:nrrw_rgn_w_rel_min and
-g:nrrw_rgn_w_rel_max (see above)
+g:nrrw_rgn_rel_min and g:nrrw_rgn_rel_max
 
 Whether an absolute or relative increase will be performed, is determined by
 the g:nrrw_rgn_resize_window variable (see above).
@@ -479,6 +473,7 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
   Konfekt, thanks!)
 - Do not resize window, if :NR! was used (patch by leonidborisenko from
   https://github.com/chrisbra/NrrwRgn/pull/38 thanks!)
+- Various improvements for Window resizing, partly by Yclept Nemo, thanks!
 
 0.33: Jan 16, 2015 {{{1
 - set local options later, so that FileType autocommands don't trigger to
