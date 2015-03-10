@@ -204,10 +204,8 @@ fun! <sid>WriteNrrwRgn(...) abort "{{{1
 		elseif bufname('') =~# 'NrrwRgn' && winnr > 0
 			exe ':noa'. winnr. 'wincmd w'
 		endif
-		if !exists("a:1") 
-			" close narrowed buffer
-			call <sid>NrrwRgnAuCmd(nrrw_instn)
-		endif
+		" close narrowed buffer
+		call <sid>NrrwRgnAuCmd(nrrw_instn)
 	endif
 endfun
 
