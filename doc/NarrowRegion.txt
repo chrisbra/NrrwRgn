@@ -217,9 +217,12 @@ height or the nr of columns, if you have also set g:nrrw_rgn_vert. >
     let g:nrrw_rgn_wdth = 30
 <
 (default: 20)
+
 Note: if the newly created narrowed window is smaller than this, it will be
-resized to fit, to not leave unwanted space around (not for single narrowed
-windows, e.g. when the '!' attribute was used).
+resized to fit (plus an additional padding that can be specified using the
+g:nrrw_rgn_pad variable (default: 0), to not leave unwanted space around (not
+for single narrowed windows, e.g. when the '!' attribute was used).
+
 ------------------------------------------------------------------------------
 
 Resizing the narrowed window can happen either by some absolute values or by a
@@ -237,7 +240,7 @@ The percentages for increasing the window size can further be specified by
 seting the following variables:
 
 default:
-g:nrrw_rgn_rel_min: 10
+g:nrrw_rgn_rel_min: 10 (50 for vertical splits)
 g:nrrw_rgn_rel_max: 80
 
 ------------------------------------------------------------------------------
@@ -470,6 +473,7 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
   Konfekt, thanks!)
 - Do not resize window, if :NR! was used (patch by leonidborisenko from
   https://github.com/chrisbra/NrrwRgn/pull/38 thanks!)
+- Various improvements for Window resizing, partly by Yclept Nemo, thanks!
 
 0.33: Jan 16, 2015 {{{1
 - set local options later, so that FileType autocommands don't trigger to
