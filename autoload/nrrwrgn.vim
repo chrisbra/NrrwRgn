@@ -92,7 +92,6 @@ fun! <sid>NrrwRgnWin(bang) abort "{{{1
 		exe ":noa ". nrrw_win. 'wincmd w'
 		" just in case, a global nomodifiable was set 
 		" disable this for the narrowed window
-		setl ma
 		silent %d _
 	else
 		if !exists('g:nrrw_topbot_leftright')
@@ -123,7 +122,7 @@ fun! <sid>NrrwRgnWin(bang) abort "{{{1
 
 		" just in case, a global nomodifiable was set 
 		" disable this for the narrowed window
-		setl ma
+		setl ma noro
 		" Just in case
 		silent %d _
 		" Set up some options like 'bufhidden', 'noswapfile', 
