@@ -838,18 +838,7 @@ fun! <sid>AdjustWindowSize(bang, size) abort "{{{1
 		endif
 	endif
 endfu
-fun! <sid>Nrrw_divnear(n, d) abort "{{{1
-    let m = n % d
-    let q = n / d
-    let r = m*2 >= d ? 1 : 0
-    return q+r
-endfu
 
-fun! <sid>Nrrw_divceil(n, d) abort "{{{1
-    let q = n / d
-    let r = q*d == n ? 0 : 1
-    return q + r
-endfu
 fun! nrrwrgn#NrrwRgnDoPrepare(...) abort "{{{1
 	let bang = (a:0 > 0 && !empty(a:1))
 	if !exists("s:nrrw_rgn_line")
