@@ -809,12 +809,11 @@ fun! <sid>ToggleWindowSize() abort "{{{1
 	if get(g:, 'nrrw_rgn_resize_window', 'absolute') is? 'absolute'
 		let nrrw_rgn_incr = get(g:, 'nrrw_rgn_incr', 10)
 	elseif get(g:, 'nrrw_rgn_resize_window', 'absolute') is? 'relative'
-		let nrrw_rgn_incr = get(g:, 'nrrw_rgn_incr', 10)
+		let nrrw_rgn_incr = size_new
 	else
 		call <sid>WarningMsg("g:nrrw_rgn_resize_window can only be one of [relative|absolute]!")
 		return ''
 	endif
-	let nrrw_rgn_incr = get(g:, 'nrrw_rgn_incr', size_new)
 	return <sid>ResizeWindow(nrrw_rgn_incr)."\n"
 endfun
 
