@@ -333,6 +333,9 @@ fun! <sid>NrrwRgnAuCmd(instn) abort "{{{1
 				endif
 			endif
 			call <sid>DeleteMatches(a:instn)
+			if get(w:, 'nrrw_rgn_orig_win', 0)
+				unlet! w:nrrw_rgn_orig_win
+			endif
 			if winnr('$') > 1
 				noa wincmd p
 			endif
@@ -958,12 +961,13 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  abort "{{{1
 	let local_options = <sid>GetOptions(s:opts)
 	let win=<sid>NrrwRgnWin(bang)
 	if bang
-	    let s:nrrw_rgn_lines[s:instn].single = 1
+		let s:nrrw_rgn_lines[s:instn].single = 1
 	else
-	    " Set the highlighting
-	    noa wincmd p
-	    let s:nrrw_rgn_lines[s:instn].winnr  = winnr()
-	    " Set highlighting in original window
+		" Set the highlighting
+		noa wincmd p
+		let w:nrrw_rgn_orig_win = 1
+		let s:nrrw_rgn_lines[s:instn].winnr  = winnr()
+		" Set highlighting in original window
 		call <sid>AddMatches(<sid>GeneratePattern(
 		\s:nrrw_rgn_lines[s:instn].start[1:2],
 		\s:nrrw_rgn_lines[s:instn].end[1:2],
