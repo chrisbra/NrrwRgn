@@ -737,23 +737,24 @@ fun! <sid>IsAbsPos(pos) abort "{{{1
 endfun
 
 fun! <sid>GetTotalSizesFromID(id) abort "{{{1
-    sizes = [0,0]
-    count = 0
+    let sizes = [0,0]
+    let l:count = 0
     for window in range(1, winnr('$'))
         let nrrw_rgn_id = getwinvar(window, 'nrrw_rgn_id', 0)
         if nrrw_rgn_id == a:id
-            sizes[0] += winwidth(window)
-            sizes[1] += winheight(window)
+            let sizes[0] += winwidth(window)
+            let sizes[1] += winheight(window)
+            let l:count += 1
         endif
     endfor
-    if count < 1
-        throw "Invalid NrrwRgn window ID count"
+    if l:count < 1
+        throw "Invalid NrrwRgn window ID count of '" . l:count . "'"
     endif
     return sizes
 endfun
 
 fun! <sid>GetTotalSizes(window) abort "{{{1
-    let nrrw_rgn_id = getwinvar(window, 'nrrw_rgn_id', 0)
+    let nrrw_rgn_id = getwinvar(a:window, 'nrrw_rgn_id', 0)
     if nrrw_rgn_id > 0
         return <sid>GetTotalSizesFromID(nrrw_rgn_id)
     else
