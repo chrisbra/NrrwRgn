@@ -822,6 +822,7 @@ fun! <sid>GetAbsVSizes(window, lines) abort "{{{1
         let size_min = min([s:nrrw_rgn_wdth, a:lines])
     else
         let size_min = winheight(a:window)
+    endif
     let size_max = size_min + nrrw_rgn_incr
     return [size_min, size_max]
 endfun
@@ -832,6 +833,7 @@ fun! <sid>GetAbsHSizes(window) abort "{{{1
         let size_min = s:nrrw_rgn_wdth
     else
         let size_min = winwidth(a:window)
+    endif
     let size_max = size_min + nrrw_rgn_incr
     return [size_min, size_max]
 endfun
