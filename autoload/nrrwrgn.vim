@@ -97,7 +97,7 @@ fun! <sid>NrrwRgnWin(bang) abort "{{{1
 		if !exists('g:nrrw_topbot_leftright')
 			let g:nrrw_topbot_leftright = 'topleft'
 		endif
-		let cmd=printf(':noa %s %d%s %s', g:nrrw_topbot_leftright, s:nrrw_rgn_wdth,
+		let cmd=printf(':noa %s %s %s', g:nrrw_topbot_leftright,
 				\ (s:nrrw_rgn_vert ? 'vsp' : 'sp'), nrrw_winname)
 		if !a:bang
 			exe cmd
@@ -333,8 +333,8 @@ fun! <sid>NrrwRgnAuCmd(instn) abort "{{{1
 				endif
 			endif
 			call <sid>DeleteMatches(a:instn)
-			if get(w:, 'nrrw_rgn_orig_win', 0)
-				unlet! w:nrrw_rgn_orig_win
+			if get(w:, 'nrrw_rgn_id', 0)
+				unlet! w:nrrw_rgn_id
 			endif
 			if winnr('$') > 1
 				noa wincmd p
@@ -730,17 +730,42 @@ endfun
 
 fun! <sid>IsAbsPos(pos) abort "{{{1
 	if s:syntax
-		return a:pos =~ 'to\%[pleft]\|bo\%[tright]'
+		return a:pos =~ '^\%(to\%[pleft]\|bo\%[tright]\)$'
 	else
 		return len(a:pos) >= 2 && ('topleft' =~ '^' . a:pos || 'botright' =~ '^' . a:pos)
 	endif
 endfun
 
-fun! <sid>GetVSizes(win,lines) abort "{{{1
+fun! <sid>GetTotalSizesFromID(id) abort "{{{1
+    sizes = [0,0]
+    count = 0
+    for window in range(1, winnr('$'))
+        let nrrw_rgn_id = getwinvar(window, 'nrrw_rgn_id', 0)
+        if nrrw_rgn_id == a:id
+            sizes[0] += winwidth(window)
+            sizes[1] += winheight(window)
+        endif
+    endfor
+    if count < 1
+        throw "Invalid NrrwRgn window ID count"
+    endif
+    return sizes
+endfun
+
+fun! <sid>GetTotalSizes(window) abort "{{{1
+    let nrrw_rgn_id = getwinvar(window, 'nrrw_rgn_id', 0)
+    if nrrw_rgn_id > 0
+        return <sid>GetTotalSizesFromID(nrrw_rgn_id)
+    else
+        throw "Expected NrrwRgn window ID"
+    endif
+endfun
+
+fun! <sid>GetRelVSizes(window, lines) abort "{{{1
 	if <sid>IsAbsPos(get(g:, 'nrrw_topbot_leftright', ''))
 		let lines_parent = &lines
 	else
-		let lines_parent = winheight(a:win)
+		let lines_parent = <sid>GetTotalSizes(a:window)[1]
 	endif
 	if s:float
 		let nrrw_rgn_rel_max = get(g:, 'nrrw_rgn_rel_max', 80)/100.0
@@ -766,13 +791,13 @@ fun! <sid>GetVSizes(win,lines) abort "{{{1
 		let size_min = min([lines_parent, <sid>NrrwDivCeil(percentage*lines_parent, 100)])
 		endif
 	return [size_min, size_max]
-endfu
+endfun
 
-fun! <sid>GetHSizes(win) abort "{{{1
+fun! <sid>GetRelHSizes(window) abort "{{{1
 	if <sid>IsAbsPos(get(g:, 'nrrw_topbot_leftright', ''))
 		let columns_parent = &columns
 	else
-		let columns_parent = winwidth(a:win)
+		let columns_parent = <sid>GetTotalSizes(a:window)[0]
 	endif
 	let nrrw_rgn_rel_max = get(g:, 'nrrw_rgn_rel_max', 80)
 	let nrrw_rgn_rel_min = get(g:, 'nrrw_rgn_rel_min', 50)
@@ -784,11 +809,40 @@ fun! <sid>GetHSizes(win) abort "{{{1
 		let size_min = min([columns_parent, <sid>NrrwDivCeil(nrrw_rgn_rel_min*columns_parent, 100))])
 	endif
 	return [size_min, size_max]
-endfu
+endfun
 
-fun! <sid>GetSizes(current_win, lines) abort "{{{1
-	return (s:nrrw_rgn_vert ? <sid>GetHSizes(a:current_win) : <sid>GetVSizes(a:current_win, a:lines))
-endfu
+fun! <sid>GetRelSizes(window, lines) abort "{{{1
+	return (s:nrrw_rgn_vert ? <sid>GetRelHSizes(a:window) : <sid>GetRelVSizes(a:window, a:lines))
+endfun
+
+fun! <sid>GetAbsVSizes(window, lines) abort "{{{1
+    let nrrw_rgn_incr = get(g:, 'nrrw_rgn_incr', 10)
+    if s:nrrw_rgn_wdth > 0
+        let size_min = min([s:nrrw_rgn_wdth, a:lines])
+    else
+        let size_min = winheight(a:window)
+    let size_max = size_min + nrrw_rgn_incr
+    return [size_min, size_max]
+endfun
+
+fun! <sid>GetAbsHSizes(window) abort "{{{1
+    let nrrw_rgn_incr = get(g:, 'nrrw_rgn_incr', 10)
+    if s:nrrw_rgn_wdth > 0
+        let size_min = s:nrrw_rgn_wdth
+    else
+        let size_min = winwidth(a:window)
+    let size_max = size_min + nrrw_rgn_incr
+    return [size_min, size_max]
+endfun
+
+fun! <sid>GetAbsSizes(window, lines) abort "{{{1
+    return (s:nrrw_rgn_vert ? <sid>GetAbsHSizes(a:window) : <sid>GetAbsVSizes(a:window, a:lines))
+endfun
+
+fun! <sid>GetSizes(window, lines) abort "{{{1
+    let nrrw_rgn_absolute = get(g:, 'nrrw_rgn_resize_window', 'absolute') is? "absolute" ? 1 : 0
+    return (nrrw_rgn_absolute ? <sid>GetAbsSizes(a:window, a:lines) : <sid>GetRelSizes(a:window, a:lines))
+endfun
 
 fun! <sid>ResizeWindow(size) abort "{{{1
 	let prefix = (s:nrrw_rgn_vert ? ':vert ': ''). ':resize'
@@ -798,6 +852,7 @@ endfu
 
 fun! <sid>ToggleWindowSize() abort "{{{1
 	" Should only be called from the narrowed window!
+    " assumes a narrowed window is currently focused
 	if has_key(s:nrrw_rgn_lines[b:nrrw_instn], 'single') && s:nrrw_rgn_lines[b:nrrw_instn].single
 		call <sid>WarningMsg("Resizing window for single windows not supported!")
 		return ''
@@ -805,18 +860,18 @@ fun! <sid>ToggleWindowSize() abort "{{{1
 	let nrrw_rgn_pad = get(g:, 'nrrw_rgn_pad', 0)
 	let [size_min, size_max] = <sid>GetSizes(winnr(), line('$') + nrrw_rgn_pad)
 	let size_cur = (s:nrrw_rgn_vert ? winwidth(0) : winheight(0))
-	" window size or contents have changed
 	let size_new = (size_cur == size_min ? size_max : size_min)
-	" g:nrrw_rgn_incr has priority over the relative sizes
-	if get(g:, 'nrrw_rgn_resize_window', 'absolute') is? 'absolute'
-		let nrrw_rgn_incr = get(g:, 'nrrw_rgn_incr', 10)
-	elseif get(g:, 'nrrw_rgn_resize_window', 'absolute') is? 'relative'
-		let nrrw_rgn_incr = size_new
-	else
-		call <sid>WarningMsg("g:nrrw_rgn_resize_window can only be one of [relative|absolute]!")
-		return ''
+	return <sid>ResizeWindow(size_new)."\n"
+endfun
+
+fun! <sid>AdjustWindowSize(bang) abort "{{{1
+	" initial window sizes
+    " assumes a narrowed window is currently focused
+	if !a:bang
+		let nrrw_rgn_pad = get(g:, 'nrrw_rgn_pad', 0)
+        let size_new = <sid>GetSizes(winnr(), line('$') + nrrw_rgn_pad)[0]
+		exe <sid>ResizeWindow(size_new)
 	endif
-	return <sid>ResizeWindow(nrrw_rgn_incr)."\n"
 endfun
 
 fun! <sid>ReturnComments() abort "{{{1
@@ -824,20 +879,6 @@ fun! <sid>ReturnComments() abort "{{{1
 	let c_s = split(cmt)[0]
 	let c_e = (len(split(cmt)) == 1 ? "" : " ". split(cmt)[1])
 	return [c_s, c_e]
-endfun
-
-fun! <sid>AdjustWindowSize(bang, size) abort "{{{1
-	" Resize window
-	if !a:bang
-		let nrrw_rgn_absolute = get(g:, 'nrrw_rgn_resize_window', 'absolute') is? "absolute" ? 1 : 0
-		let nrrw_rgn_pad = get(g:, 'nrrw_rgn_pad', 0)
-		if nrrw_rgn_absolute && !s:nrrw_rgn_vert && len(a:size) < s:nrrw_rgn_wdth
-			" Resize narrowed window to size of buffer
-			exe "sil resize" len(a:size)+nrrw_rgn_pad
-		else
-			exe <sid>ResizeWindow(<sid>GetSizes(winnr(), line('$') + nrrw_rgn_pad)[0])
-		endif
-	endif
 endfun
 
 fun! nrrwrgn#NrrwRgnDoPrepare(...) abort "{{{1
@@ -900,7 +941,7 @@ fun! nrrwrgn#NrrwRgnDoPrepare(...) abort "{{{1
 	let b:orig_buf = orig_buf
 	let s:nrrw_rgn_lines[s:instn].winnr  = bufwinnr(orig_buf)
 	call setline(1, buffer)
-	call <sid>AdjustWindowSize(bang, buffer)
+	call <sid>AdjustWindowSize(bang)
 	setl nomod
 	let b:nrrw_instn = s:instn
 	call <sid>SetupBufLocalCommands()
@@ -965,7 +1006,7 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  abort "{{{1
 	else
 		" Set the highlighting
 		noa wincmd p
-		let w:nrrw_rgn_orig_win = 1
+		let w:nrrw_rgn_id = 1
 		let s:nrrw_rgn_lines[s:instn].winnr  = winnr()
 		" Set highlighting in original window
 		call <sid>AddMatches(<sid>GeneratePattern(
@@ -984,7 +1025,7 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  abort "{{{1
 	let b:orig_buf = orig_buf
 	let s:nrrw_rgn_lines[s:instn].orig_buf  = orig_buf
 	call setline(1, a)
-	call <sid>AdjustWindowSize(bang, a)
+	call <sid>AdjustWindowSize(bang)
 	let b:nrrw_instn = s:instn
 	setl nomod
 	call <sid>SetupBufLocalCommands()
