@@ -874,6 +874,26 @@ fun! <sid>AdjustWindowSize(bang) abort "{{{1
 	endif
 endfun
 
+fun! <sid>SetNrrwID() abort "{{{1
+    if ! has_key(t:, 'nrrw_rgn_ids')
+        let t:nrrw_rgn_ids = []
+    endif
+    for i in range(1, len(t:nrrw_rgn_ids) + 1)
+        if index(t:nrrw_rgn_ids, i) < 0
+            let id = i
+            break
+        endif
+    endfor
+    return id
+endfun
+
+fun! <sid>DelNrrwID(id) abort "{{{
+    let i = index(t:nrrw_rgn_ids, id)
+    if i >= 0
+        remove(t:nrrw_rgn_ids, i)
+    endif
+endfun
+
 fun! <sid>ReturnComments() abort "{{{1
 	let cmt = <sid>ReturnCommentFT()
 	let c_s = split(cmt)[0]
@@ -1001,12 +1021,14 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  abort "{{{1
 	call <sid>DeleteMatches(s:instn)
 	let local_options = <sid>GetOptions(s:opts)
 	let win=<sid>NrrwRgnWin(bang)
+    let nrrw_rgn_id = <sid>SetNrrwID()
+    let w:nrrw_rgn_id = nrrw_rgn_id
 	if bang
 		let s:nrrw_rgn_lines[s:instn].single = 1
 	else
 		" Set the highlighting
 		noa wincmd p
-		let w:nrrw_rgn_id = 1
+		let w:nrrw_rgn_id = nrrw_rgn_id
 		let s:nrrw_rgn_lines[s:instn].winnr  = winnr()
 		" Set highlighting in original window
 		call <sid>AddMatches(<sid>GeneratePattern(
