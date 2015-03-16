@@ -172,12 +172,12 @@ fun! <sid>ParseList(list) abort "{{{1
      return result
 endfun
 
-fun! <sid>GoToWindow(buffer, instn) abort "{{{1
+fun! <sid>GoToWindow(buffer, instn, type) abort "{{{1
 	" find correct source window and switch to it
 	" should be called in correct tab page
 	for win in range(1,winnr('$'))
 		exe ':noa '. win. 'wincmd w'
-		if get(w:, 'nrrw_rgn_source_win', 0) == a:instn
+		if get(w:, 'nrrw_rgn_'.a:type.'_win', 0) == a:instn
 			break
 		endif
 	endfor
@@ -339,7 +339,7 @@ fun! <sid>NrrwRgnAuCmd(instn) abort "{{{1
 		\  (has_key(s:nrrw_rgn_lines[a:instn], 'disable') &&
 		\	!s:nrrw_rgn_lines[a:instn].disable ))
 			" Skip to original window and remove highlighting
-			call <sid>GoToWindow(buf, a:instn)
+			call <sid>GoToWindow(buf, a:instn, "source")
 			call <sid>DeleteMatches(a:instn)
 			if get(w:, 'nrrw_rgn_source_win', 0)
 				unlet! w:nrrw_rgn_source_win
@@ -650,11 +650,13 @@ fun! <sid>BufInTab(bufnr) abort "{{{1
 	return 0
 endfun
 
-fun! <sid>JumpToBufinTab(tab,buf,instn) abort "{{{1
-	if a:tab
+fun! <sid>JumpToBufinTab(tab,buf,instn,type) abort "{{{1
+	" Type is "source" or "target" and checks for
+	" w:nrrw_rgn_source_win or w:nrrw_rgn_target_win variable
+	if a:tab && a:tab != tabpagenr()
 		exe "noa tabn" a:tab
 	endif
-	call <sid>GoToWindow(a:buf,instn)
+	call <sid>GoToWindow(a:buf, a:instn, a:type)
 endfun
 
 fun! <sid>RecalculateLineNumbers(instn, adjust) abort "{{{1
@@ -964,6 +966,7 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  abort "{{{1
 	call <sid>DeleteMatches(s:instn)
 	let local_options = <sid>GetOptions(s:opts)
 	let win=<sid>NrrwRgnWin(bang)
+	let w:nrrw_rgn_target_win = s:instn
 	if bang
 		let s:nrrw_rgn_lines[s:instn].single = 1
 	else
@@ -972,10 +975,10 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  abort "{{{1
 		let w:nrrw_rgn_source_win = s:instn
 		" Set highlighting in original window
 		call <sid>AddMatches(<sid>GeneratePattern(
-		\s:nrrw_rgn_lines[s:instn].start[1:2],
-		\s:nrrw_rgn_lines[s:instn].end[1:2],
-		\(visual ? s:nrrw_rgn_lines[s:instn].vmode : 'V')),
-		\s:instn)
+			\s:nrrw_rgn_lines[s:instn].start[1:2],
+			\s:nrrw_rgn_lines[s:instn].end[1:2],
+			\(visual ? s:nrrw_rgn_lines[s:instn].vmode : 'V')),
+			\s:instn)
 		if _opts[1][0]
 			" reset folding
 			setl foldenable
@@ -1043,7 +1046,7 @@ fun! nrrwrgn#WidenRegion(force)  abort "{{{1
 		exe "undo" nr
 	endif
 
-	call <sid>JumpToBufinTab(<sid>BufInTab(orig_buf), orig_buf, instn)
+	call <sid>JumpToBufinTab(<sid>BufInTab(orig_buf), orig_buf, instn, "source")
 	let orig_win = bufwinnr(orig_buf)
 	" Should be in the right tab now!
 	if (orig_win == -1)
@@ -1066,7 +1069,7 @@ fun! nrrwrgn#WidenRegion(force)  abort "{{{1
 	endif
 	if exists("b:orig_buf_ro") && b:orig_buf_ro && !a:force
 		call s:WarningMsg("Original buffer protected. Can't write changes!")
-		call <sid>JumpToBufinTab(orig_tab, nrw_buf)
+		call <sid>JumpToBufinTab(orig_tab, nrw_buf, instn, "target")
 		return
 	endif
 	if !&l:ma && !(exists("b:orig_buf_ro") && b:orig_buf_ro)
@@ -1204,7 +1207,7 @@ fun! nrrwrgn#WidenRegion(force)  abort "{{{1
 	endif
 	let bufnr = bufnr('')
 	" jump back to narrowed window
-	call <sid>JumpToBufinTab(orig_tab, nrw_buf)
+	call <sid>JumpToBufinTab(orig_tab, nrw_buf, instn, "target")
 	if bufnr('') != bufnr
 		" do not set the original buffer unmodified
 		setl nomod
