@@ -172,6 +172,9 @@ fun! <sid>ParseList(list) abort "{{{1
      return result
 endfun
 
+fun! <sid>GoToWindow(buffer, instn) abort "{{{1
+	" find correct source window and switch to it
+endfun
 fun! <sid>WriteNrrwRgn(...) abort "{{{1
 	" if argument is given, write narrowed buffer back
 	" else destroy the narrowed window
@@ -324,6 +327,7 @@ fun! <sid>NrrwRgnAuCmd(instn) abort "{{{1
 		\  (has_key(s:nrrw_rgn_lines[a:instn], 'disable') &&
 		\	!s:nrrw_rgn_lines[a:instn].disable ))
 			" Skip to original window and remove highlighting
+			call <sid>GoToWindow(buf, instn)
 			if bufnr('') != s:nrrw_rgn_lines[a:instn].orig_buf
 				if bufwinnr(s:nrrw_rgn_lines[a:instn].orig_buf) == -1
 					exe "noa ". s:nrrw_rgn_lines[a:instn].orig_buf. "b"
@@ -647,7 +651,7 @@ fun! <sid>JumpToBufinTab(tab,buf) abort "{{{1
 	endif
 	let win = bufwinnr(a:buf)
 	if win > 0
-		exe ':noa '. bufwinnr(a:buf). 'wincmd w'
+		exe ':noa '. win. 'wincmd w'
 	endif
 endfun
 
@@ -1037,18 +1041,12 @@ fun! nrrwrgn#WidenRegion(force)  abort "{{{1
 		exe "undo" nr
 	endif
 
-	let tab=<sid>BufInTab(orig_buf)
-	if tab != tabpagenr() && tab > 0
-		exe "noa tabn" tab
-	endif
+	call <sid>JumpToBufinTab(<sid>BufInTab(orig_buf), orig_buf)
 	let orig_win = bufwinnr(orig_buf)
 	" Should be in the right tab now!
 	if (orig_win == -1)
 		if bufexists(orig_buf)
 			" buffer not in current window, switch to it!
-			if (winnr != winnr())
-				exe "noa" winnr "wincmd w"
-			endif
 			exe "noa" orig_buf "b!"
 			" Make sure highlighting will be removed
 			let close = (&g:hid ? 0 : 1)
@@ -1056,8 +1054,6 @@ fun! nrrwrgn#WidenRegion(force)  abort "{{{1
 			call s:WarningMsg("Original buffer does no longer exist! Aborting!")
 			return
 		endif
-	else
-		exe ':noa'. orig_win. 'wincmd w'
 	endif
 	let _opts = <sid>SaveRestoreRegister([])
 	let wsv=winsaveview()
