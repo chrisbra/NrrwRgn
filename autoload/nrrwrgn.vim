@@ -320,10 +320,9 @@ fun! <sid>NrrwRgnAuCmd(instn) abort "{{{1
 			echo printf("bufnr: %d a:instn: %d\n", bufnr(''), a:instn)
 			echo "bwipe " s:nrrw_winname. '_'. a:instn
 		endif
-		if ((has_key(s:nrrw_rgn_lines[a:instn], 'disable') &&
-		\	!s:nrrw_rgn_lines[a:instn].disable ) ||
-		\   !has_key(s:nrrw_rgn_lines[a:instn], 'disable') &&
-		\    has_key(s:nrrw_rgn_lines[a:instn], 'winnr'))
+		if (!has_key(s:nrrw_rgn_lines[a:instn], 'disable') ||
+		\  (has_key(s:nrrw_rgn_lines[a:instn], 'disable') &&
+		\	!s:nrrw_rgn_lines[a:instn].disable ))
 			" Skip to original window and remove highlighting
 			if bufnr('') != s:nrrw_rgn_lines[a:instn].orig_buf
 				if bufwinnr(s:nrrw_rgn_lines[a:instn].orig_buf) == -1
@@ -333,8 +332,8 @@ fun! <sid>NrrwRgnAuCmd(instn) abort "{{{1
 				endif
 			endif
 			call <sid>DeleteMatches(a:instn)
-			if get(w:, 'nrrw_rgn_orig_win', 0)
-				unlet! w:nrrw_rgn_orig_win
+			if get(w:, 'nrrw_rgn_source_win', 0)
+				unlet! w:nrrw_rgn_source_win
 			endif
 			if winnr('$') > 1
 				noa wincmd p
@@ -898,7 +897,6 @@ fun! nrrwrgn#NrrwRgnDoPrepare(...) abort "{{{1
 	let win=<sid>NrrwRgnWin(bang)
 	let s:nrrw_rgn_lines[s:instn].single = bang
 	let b:orig_buf = orig_buf
-	let s:nrrw_rgn_lines[s:instn].winnr  = bufwinnr(orig_buf)
 	call setline(1, buffer)
 	call <sid>AdjustWindowSize(bang, buffer)
 	setl nomod
@@ -965,8 +963,7 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  abort "{{{1
 	else
 		" Set the highlighting
 		noa wincmd p
-		let w:nrrw_rgn_orig_win = 1
-		let s:nrrw_rgn_lines[s:instn].winnr  = winnr()
+		let w:nrrw_rgn_source_win = s:instn
 		" Set highlighting in original window
 		call <sid>AddMatches(<sid>GeneratePattern(
 		\s:nrrw_rgn_lines[s:instn].start[1:2],
@@ -1023,13 +1020,9 @@ fun! nrrwrgn#WidenRegion(force)  abort "{{{1
 					\ "Narrowed Window invalid!")
 		return
 	endif
-	let winnr    = get(s:nrrw_rgn_lines[instn], 'winnr', winnr())
+	let winnr    = winnr()
 	let close    = has_key(s:nrrw_rgn_lines[instn], 'single')
 	let vmode    = has_key(s:nrrw_rgn_lines[instn], 'vmode')
-	if winnr > winnr('$')
-		" window doesn't exists anymore
-		let winnr = winnr()
-	endif
 	" Save current state
 	let nr = changenr()
 	" Execute autocommands
