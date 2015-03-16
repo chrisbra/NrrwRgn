@@ -174,6 +174,18 @@ endfun
 
 fun! <sid>GoToWindow(buffer, instn) abort "{{{1
 	" find correct source window and switch to it
+	" should be called in correct tab page
+	for win in range(1,winnr('$'))
+		exe ':noa '. win. 'wincmd w'
+		if get(w:, 'nrrw_rgn_source_win', 0) == a:instn
+			break
+		endif
+	endfor
+	if bufnr('') == a:buffer
+		return
+	else
+		exe ":noa ". a:buffer. "b"
+	endif
 endfun
 fun! <sid>WriteNrrwRgn(...) abort "{{{1
 	" if argument is given, write narrowed buffer back
@@ -327,14 +339,7 @@ fun! <sid>NrrwRgnAuCmd(instn) abort "{{{1
 		\  (has_key(s:nrrw_rgn_lines[a:instn], 'disable') &&
 		\	!s:nrrw_rgn_lines[a:instn].disable ))
 			" Skip to original window and remove highlighting
-			call <sid>GoToWindow(buf, instn)
-			if bufnr('') != s:nrrw_rgn_lines[a:instn].orig_buf
-				if bufwinnr(s:nrrw_rgn_lines[a:instn].orig_buf) == -1
-					exe "noa ". s:nrrw_rgn_lines[a:instn].orig_buf. "b"
-				else
-					exe "noa ". bufwinnr(s:nrrw_rgn_lines[a:instn].orig_buf). "wincmd w"
-				endif
-			endif
+			call <sid>GoToWindow(buf, a:instn)
 			call <sid>DeleteMatches(a:instn)
 			if get(w:, 'nrrw_rgn_source_win', 0)
 				unlet! w:nrrw_rgn_source_win
@@ -645,14 +650,11 @@ fun! <sid>BufInTab(bufnr) abort "{{{1
 	return 0
 endfun
 
-fun! <sid>JumpToBufinTab(tab,buf) abort "{{{1
+fun! <sid>JumpToBufinTab(tab,buf,instn) abort "{{{1
 	if a:tab
 		exe "noa tabn" a:tab
 	endif
-	let win = bufwinnr(a:buf)
-	if win > 0
-		exe ':noa '. win. 'wincmd w'
-	endif
+	call <sid>GoToWindow(a:buf,instn)
 endfun
 
 fun! <sid>RecalculateLineNumbers(instn, adjust) abort "{{{1
@@ -1041,7 +1043,7 @@ fun! nrrwrgn#WidenRegion(force)  abort "{{{1
 		exe "undo" nr
 	endif
 
-	call <sid>JumpToBufinTab(<sid>BufInTab(orig_buf), orig_buf)
+	call <sid>JumpToBufinTab(<sid>BufInTab(orig_buf), orig_buf, instn)
 	let orig_win = bufwinnr(orig_buf)
 	" Should be in the right tab now!
 	if (orig_win == -1)
