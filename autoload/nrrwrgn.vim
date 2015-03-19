@@ -772,7 +772,7 @@ fun! <sid>GetTotalSizesFromID(id) abort "{{{1
 			let l:count += 1
 		endif
 	endfor
-	if l:count < 1 or l:count > 2
+	if l:count < 1 || l:count > 2
 		throw "Invalid NrrwRgn window ID count of '" . l:count . "'"
 	endif
 	return sizes
