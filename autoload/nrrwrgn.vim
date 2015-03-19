@@ -136,7 +136,7 @@ fun! <sid>NrrwRgnWin(bang) abort "{{{1
     " set window variables
     let w:nrrw_rgn_id = s:instn
     let w:nrrw_rgn_id_type = s:window_type["target"]
-    if !bang
+    if !a:bang
 		noa wincmd p
         " focus: source window
 		let w:nrrw_rgn_id = s:instn
