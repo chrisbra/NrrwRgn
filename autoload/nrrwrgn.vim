@@ -99,10 +99,18 @@ fun! <sid>NrrwRgnWin(bang) abort "{{{1
 		if !exists('g:nrrw_topbot_leftright')
 			let g:nrrw_topbot_leftright = 'topleft'
 		endif
-		let l:equalalways = &equalalways
-		let &equalalways = get(g:, 'nrrw_rgn_equalalways', &equalalways)
-		let cmd=printf(':noa %s %s %s', g:nrrw_topbot_leftright,
-				\ (s:nrrw_rgn_vert ? 'vsp' : 'sp'), nrrw_winname)
+		let nrrw_rgn_direction = (s:nrrw_rgn_vert ? 'vsp' : 'sp')
+		if get(g:, 'nrrw_rgn_equalalways', &equalalways)
+			let cmd=printf(':noa %s %s %s', g:nrrw_topbot_leftright,
+										  \ nrrw_rgn_direction,
+										  \ nrrw_winname)
+		else
+			let nrrw_rgn_size = (s:nrrw_rgn_vert ? winwidth(0) : winheight(0))/2
+			let cmd=printf(':noa %s %d%s %s', g:nrrw_topbot_leftright,
+											\ nrrw_rgn_size,
+											\ nrrw_rgn_direction,
+											\ nrrw_winname)
+		endif
 		if !a:bang
 			exe cmd
 		else
@@ -123,7 +131,6 @@ fun! <sid>NrrwRgnWin(bang) abort "{{{1
 				exe cmd
 			endtry
 		endif
-		let &equalalways = l:equalalways
 
 		" just in case, a global nomodifiable was set
 		" disable this for the narrowed window
