@@ -16,6 +16,8 @@
 
 let s:numeric_sort = v:version > 704 || v:version == 704 && has("patch341")
 
+let s:window_type = { "source": 0, "target": 1}
+
 fun! <sid>WarningMsg(msg) abort "{{{1
 	let msg = "NarrowRegion: ". a:msg
 	echohl WarningMsg
@@ -130,6 +132,18 @@ fun! <sid>NrrwRgnWin(bang) abort "{{{1
 		call <sid>NrrwSettings(1)
 		let nrrw_win = bufwinnr("")
 	endif
+    " focus: target
+    " set window variables
+    let w:nrrw_rgn_id = s:instn
+    let w:nrrw_rgn_id_type = s:window_type["target"]
+    if !bang
+		noa wincmd p
+        " focus: source window
+		let w:nrrw_rgn_id = s:instn
+        let w:nrrw_rgn_id_type = s:window_type["source"]
+		noa wincmd p
+        " focus: target window
+    endif
 	" We are in the narrowed buffer now!
 	return nrrw_win
 endfun
@@ -333,9 +347,12 @@ fun! <sid>NrrwRgnAuCmd(instn) abort "{{{1
 				endif
 			endif
 			call <sid>DeleteMatches(a:instn)
-			if get(w:, 'nrrw_rgn_id', 0)
-				unlet! w:nrrw_rgn_id
-			endif
+            if has_key(w:, 'nrrw_rgn_id')
+                unlet! w:nrrw_rgn_id
+            endif
+            if has_key(w:, 'nrrw_rgn_id_type')
+                unlet! w:nrrw_rgn_id_type
+            endif
 			if winnr('$') > 1
 				noa wincmd p
 			endif
@@ -877,26 +894,6 @@ fun! <sid>AdjustWindowSize(bang) abort "{{{1
 	endif
 endfun
 
-fun! <sid>SetNrrwID() abort "{{{1
-    if ! has_key(t:, 'nrrw_rgn_ids')
-        let t:nrrw_rgn_ids = []
-    endif
-    for i in range(1, len(t:nrrw_rgn_ids) + 1)
-        if index(t:nrrw_rgn_ids, i) < 0
-            let id = i
-            break
-        endif
-    endfor
-    return id
-endfun
-
-fun! <sid>DelNrrwID(id) abort "{{{
-    let i = index(t:nrrw_rgn_ids, id)
-    if i >= 0
-        remove(t:nrrw_rgn_ids, i)
-    endif
-endfun
-
 fun! <sid>ReturnComments() abort "{{{1
 	let cmt = <sid>ReturnCommentFT()
 	let c_s = split(cmt)[0]
@@ -1024,14 +1021,11 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  abort "{{{1
 	call <sid>DeleteMatches(s:instn)
 	let local_options = <sid>GetOptions(s:opts)
 	let win=<sid>NrrwRgnWin(bang)
-    let nrrw_rgn_id = <sid>SetNrrwID()
-    let w:nrrw_rgn_id = nrrw_rgn_id
 	if bang
 		let s:nrrw_rgn_lines[s:instn].single = 1
 	else
 		" Set the highlighting
 		noa wincmd p
-		let w:nrrw_rgn_id = nrrw_rgn_id
 		let s:nrrw_rgn_lines[s:instn].winnr  = winnr()
 		" Set highlighting in original window
 		call <sid>AddMatches(<sid>GeneratePattern(
