@@ -803,7 +803,8 @@ fun! <sid>GetRelVSizes(window, lines) abort "{{{1
 			let ratio = nrrw_rgn_rel_max
 		endif
 		let size_max = min([lines_parent, float2nr(ceil(nrrw_rgn_rel_max*lines_parent))])
-		let size_min = min([lines_parent, float2nr(ceil(ratio*lines_parent))])
+		let size_min = min([lines_parent, float2nr(ceil(nrrw_rgn_rel_min*lines_parent))])
+		let size_tgt = min([lines_parent, float2nr(ceil(ratio*lines_parent))])
 	else
 		let nrrw_rgn_rel_max = get(g:, 'nrrw_rgn_rel_max', 80)
 		let nrrw_rgn_rel_min = get(g:, 'nrrw_rgn_rel_min', 10)
@@ -814,9 +815,11 @@ fun! <sid>GetRelVSizes(window, lines) abort "{{{1
 			let percentage = nrrw_rgn_rel_max
 		endif
 		let size_max = min([lines_parent, <sid>NrrwDivCeil(nrrw_rgn_rel_max*lines_parent, 100)])
-		let size_min = min([lines_parent, <sid>NrrwDivCeil(percentage*lines_parent, 100)])
-		endif
-	return [size_min, size_max]
+		let size_min = min([lines_parent, <sid>NrrwDivCeil(nrrw_rgn_rel_min*lines_parent, 100)])
+		let size_tgt = min([lines_parent, <sid>NrrwDivCeil(percentage*lines_parent, 100)])
+	endif
+	let size_alt = (size_tgt >= size_max ? size_min : size_max)
+	return [size_tgt, size_alt]
 endfun
 
 fun! <sid>GetRelHSizes(window) abort "{{{1
@@ -886,9 +889,9 @@ fun! <sid>ToggleWindowSize() abort "{{{1
 		return ''
 	endif
 	let nrrw_rgn_pad = get(g:, 'nrrw_rgn_pad', 0)
-	let [size_min, size_max] = <sid>GetSizes(winnr(), line('$') + nrrw_rgn_pad)
+	let [size_tgt, size_alt] = <sid>GetSizes(winnr(), line('$') + nrrw_rgn_pad)
 	let size_cur = (s:nrrw_rgn_vert ? winwidth(0) : winheight(0))
-	let size_new = (size_cur == size_min ? size_max : size_min)
+	let size_new = (size_cur == size_tgt ? size_alt : size_tgt)
 	return <sid>ResizeWindow(size_new)."\n"
 endfun
 
