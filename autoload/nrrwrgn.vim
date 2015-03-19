@@ -186,6 +186,22 @@ fun! <sid>ParseList(list) abort "{{{1
 	return result
 endfun
 
+fun! <sid>GoToWindow(buffer, instn, type) abort "{{{1
+	" find correct window and switch to it
+	" should be called from correct tab page
+	for win in range(1,winnr('$'))
+		exe ':noa '. win. 'wincmd w'
+        if get(w:, 'nrrw_rgn_id', 0) == a:instn && get(w:, 'nrrw_rgn_id_type', -1) == a:type
+			break
+		endif
+	endfor
+	if bufnr('') == a:buffer
+		return
+	else
+		exe ":noa ". a:buffer. "b"
+	endif
+endfun
+
 fun! <sid>WriteNrrwRgn(...) abort "{{{1
 	" if argument is given, write narrowed buffer back
 	" else destroy the narrowed window
@@ -334,18 +350,11 @@ fun! <sid>NrrwRgnAuCmd(instn) abort "{{{1
 			echo printf("bufnr: %d a:instn: %d\n", bufnr(''), a:instn)
 			echo "bwipe " s:nrrw_winname. '_'. a:instn
 		endif
-		if ((has_key(s:nrrw_rgn_lines[a:instn], 'disable') &&
-		\	!s:nrrw_rgn_lines[a:instn].disable ) ||
-		\   !has_key(s:nrrw_rgn_lines[a:instn], 'disable') &&
-		\    has_key(s:nrrw_rgn_lines[a:instn], 'winnr'))
+		if (!has_key(s:nrrw_rgn_lines[a:instn], 'disable') ||
+		\  (has_key(s:nrrw_rgn_lines[a:instn], 'disable') &&
+		\	!s:nrrw_rgn_lines[a:instn].disable ))
 			" Skip to original window and remove highlighting
-			if bufnr('') != s:nrrw_rgn_lines[a:instn].orig_buf
-				if bufwinnr(s:nrrw_rgn_lines[a:instn].orig_buf) == -1
-					exe "noa ". s:nrrw_rgn_lines[a:instn].orig_buf. "b"
-				else
-					exe "noa ". bufwinnr(s:nrrw_rgn_lines[a:instn].orig_buf). "wincmd w"
-				endif
-			endif
+			call <sid>GoToWindow(buf, a:instn, s:window_type["source"])
 			call <sid>DeleteMatches(a:instn)
             if has_key(w:, 'nrrw_rgn_id')
                 unlet! w:nrrw_rgn_id
@@ -659,14 +668,13 @@ fun! <sid>BufInTab(bufnr) abort "{{{1
 	return 0
 endfun
 
-fun! <sid>JumpToBufinTab(tab,buf) abort "{{{1
-	if a:tab
+fun! <sid>JumpToBufinTab(tab,buf,instn,type) abort "{{{1
+	" Type is s:window_type["source"] or s:window_type["target"] and checks for
+	" w:nrrw_rgn_source_win or w:nrrw_rgn_target_win variable
+	if a:tab && a:tab != tabpagenr()
 		exe "noa tabn" a:tab
 	endif
-	let win = bufwinnr(a:buf)
-	if win > 0
-		exe ':noa '. bufwinnr(a:buf). 'wincmd w'
-	endif
+	call <sid>GoToWindow(a:buf, a:instn, a:type)
 endfun
 
 fun! <sid>RecalculateLineNumbers(instn, adjust) abort "{{{1
@@ -959,7 +967,6 @@ fun! nrrwrgn#NrrwRgnDoPrepare(...) abort "{{{1
 	let win=<sid>NrrwRgnWin(bang)
 	let s:nrrw_rgn_lines[s:instn].single = bang
 	let b:orig_buf = orig_buf
-	let s:nrrw_rgn_lines[s:instn].winnr  = bufwinnr(orig_buf)
 	call setline(1, buffer)
 	call <sid>AdjustWindowSize(bang)
 	setl nomod
@@ -1026,13 +1033,12 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  abort "{{{1
 	else
 		" Set the highlighting
 		noa wincmd p
-		let s:nrrw_rgn_lines[s:instn].winnr  = winnr()
 		" Set highlighting in original window
 		call <sid>AddMatches(<sid>GeneratePattern(
-		\s:nrrw_rgn_lines[s:instn].start[1:2],
-		\s:nrrw_rgn_lines[s:instn].end[1:2],
-		\(visual ? s:nrrw_rgn_lines[s:instn].vmode : 'V')),
-		\s:instn)
+			\s:nrrw_rgn_lines[s:instn].start[1:2],
+			\s:nrrw_rgn_lines[s:instn].end[1:2],
+			\(visual ? s:nrrw_rgn_lines[s:instn].vmode : 'V')),
+			\s:instn)
 		if _opts[1][0]
 			" reset folding
 			setl foldenable
@@ -1083,13 +1089,9 @@ fun! nrrwrgn#WidenRegion(force)  abort "{{{1
 					\ "Narrowed Window invalid!")
 		return
 	endif
-	let winnr    = get(s:nrrw_rgn_lines[instn], 'winnr', winnr())
+	let winnr    = winnr()
 	let close    = has_key(s:nrrw_rgn_lines[instn], 'single')
 	let vmode    = has_key(s:nrrw_rgn_lines[instn], 'vmode')
-	if winnr > winnr('$')
-		" window doesn't exists anymore
-		let winnr = winnr()
-	endif
 	" Save current state
 	let nr = changenr()
 	" Execute autocommands
@@ -1104,18 +1106,12 @@ fun! nrrwrgn#WidenRegion(force)  abort "{{{1
 		exe "undo" nr
 	endif
 
-	let tab=<sid>BufInTab(orig_buf)
-	if tab != tabpagenr() && tab > 0
-		exe "noa tabn" tab
-	endif
+	call <sid>JumpToBufinTab(<sid>BufInTab(orig_buf), orig_buf, instn, s:window_type["source"])
 	let orig_win = bufwinnr(orig_buf)
 	" Should be in the right tab now!
 	if (orig_win == -1)
 		if bufexists(orig_buf)
 			" buffer not in current window, switch to it!
-			if (winnr != winnr())
-				exe "noa" winnr "wincmd w"
-			endif
 			exe "noa" orig_buf "b!"
 			" Make sure highlighting will be removed
 			let close = (&g:hid ? 0 : 1)
@@ -1123,8 +1119,6 @@ fun! nrrwrgn#WidenRegion(force)  abort "{{{1
 			call s:WarningMsg("Original buffer does no longer exist! Aborting!")
 			return
 		endif
-	else
-		exe ':noa'. orig_win. 'wincmd w'
 	endif
 	let _opts = <sid>SaveRestoreRegister([])
 	let wsv=winsaveview()
@@ -1135,7 +1129,7 @@ fun! nrrwrgn#WidenRegion(force)  abort "{{{1
 	endif
 	if exists("b:orig_buf_ro") && b:orig_buf_ro && !a:force
 		call s:WarningMsg("Original buffer protected. Can't write changes!")
-		call <sid>JumpToBufinTab(orig_tab, nrw_buf)
+		call <sid>JumpToBufinTab(orig_tab, nrw_buf, instn, s:window_type["target"])
 		return
 	endif
 	if !&l:ma && !(exists("b:orig_buf_ro") && b:orig_buf_ro)
@@ -1273,7 +1267,7 @@ fun! nrrwrgn#WidenRegion(force)  abort "{{{1
 	endif
 	let bufnr = bufnr('')
 	" jump back to narrowed window
-	call <sid>JumpToBufinTab(orig_tab, nrw_buf)
+	call <sid>JumpToBufinTab(orig_tab, nrw_buf, instn, s:window_type["target"])
 	if bufnr('') != bufnr
 		" do not set the original buffer unmodified
 		setl nomod
