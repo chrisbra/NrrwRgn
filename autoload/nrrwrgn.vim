@@ -94,6 +94,7 @@ fun! <sid>NrrwRgnWin(bang) abort "{{{1
 		exe ":noa ". nrrw_win. 'wincmd w'
 		" just in case, a global nomodifiable was set
 		" disable this for the narrowed window
+		setl ma noro
 		silent %d _
 	else
 		if !exists('g:nrrw_topbot_leftright')
@@ -157,59 +158,53 @@ fun! <sid>NrrwRgnWin(bang) abort "{{{1
 	" We are in the narrowed buffer now!
 	return nrrw_win
 endfun
-
 fun! <sid>CleanRegions() abort "{{{1
-	let s:nrrw_rgn_line=[]
-	unlet! s:nrrw_rgn_buf
+	 let s:nrrw_rgn_line={}
+	 unlet! s:nrrw_rgn_buf
 endfun
 
 fun! <sid>CompareNumbers(a1,a2) abort "{{{1
 	return (a:a1+0) == (a:a2+0) ? 0 : (a:a1+0) > (a:a2+0) ? 1 : -1
 endfun
 
-fun! <sid>ParseList(list) abort "{{{1
+fun! <sid>ParseList(dict) "{{{1
 	" for a given list of line numbers, return those line numbers
 	" in a format start:end for continous items, else [start, next]
-	let result={}
-	let start=0
-	let temp=0
-	let i=1
-	for item in sort(a:list, (s:numeric_sort ? 'n' : "<sid>CompareNumbers"))
-		if start==0
-			let start=item
-		elseif temp!=item-1
-			let result[i]=[start,temp]
-			let start=item
+	" returns a dict of dict: dict[buf][1]=[1,10], dict[buf][2]=[15,20]
+	let outdict = {}
+    let i=1
+	let list = a:dict
+	for buf in sort(keys(a:dict), (s:numeric_sort ? 'n' : '<sid>CompareNumbers'))
+		let result = {}
+		let start  = 0
+		let temp   = 0
+		let item   = 0
+		for item in sort(list[buf], (s:numeric_sort ? 'n' : "<sid>CompareNumbers"))
+			if start==0
+				let start=item
+			elseif temp!=item-1
+				if has_key(result, i)
+					let i+=1
+				endif
+				let result[i]=[start,temp]
+				let start=item
+			endif
+			let temp=item
+		endfor
+		if empty(result)
+			" add all items from the list to the result
+			" list consists only of consecutive items
+			let result[i] = [list[buf][0], list[buf][-1]]
+		endif
+		" Make sure the last item is included in the selection
+		if get(result, i, 0)[0] && result[i][1] != item
 			let i+=1
+			let result[i]=[start,item]
 		endif
-		let temp=item
+		let outdict[buf] = result
+		let i+=1
 	endfor
-	if empty(result)
-		" add all items from the list to the result
-		" list consists only of consecutive items
-		let result[i] = [a:list[0], a:list[-1]]
-	endif
-	" Make sure the last item is included in the selection
-	if get(result, (i-1), 0)[0] && result[i-1][1] != item
-		let result[i]=[start,item]
-	endif
-	return result
-endfun
-
-fun! <sid>GoToWindow(buffer, instn, type) abort "{{{1
-	" find correct window and switch to it
-	" should be called from correct tab page
-	for win in range(1,winnr('$'))
-		exe ':noa '. win. 'wincmd w'
-		if get(w:, 'nrrw_rgn_id', 0) == a:instn && get(w:, 'nrrw_rgn_id_type', -1) == a:type
-			break
-		endif
-	endfor
-	if bufnr('') == a:buffer
-		return
-	else
-		exe ":noa ". a:buffer. "b"
-	endif
+	return outdict
 endfun
 
 fun! <sid>WriteNrrwRgn(...) abort "{{{1
@@ -222,7 +217,7 @@ fun! <sid>WriteNrrwRgn(...) abort "{{{1
 		call s:WarningMsg("Original buffer does no longer exist! Aborting!")
 		return
 	endif
-	if exists("a:1") && a:1
+	if &l:mod && exists("a:1") && a:1
 		" Write the buffer back to the original buffer
 		let _wsv = winsaveview()
 		setl nomod
@@ -333,9 +328,12 @@ fun! <sid>NrrwRgnAuCmd(instn) abort "{{{1
 		" When switching buffer in the original buffer,
 		" make sure the highlighting of the narrowed buffer will
 		" be removed"
-		exe "au BufWinLeave <buffer=".b:orig_buf.
+		if bufloaded(b:orig_buf) && exists(b:orig_buf)
+			" for multi narrowed buffers, is not defined!
+			exe "au BufWinLeave <buffer=".b:orig_buf.
 			\ "> if <sid>HasMatchID(".b:nrrw_instn.")|call <sid>DeleteMatches(".
 			\ b:nrrw_instn.")|endif"
+		endif
 		aug end
 	else
 		exe "aug NrrwRgn".  a:instn
@@ -607,6 +605,19 @@ fun! <sid>WidenRegionMulti(content, instn) abort "{{{1
 	if empty(s:nrrw_rgn_lines[a:instn].multi)
 		return
 	endif
+	" we are not yet in the correct buffer, start loading it
+	let c_win = winnr()
+	let c_buf = bufnr('')
+	" let's pretend, splitting windows is always possible .... :(
+	noa new
+	let s_win = winnr()
+	for buf in sort(keys(s:nrrw_rgn_lines[a:instn].multi), '<sid>CompareNumbers')
+		exe "noa ". (buf+0). "b"
+		let _list = []
+		for item in ['ma', 'ro']
+			call add(_list, printf("let &l:%s=%s", item, get(g:, '&l:'.item)))
+		endfor
+		setl ma noro
 
 	let output= []
 	let list  = []
@@ -615,19 +626,20 @@ fun! <sid>WidenRegionMulti(content, instn) abort "{{{1
 	" We must put the regions back from top to bottom,
 	" otherwise, changing lines in between messes up the list of lines that
 	" still need to put back from the narrowed buffer to the original buffer
-	for key in sort(keys(s:nrrw_rgn_lines[a:instn].multi), (s:numeric_sort ? 'n' :
+	for key in sort(keys(s:nrrw_rgn_lines[a:instn].multi[buf]), (s:numeric_sort ? 'n' :
 			\ "<sid>CompareNumbers"))
 		let adjust   = line('$') - lastline
-		let range    = s:nrrw_rgn_lines[a:instn].multi[key]
+		let range    = s:nrrw_rgn_lines[a:instn].multi[buf][key]
 		let last     = (len(range)==2) ? range[1] : range[0]
 		let first    = range[0]
-		let indexs   = index(a:content, c_s.' Start NrrwRgn'.key.c_e) + 1
-		let indexe   = index(a:content, c_s.' End NrrwRgn'.key.c_e) - 1
+		let pattern  = printf("%s %%s %s %s %s%s", c_s, "NrrwRgn".key, "buffer:", simplify(bufname(buf+0)), c_e)
+		let indexs   = index(a:content, printf(pattern, 'Start')) + 1
+		let indexe   = index(a:content, printf(pattern, 'End')) - 1
 		if indexs <= 0 || indexe < -1
 			call s:WarningMsg("Skipping Region ". key)
 			continue
 		endif
-		" Adjust line numbers. Changing the original buffer, might also
+		" Adjust line numbers. Changing the original buffer, might also 
 		" change the regions we have remembered. So we must adjust these
 		" numbers.
 		" This only works, if we put the regions from top to bottom!
@@ -654,8 +666,14 @@ fun! <sid>WidenRegionMulti(content, instn) abort "{{{1
 		endif
 		if delete_last_line
 			silent! $d _
-		endif
+			endif
+		endfor
+		for item in _list
+			exe item
+		endfor
 	endfor
+	" remove scratch window
+	exe ":noa ".s_win."wincmd c"
 endfun
 
 fun! <sid>AddMatches(pattern, instn) abort "{{{1
@@ -922,7 +940,7 @@ fun! <sid>ReturnComments() abort "{{{1
 	return [c_s, c_e]
 endfun
 
-fun! nrrwrgn#NrrwRgnDoPrepare(...) abort "{{{1
+fun! nrrwrgn#NrrwRgnDoMulti(...) abort "{{{1
 	let bang = (a:0 > 0 && !empty(a:1))
 	if !exists("s:nrrw_rgn_line")
 		call <sid>WarningMsg("You need to first select the lines to".
@@ -959,26 +977,38 @@ fun! nrrwrgn#NrrwRgnDoPrepare(...) abort "{{{1
 	let lines=[]
 	let buffer=[]
 
-	let keys = keys(s:nrrw_rgn_buf)
-	call sort(keys, (s:numeric_sort ? 'n' : "<sid>CompareNumbers"))
-	let [c_s, c_e] =  <sid>ReturnComments()
-	for nr in keys
-		let lines = s:nrrw_rgn_buf[nr]
-		let start = lines[0]
-		let end   = len(lines)==2 ? lines[1] : lines[0]
-		if !bang
-			call <sid>AddMatches(<sid>GeneratePattern([start,0], [end,0], 'V'),
-					\s:instn)
+	for buf in sort(keys(s:nrrw_rgn_buf), (s:numeric_sort ? 'n' : "<sid>CompareNumbers"))
+		if buf !=? bufnr('%')
+			exe ":noa " . buf. "b"
 		endif
-		call add(buffer, c_s.' Start NrrwRgn'.nr.c_e)
-		let buffer = buffer +
-				\ getline(start,end) +
-				\ [c_s.' End NrrwRgn'.nr.c_e, '']
+		let keys = keys(s:nrrw_rgn_buf[buf])
+		call sort(keys, (s:numeric_sort ? 'n' : "<sid>CompareNumbers"))
+		"for [ nr,lines] in items(s:nrrw_rgn_buf)
+		let [c_s, c_e] =  <sid>ReturnComments()
+		for nr in keys
+			let lines = s:nrrw_rgn_buf[buf][nr]
+			let start = lines[0]
+			let end   = len(lines)==2 ? lines[1] : lines[0]
+			if !bang
+				call <sid>AddMatches(<sid>GeneratePattern([start,0], [end,0], 'V'),
+						\s:instn)
+			endif
+			call add(buffer, c_s.' Start NrrwRgn'.nr.c_e.' buffer: '.simplify(bufname("")))
+			let buffer = buffer +
+					\ getline(start,end) +
+					\ [c_s.' End NrrwRgn'.nr.c_e. ' buffer: '.simplify(bufname("")), '']
+		endfor
 	endfor
+	if bufnr('') !=# orig_buf
+		" switch back to buffer, where we started
+		exe ":noa ". orig_buf. "b"
+	endif
 
 	let local_options = <sid>GetOptions(s:opts)
 	let win=<sid>NrrwRgnWin(bang)
-	let s:nrrw_rgn_lines[s:instn].single = bang
+	if bang
+		let s:nrrw_rgn_lines[s:instn].single = 1
+	endif
 	let b:orig_buf = orig_buf
 	call setline(1, buffer)
 	call <sid>AdjustWindowSize(bang)
@@ -1020,15 +1050,15 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  abort "{{{1
 
 	call <sid>CheckProtected()
 	if visual
-		let [ s:nrrw_rgn_lines[s:instn].start,
-			\ s:nrrw_rgn_lines[s:instn].end ] = <sid>RetVisRegionPos()
-		norm! gv"ay
-		if len(split(@a, "\n", 1)) !=
+	let [ s:nrrw_rgn_lines[s:instn].start,
+		\ s:nrrw_rgn_lines[s:instn].end ] = <sid>RetVisRegionPos()
+	norm! gv"ay
+	if len(split(@a, "\n", 1)) !=
 			\ (s:nrrw_rgn_lines[s:instn].end[1] -
 			\ s:nrrw_rgn_lines[s:instn].start[1] + 1)
 			" remove trailing "\n"
 			let @a=substitute(@a, '\n$', '', '')
-		endif
+	endif
 		let a = split(@a, "\n")
 	else
 		let first = a:firstline
@@ -1083,9 +1113,15 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  abort "{{{1
 endfun
 fun! nrrwrgn#Prepare(bang) abort "{{{1
 	if !exists("s:nrrw_rgn_line") || !empty(a:bang)
-		let s:nrrw_rgn_line=[]
+		let s:nrrw_rgn_line={}
+		if !empty(a:bang)
+			return
+		endif
 	endif
-	call add(s:nrrw_rgn_line, line('.'))
+	if !has_key(s:nrrw_rgn_line, bufnr('%'))
+		let s:nrrw_rgn_line[bufnr('%')] = []
+	endif
+	call add(s:nrrw_rgn_line[bufnr('%')], line('.'))
 endfun
 
 fun! nrrwrgn#WidenRegion(force)  abort "{{{1
@@ -1119,35 +1155,40 @@ fun! nrrwrgn#WidenRegion(force)  abort "{{{1
 		exe "undo" nr
 	endif
 
-	call <sid>JumpToBufinTab(<sid>BufInTab(orig_buf), orig_buf, instn, s:window_type["source"])
-	let orig_win = bufwinnr(orig_buf)
-	" Should be in the right tab now!
-	if (orig_win == -1)
-		if bufexists(orig_buf)
-			" buffer not in current window, switch to it!
-			exe "noa" orig_buf "b!"
-			" Make sure highlighting will be removed
-			let close = (&g:hid ? 0 : 1)
+	if !has_key(s:nrrw_rgn_lines[instn], 'multi')
+		" <sid>WidenRegionMulti does take care of loading the correct buffer!
+		call <sid>JumpToBufinTab(<sid>BufInTab(orig_buf), orig_buf, instn, s:window_type["source"])
+		let orig_win = bufwinnr(orig_buf)
+		" Should be in the right tab now!
+		if (orig_win == -1)
+			if bufexists(orig_buf)
+				" buffer not in current window, switch to it!
+				exe "noa" orig_buf "b!"
+				" Make sure highlighting will be removed
+				let close = (&g:hid ? 0 : 1)
+			else
+				call s:WarningMsg("Original buffer does no longer exist! Aborting!")
+				return
+			endif
 		else
-			call s:WarningMsg("Original buffer does no longer exist! Aborting!")
+			exe ':noa'. orig_win. 'wincmd w'
+		endif
+		" Removing matches only works in the right window. So need to check,
+		" the matchid actually exists, if not, try to remove it later.
+		if <sid>HasMatchID(instn)
+			call <sid>DeleteMatches(instn)
+		endif
+		if exists("b:orig_buf_ro") && b:orig_buf_ro && !a:force
+			call s:WarningMsg("Original buffer protected. Can't write changes!")
+			call <sid>JumpToBufinTab(orig_tab, nrw_buf, instn, s:window_type["target"])
 			return
+		endif
+		if !&l:ma && !(exists("b:orig_buf_ro") && b:orig_buf_ro)
+			setl ma
 		endif
 	endif
 	let _opts = <sid>SaveRestoreRegister([])
 	let wsv=winsaveview()
-	" Removing matches only works in the right window. So need to check,
-	" the matchid actually exists, if not, try to remove it later.
-	if <sid>HasMatchID(instn)
-		call <sid>DeleteMatches(instn)
-	endif
-	if exists("b:orig_buf_ro") && b:orig_buf_ro && !a:force
-		call s:WarningMsg("Original buffer protected. Can't write changes!")
-		call <sid>JumpToBufinTab(orig_tab, nrw_buf, instn, s:window_type["target"])
-		return
-	endif
-	if !&l:ma && !(exists("b:orig_buf_ro") && b:orig_buf_ro)
-		setl ma
-	endif
 	" This is needed to adjust all other narrowed regions
 	" in case we have several narrowed regions within the same buffer
 	if exists("g:nrrw_rgn_protect") && g:nrrw_rgn_protect =~? 'n'
@@ -1210,6 +1251,8 @@ fun! nrrwrgn#WidenRegion(force)  abort "{{{1
 				\ s:nrrw_rgn_lines[instn].end[1:2],
 				\ s:nrrw_rgn_lines[instn].vmode),
 				\ instn)
+		else
+			noa b #
 		endif
 	" 3) :NR started selection
 	else
@@ -1369,7 +1412,7 @@ fun! nrrwrgn#LastNrrwRgn(bang) abort "{{{1
 	if len(s:nrrw_rgn_lines['last']) == 1
 		" Multi Narrowed
 		let s:nrrw_rgn_buf =  s:nrrw_rgn_lines['last'][0][1]
-		call nrrwrgn#NrrwRgnDoPrepare('')
+		call nrrwrgn#NrrwRgnDoMulti('')
 	else
 		exe "keepj" s:nrrw_rgn_lines['last'][0][1][0]
 		exe "keepj norm!" s:nrrw_rgn_lines['last'][0][1][1]. '|'
@@ -1408,8 +1451,9 @@ fun! nrrwrgn#NrrwRgnStatus() abort "{{{1
 			endif
 			let dict.multi     = has_key(cur, 'multi')
 			if has_key(cur, 'multi')
-				let dict.startl= map(copy(multi), 'v:val[0]')
-				let dict.endl  = map(copy(multi), 'v:val[1]')
+				let end = keys(multi[1])[-1]
+				let dict.startl= map(copy(multi), 'v:val[1][0]')
+				let dict.endl  = map(copy(multi), 'v:val[end][1]')
 			else
 				let dict.start = cur.start
 				let dict.end   = cur.end

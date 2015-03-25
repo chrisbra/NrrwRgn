@@ -497,6 +497,7 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
   "written" hook
 - error on writing back multi narrowed window (issue #30, reported by
   aleprovencio https://github.com/chrisbra/NrrwRgn/issues/30, thanks!)
+- document autoresize function (g:nrrw_rgn_autoresize_win)
 - error when calling Incr Function, Make it override over global mapping.
   (issue #31, reported by zc he https://github.com/chrisbra/NrrwRgn/issues/31, thanks!)
 - |:NRP| didn't work as documented (reported by David Fishburn, thanks!)
