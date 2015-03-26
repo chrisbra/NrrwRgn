@@ -207,6 +207,22 @@ fun! <sid>ParseList(dict) "{{{1
 	return outdict
 endfun
 
+fun! <sid>GoToWindow(buffer, instn, type) abort "{{{1
+	" find correct window and switch to it
+	" should be called from correct tab page
+	for win in range(1,winnr('$'))
+		exe ':noa '. win. 'wincmd w'
+		if get(w:, 'nrrw_rgn_id', 0) == a:instn && get(w:, 'nrrw_rgn_id_type', -1) == a:type
+			break
+		endif
+	endfor
+	if bufnr('') == a:buffer
+		return
+	else
+		exe ":noa ". a:buffer. "b"
+	endif
+endfun
+
 fun! <sid>WriteNrrwRgn(...) abort "{{{1
 	" if argument is given, write narrowed buffer back
 	" else destroy the narrowed window
