@@ -611,7 +611,11 @@ fun! <sid>HideNrrwRgnLines() abort "{{{1
 endfun
 
 fun! <sid>ReturnCommentFT() abort "{{{1
-	return substitute(&l:commentstring, '%s', ' ', '')
+	if !empty(&l:commentstring)
+		return substitute(&l:commentstring, '%s', ' ', '')
+	else
+		return "# "
+	endif
 endfun
 
 fun! <sid>WidenRegionMulti(content, instn) abort "{{{1
