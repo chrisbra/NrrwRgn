@@ -15,7 +15,6 @@
 " Functions:
 
 let s:numeric_sort = v:version > 704 || v:version == 704 && has("patch341")
-
 let s:window_type = { "source": 0, "target": 1}
 
 fun! <sid>WarningMsg(msg) abort "{{{1
@@ -87,7 +86,12 @@ endfun
 
 fun! <sid>NrrwRgnWin(bang) abort "{{{1
 	" Create new scratch window
-	let bufname = matchstr(substitute(expand('%:t:r'), ' ', '_', 'g'), '^.\{0,8}')
+	if has_key(s:nrrw_rgn_lines, s:instn) &&
+		\ has_key(s:nrrw_rgn_lines[s:instn], 'multi')
+		let bufname = 'multi'
+	else
+		let bufname = matchstr(substitute(expand('%:t:r'), ' ', '_', 'g'), '^.\{0,8}')
+	endif
 	let nrrw_winname = s:nrrw_winname. '_'. bufname . '_'. s:instn
 	let nrrw_win = bufwinnr('^'.nrrw_winname.'$')
 	if nrrw_win != -1
@@ -761,11 +765,13 @@ fun! <sid>NrrwSettings(on) abort "{{{1
 	if a:on
 		setl noswapfile buftype=acwrite foldcolumn=0
 		setl nobuflisted
-		let instn = matchstr(bufname(''), '_\zs\d\+')+0
-		if  !&hidden && !has_key(s:nrrw_rgn_lines[instn], "single")
-			setl bufhidden=wipe
-		else
-			setl bufhidden=hide
+		let instn = matchstr(bufname(''), '_\zs\d\+$')+0
+		if has_key(s:nrrw_rgn_lines, 'instn')
+			if  !&hidden && !has_key(s:nrrw_rgn_lines[instn], "single")
+				setl bufhidden=wipe
+			else
+				setl bufhidden=hide
+			endif
 		endif
 	else
 		setl swapfile buftype= bufhidden= buflisted
@@ -1010,13 +1016,14 @@ fun! nrrwrgn#NrrwRgnDoMulti(...) abort "{{{1
 			let start = lines[0]
 			let end   = len(lines)==2 ? lines[1] : lines[0]
 			if !bang
-				call <sid>AddMatches(<sid>GeneratePattern([start,0], [end,0], 'V'),
-						\s:instn)
+				call <sid>AddMatches(<sid>GeneratePattern([start,0],
+					\ [end,0], 'V'), s:instn)
 			endif
 			call add(buffer, c_s.' Start NrrwRgn'.nr.c_e.' buffer: '.simplify(bufname("")))
 			let buffer = buffer +
 					\ getline(start,end) +
-					\ [c_s.' End NrrwRgn'.nr.c_e. ' buffer: '.simplify(bufname("")), '']
+					\ [c_s.' End NrrwRgn'.nr.c_e. 
+					\ ' buffer: '.simplify(bufname("")), '']
 		endfor
 	endfor
 	if bufnr('') !=# orig_buf
