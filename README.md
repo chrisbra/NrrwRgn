@@ -31,6 +31,9 @@ Here is a short overview of the functionality provided by the plugin:
 ####Scripting Functions:
     nrrwrgn#NrrwRgnStatus()   - Return a dict with all the status information for the current window
 
+###Attention###
+   :NRM is currently experimental
+
 ####Similar Work
 Andreas Politz' [narrow_region](http://www.vim.org/scripts/script.php?script_id=2038)<br/>
 Kana Natsunos [narrow](http://www.vim.org/scripts/script.php?script_id=2097)<br/>
