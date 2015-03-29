@@ -15,7 +15,7 @@
 " Functions:
 
 let s:numeric_sort = v:version > 704 || v:version == 704 && has("patch341")
-let s:window_type = { "source": 0, "target": 1}
+let s:window_type = {"source": 0, "target": 1}
 
 fun! <sid>WarningMsg(msg) abort "{{{1
 	let msg = "NarrowRegion: ". a:msg
@@ -384,15 +384,7 @@ fun! <sid>NrrwRgnAuCmd(instn) abort "{{{1
 			" Skip to original window and remove highlighting
 			call <sid>GoToWindow(buf, a:instn, s:window_type["source"])
 			call <sid>DeleteMatches(a:instn)
-			if has_key(w:, 'nrrw_rgn_id')
-				unlet! w:nrrw_rgn_id
-			endif
-			if has_key(w:, 'nrrw_rgn_id_type')
-				unlet! w:nrrw_rgn_id_type
-			endif
-			if winnr('$') > 1
-				noa wincmd p
-			endif
+			unlet! w:nrrw_rgn_id w:nrrw_rgn_id_type
 			call <sid>CleanUpInstn(a:instn)
 		endif
 	endif

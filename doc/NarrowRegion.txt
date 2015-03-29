@@ -474,6 +474,9 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 - Do not resize window, if :NR! was used (patch by leonidborisenko from
   https://github.com/chrisbra/NrrwRgn/pull/38 thanks!)
 - Various improvements for Window resizing, partly by Yclept Nemo, thanks!
+- Fixed error for undefined function and cursor movement in wrong window
+  (issue https://github.com/chrisbra/NrrwRgn/issues/42 reported by adelarsq,
+  thanks!)
 
 0.33: Jan 16, 2015 {{{1
 - set local options later, so that FileType autocommands don't trigger to
