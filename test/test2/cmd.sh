@@ -12,7 +12,7 @@ LC_ALL=C vim -u NONE -N \
     -c 'sil :wq' \
     -c 'sil :$put =\"Added after Narrowing Line\"' \
     -c ':bufdo if bufname("")=~"^\\d\\.txt$"|saveas! %.mod|endif' \
-    -c ':qa' 1.txt
+    -c ':qa!' 1.txt
 
 rt=$(diff -uN0 <(cat *.mod) <(cat *.ok))
 if [ "$?" -ne 0 ]; then
