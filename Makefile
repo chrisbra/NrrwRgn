@@ -4,7 +4,7 @@ DOC=$(wildcard doc/*.txt)
 PLUGIN=$(shell basename "$$PWD")
 VERSION=$(shell sed -n '/Version:/{s/^.*\(\S\.\S\+\)$$/\1/;p}' $(SCRIPT))
 
-.PHONY: $(PLUGIN).vmb README
+.PHONY: $(PLUGIN).vmb README test
 
 all: uninstall vimball install
 
@@ -35,6 +35,9 @@ $(PLUGIN).vmb:
 	ln -f $(PLUGIN)-$(VERSION).vmb $(PLUGIN).vmb
      
 release: version all README
+
+test:
+	cd test && ./runtest.sh
 
 version:
 	perl -i.orig -pne 'if (/Version:/) {s/\.(\d*)/sprintf(".%d", 1+$$1)/e}' ${SCRIPT} ${AUTOL}
