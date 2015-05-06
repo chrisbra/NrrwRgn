@@ -11,6 +11,7 @@ LC_ALL=C vim -u NONE -N \
     -c 'sil :1,$NR' \
     -c 'sil :$put =\"Added Line\"' \
     -c 'sil :wq' \
+    -c '2wincmd w' \
     -c 'sil :$put =\"Added after Narrowing Line\"' \
     -c ':bufdo if bufname("")=~"^\\d\\.txt$"|saveas! %.mod|endif' \
     -c ':qa!'
