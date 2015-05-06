@@ -330,15 +330,26 @@ fun! <sid>UpdateOrigWin() abort "{{{
 	endtry
 endfun!
 
+fun! <sid>SetupBufWriteCmd(instn) "{{{1
+	if !exists("#NrrwRgn".a:instn."#BufWriteCmd#<buffer>")
+		if s:debug
+			echo "Setting up BufWriteCmd!"
+		endif
+		au BufWriteCmd <buffer> nested :call s:WriteNrrwRgn(1)
+	endif
+endfu
 fun! <sid>NrrwRgnAuCmd(instn) abort "{{{1
 	" If a:instn==0, then enable auto commands
 	" else disable auto commands for a:instn
 	if !a:instn
 		exe "aug NrrwRgn". b:nrrw_instn
 		au!
-		au BufWriteCmd <buffer> nested :call s:WriteNrrwRgn(1)
-		au BufWinLeave,BufWipeout,BufDelete <buffer> nested
+		"au BufWriteCmd <buffer> nested :call s:WriteNrrwRgn(1)
+		" don't clean up on BufWinLeave autocommand, that breaks
+		" :b# and returning back to that buffer later (see issue #44)
+		au BufWipeout,BufDelete <buffer> nested
 					\ :call s:WriteNrrwRgn()
+		"au BufWriteCmd <buffer> nested :call s:WriteNrrwRgn(1)
 		au CursorMoved <buffer> :call s:UpdateOrigWin()
 		" When switching buffer in the original buffer,
 		" make sure the highlighting of the narrowed buffer will
@@ -349,7 +360,11 @@ fun! <sid>NrrwRgnAuCmd(instn) abort "{{{1
 			\ "> if <sid>HasMatchID(".b:nrrw_instn.")|call <sid>DeleteMatches(".
 			\ b:nrrw_instn.")|endif"
 		endif
+		call s:SetupBufWriteCmd(b:nrrw_instn)
 		aug end
+		au BufWinEnter <buffer> if !exists("#BufWinEnter#<buffer>") |
+				\	call s:SetupBufWriteCmd(b:nrrw_instn) |
+				\ endif
 	else
 		exe "aug NrrwRgn".  a:instn
 		au!
