@@ -120,11 +120,6 @@ fun! <sid>NrrwRgnWin(bang) abort "{{{1
 			exe cmd
 		else
 			try
-				" if hidden is set, set the original buffer to be modified, so
-				" that :q won't accidently quit vim
-				if &hid
-					setl modified
-				endif
 				enew
 				if bufexists(s:nrrw_winname. '_'. s:instn)
 					" avoid E95
@@ -782,7 +777,7 @@ fun! <sid>SetupBufLocalCommands() abort "{{{1
 	com! -buffer NRNoSyncOnWrite :call nrrwrgn#ToggleSyncWrite(0)
 endfun
 
-fun! <sid>SetupBufLocalMaps() abort "{{{1
+fun! <sid>SetupBufLocalMaps(bang) abort "{{{1
 	if !hasmapto('<Plug>NrrwrgnWinIncr', 'n')
 		nmap <buffer> <Leader><Space> <Plug>NrrwrgnWinIncr
 	endif
@@ -790,6 +785,12 @@ fun! <sid>SetupBufLocalMaps() abort "{{{1
 		nmap <buffer><unique> <Plug>NrrwrgnWinIncr NrrwRgnIncr
 	endif
 	nnoremap <buffer><silent><script><expr> NrrwRgnIncr <sid>ToggleWindowSize()
+	if a:bang && winnr('$') == 1
+		" Map away :q and :q! in single window mode, so that :q won't
+		" accidently quit vim.
+		cabbr <buffer> q  <c-r>=(getcmdtype()==':'&&getcmdpos()==1 ? ':bd' : ':q')<cr>
+		cabbr <buffer> q! <c-r>=(getcmdtype()==':'&&getcmdpos()==1 ? ':bd!' : ':q!')<cr>
+	endif
 endfun
 
 fun! <sid>NrrwDivNear(n, d) abort "{{{1
@@ -1040,7 +1041,7 @@ fun! nrrwrgn#NrrwRgnDoMulti(...) abort "{{{1
 	setl nomod
 	let b:nrrw_instn = s:instn
 	call <sid>SetupBufLocalCommands()
-	call <sid>SetupBufLocalMaps()
+	call <sid>SetupBufLocalMaps(bang)
 	call <sid>NrrwRgnAuCmd(0)
 	call <sid>SetOptions(local_options)
 	call <sid>CleanRegions()
@@ -1122,7 +1123,7 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  abort "{{{1
 	let b:nrrw_instn = s:instn
 	setl nomod
 	call <sid>SetupBufLocalCommands()
-	call <sid>SetupBufLocalMaps()
+	call <sid>SetupBufLocalMaps(bang)
 	call <sid>NrrwRgnAuCmd(0)
 	call <sid>SetOptions(local_options)
 	if has_key(s:nrrw_aucmd, "create")
