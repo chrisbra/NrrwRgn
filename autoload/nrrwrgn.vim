@@ -232,7 +232,7 @@ fun! <sid>WriteNrrwRgn(...) abort "{{{1
 		call s:WarningMsg("Original buffer does no longer exist! Aborting!")
 		return
 	endif
-	if &l:mod && exists("a:1") && a:1
+	if exists("a:1") && a:1
 		" Write the buffer back to the original buffer
 		let _wsv = winsaveview()
 		setl nomod
@@ -362,9 +362,7 @@ fun! <sid>NrrwRgnAuCmd(instn) abort "{{{1
 		endif
 		call s:SetupBufWriteCmd(b:nrrw_instn)
 		aug end
-		au BufWinEnter <buffer> if !exists("#BufWinEnter#<buffer>") |
-				\	call s:SetupBufWriteCmd(b:nrrw_instn) |
-				\ endif
+		au BufWinEnter <buffer> call s:SetupBufWriteCmd(b:nrrw_instn)
 	else
 		exe "aug NrrwRgn".  a:instn
 		au!
@@ -1356,11 +1354,12 @@ fun! nrrwrgn#WidenRegion(force)  abort "{{{1
 		exe b:nrrw_aucmd_written
 	endif
 	call winrestview(wsv)
-	if !close && has_key(s:nrrw_rgn_lines[instn], 'single')
+	"if !close && has_key(s:nrrw_rgn_lines[instn], 'single')
+	if has_key(s:nrrw_rgn_lines[instn], 'single')
 		" move back to narrowed buffer
 		noa b #
-	elseif close
-		call <sid>CleanUpInstn(instn)
+	"elseif close
+	"	call <sid>CleanUpInstn(instn)
 	endif
 	let bufnr = bufnr('')
 	" jump back to narrowed window
