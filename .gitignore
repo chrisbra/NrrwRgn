@@ -8,3 +8,5 @@ vim_passfile
 # ignore *.orig files
 *.orig
 doc/tags
+# ignore test files
+*.mod
