@@ -1,5 +1,7 @@
 (issues to work on, in the order of importance):
 
+- clean up does not work? (instn data isn't removed after :wq in narrowed window)
+
 - When disabling Narrowing using :NRN and one quits the buffer,
   should the highlighting be removed? (it doesn't yet)
 
