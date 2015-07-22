@@ -1284,14 +1284,12 @@ fun! nrrwrgn#WidenRegion(force)  abort "{{{1
 		" then where we started, else we might accidentally
 		" set a match in the narrowed window (might happen if the
 		" user typed Ctrl-W o in the narrowed window)
-		if !has_key(s:nrrw_rgn_lines[instn], 'single') && winnr != winnr()
+		if !(has_key(s:nrrw_rgn_lines[instn], 'single') || winnr != winnr())
 			call <sid>AddMatches(<sid>GeneratePattern(
 				\ s:nrrw_rgn_lines[instn].start[1:2],
 				\ s:nrrw_rgn_lines[instn].end[1:2],
 				\ s:nrrw_rgn_lines[instn].vmode),
 				\ instn)
-		else
-			noa b #
 		endif
 	" 3) :NR started selection
 	else
