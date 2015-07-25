@@ -338,6 +338,26 @@ fun! <sid>SetupBufWriteCmd(instn) "{{{1
 		au BufWriteCmd <buffer> nested :call s:WriteNrrwRgn(1)
 	endif
 endfu
+fun! <sid>SetupBufWinLeave(instn) "{{{1
+	if !exists("#NrrwRgn".a:instn."#BufWinLeave#<buffer>") &&
+	\ exists("b:orig_buf") && bufloaded(b:orig_buf)
+		au BufWinLeave <buffer> :call s:NRBufWinLeave(b:nrrw_instn)
+	endif
+endfu
+fun! <sid>NRBufWinLeave(instn) "{{{1
+	let nrw_buf  = bufnr('')
+	let orig_win = winnr()
+	let instn    = a:instn
+	let orig_buf = b:orig_buf
+	let orig_tab = tabpagenr()
+	call <sid>JumpToBufinTab(<sid>BufInTab(orig_buf), orig_buf, instn, s:window_type["source"])
+	if !&modifiable
+		set modifiable
+	endif
+	call s:DeleteMatches(instn)
+	call <sid>JumpToBufinTab(orig_tab, nrw_buf, instn, s:window_type["target"])
+endfu
+
 fun! <sid>NrrwRgnAuCmd(instn) abort "{{{1
 	" If a:instn==0, then enable auto commands
 	" else disable auto commands for a:instn
@@ -349,17 +369,11 @@ fun! <sid>NrrwRgnAuCmd(instn) abort "{{{1
 		" :b# and returning back to that buffer later (see issue #44)
 		au BufWipeout,BufDelete <buffer> nested
 					\ :call s:WriteNrrwRgn()
-		"au BufWriteCmd <buffer> nested :call s:WriteNrrwRgn(1)
 		au CursorMoved <buffer> :call s:UpdateOrigWin()
 		" When switching buffer in the original buffer,
 		" make sure the highlighting of the narrowed buffer will
 		" be removed"
-		if bufloaded(b:orig_buf) && exists(b:orig_buf)
-			" for multi narrowed buffers, is not defined!
-			exe "au BufWinLeave <buffer=".b:orig_buf.
-			\ "> if <sid>HasMatchID(".b:nrrw_instn.")|call <sid>DeleteMatches(".
-			\ b:nrrw_instn.")|endif"
-		endif
+		call s:SetupBufWinLeave(b:nrrw_instn)
 		call s:SetupBufWriteCmd(b:nrrw_instn)
 		aug end
 		au BufWinEnter <buffer> call s:SetupBufWriteCmd(b:nrrw_instn)
@@ -591,10 +605,14 @@ fun! <sid>DeleteMatches(instn) abort "{{{1
 		for item in s:nrrw_rgn_lines[a:instn].matchid
 			if item > 0
 				" If the match has been deleted, discard the error
-				exe (s:debug ? "" : "silent!") "call matchdelete(item)"
+				try
+					call matchdelete(item)
+					call remove(s:nrrw_rgn_lines[a:instn].matchid, 0)
+				catch
+					" id not found ignore
+				endtry
 			endif
 		endfor
-		let s:nrrw_rgn_lines[a:instn].matchid=[]
 	endif
 endfun
 
