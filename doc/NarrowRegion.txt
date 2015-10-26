@@ -16,8 +16,9 @@ Copyright: (c) 2009-2015 by Christian Brabandt
         2.2   NrrwRgn Multi..............................: |NR-multi-example|
         2.3   NrrwRgn Configuration......................: |NrrwRgn-config|
         2.4   NrrwRgn public functions...................: |NrrwRgn-func|
-        3.  NrrwRgn Feedback.............................: |NrrwRgn-feedback|
-        4.  NrrwRgn History..............................: |NrrwRgn-history|
+        3.  NrrwRgn Tips.................................: |NrrwRgn-tips|
+        4.  NrrwRgn Feedback.............................: |NrrwRgn-feedback|
+        5.  NrrwRgn History..............................: |NrrwRgn-history|
 
 ==============================================================================
 2. NrrwRgn Manual                                       *NrrwRgn-manual*
@@ -441,7 +442,35 @@ nrrwrgn#NrrwRgnStatus()
                             
     If not executed in a narrowed window, returns an empty dict.
 =============================================================================
-3. NrrwRgn Feedback                                        *NrrwRgn-feedback*
+3. NrrwRgn Tips                                           *NrrwRgn-tips*
+
+To have the filetype in the narrowed window set, you can use this function: >
+
+     function! s:NR_ft_complete(...)
+      " this could clearly be smarter :-)
+      return "awk\n" .
+        \ "css\n" .
+        \ "csv\n" .
+        \ "html\n" .
+        \ "javascript\n" .
+        \ "ldif\n" .
+        \ "mail\n" .
+        \ "perl\n" .
+        \ "sh\n" .
+        \ "sql"
+    endfunction
+
+  command! -nargs=* -bang -range -complete=custom,<SID>NR_ft_complete NN
+              \ :<line1>,<line2> call nrrwrgn#NrrwRgn('',<q-bang>)
+              \ | set filetype=<args>
+<
+This lets you select a region, call :NN sql and the selected region will get
+the sql filetype set.
+
+(Contributed by @fourjay, thanks!)
+
+=============================================================================
+4. NrrwRgn Feedback                                        *NrrwRgn-feedback*
 
 Feedback is always welcome. If you like the plugin, please rate it at the
 vim-page:
@@ -458,7 +487,7 @@ address). And if you are really happy, vote for the plugin and consider
 looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 
 =============================================================================
-4. NrrwRgn History                                          *NrrwRgn-history*
+5. NrrwRgn History                                          *NrrwRgn-history*
 
 0.34: (unreleased) {{{1
 - merge Github Pull #34 (https://github.com/chrisbra/NrrwRgn/pull/34, by
