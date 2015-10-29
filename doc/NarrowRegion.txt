@@ -446,21 +446,7 @@ nrrwrgn#NrrwRgnStatus()
 
 To have the filetype in the narrowed window set, you can use this function: >
 
-     function! s:NR_ft_complete(...)
-      " this could clearly be smarter :-)
-      return "awk\n" .
-        \ "css\n" .
-        \ "csv\n" .
-        \ "html\n" .
-        \ "javascript\n" .
-        \ "ldif\n" .
-        \ "mail\n" .
-        \ "perl\n" .
-        \ "sh\n" .
-        \ "sql"
-    endfunction
-
-  command! -nargs=* -bang -range -complete=custom,<SID>NR_ft_complete NN
+  command! -nargs=* -bang -range -complete=filetype NN
               \ :<line1>,<line2> call nrrwrgn#NrrwRgn('',<q-bang>)
               \ | set filetype=<args>
 <
