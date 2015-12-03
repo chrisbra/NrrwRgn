@@ -145,6 +145,8 @@ or linewise select |V| a region. Then press <Leader>nr where <Leader> by
 default is set to '\', unless you have set it to something different (see
 |<Leader>| for information how to change this) and the selected range will
 open in a new scratch buffer. This key combination only works in |Visual-mode|
+If instead of <Leader>nr you use <Leader>Nr in visual mode, the selection will
+be opened in the current window, replacing the original buffer.
 
 (Alternatively, you can use the normal mode mapping <Leader>nr and the region
 over which you move will be opened in a new Narrowed window).
@@ -373,6 +375,18 @@ changes in the narrowed window (using a |CursorMoved| autocommand).
 Note: that this might slow down scrolling and cursor movement a bit.
 
 (default: 0)
+------------------------------------------------------------------------------
+
+By default, NarrowRegion plugin defines the two mappings <Leader>nr in visual
+mode and normal mode and <Leader>Nr only in visual mode. If you have your own
+mappings defined, than NarrowRegion will complain about the key already being
+defined. Chances are, this will be quite annoying to you, so you can disable
+mappings those keys by defining the following variables in your |.vimr| >
+
+  :let g:nrrw_rgn_nomap_nr = 1
+  :let g_nrrw_rgn_nomap_Nr = 1
+
+(default: 0)
 ----------------------------------------------------------------------------
                                                  *NrrwRgn-hook*  *NR-hooks*
 
@@ -500,6 +514,9 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 - remove highlighting after closing narrowed buffer
   (also issue https://github.com/chrisbra/NrrwRgn/issues/45,
   reported by Serabe, thanks!)
+- do not map <Leader>nr and <Leader>Nr if g:nrrw_rgn_nomap_<key> is set
+  (issue https://github.com/chrisbra/NrrwRgn/issues/52, reported by
+  digitalronin, thanks!)
 
 0.33: Jan 16, 2015 {{{1
 - set local options later, so that FileType autocommands don't trigger to

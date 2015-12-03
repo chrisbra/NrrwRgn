@@ -64,11 +64,11 @@ com! -bang NRM :call nrrwrgn#NrrwRgnDoMulti(<q-bang>)
 com! -bang NRL :call nrrwrgn#LastNrrwRgn(<q-bang>)
 
 " Define the Mapping: "{{{2
-if !hasmapto('<Plug>NrrwrgnDo')
+if !hasmapto('<Plug>NrrwrgnDo') && !get(g:, 'nrrw_rgn_nomap_nr', 0)
 	xmap <unique> <Leader>nr <Plug>NrrwrgnDo
 	nmap <unique> <Leader>nr <Plug>NrrwrgnDo
 endif
-if !hasmapto('<Plug>NrrwrgnBangDo')
+if !hasmapto('<Plug>NrrwrgnBangDo') && !get(g:, 'nrrw_rgn_nomap_Nr', 0)
 	xmap <unique> <Leader>Nr <Plug>NrrwrgnBangDo
 endif
 if !hasmapto('VisualNrrwRgn')
