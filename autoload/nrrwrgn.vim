@@ -1111,15 +1111,15 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  abort "{{{1
 
 	call <sid>CheckProtected()
 	if visual
-	let [ s:nrrw_rgn_lines[s:instn].start,
-		\ s:nrrw_rgn_lines[s:instn].end ] = <sid>RetVisRegionPos()
-	norm! gv"ay
-	if len(split(@a, "\n", 1)) !=
+		let [ s:nrrw_rgn_lines[s:instn].start,
+			\ s:nrrw_rgn_lines[s:instn].end ] = <sid>RetVisRegionPos()
+		norm! gv"ay
+		if len(split(@a, "\n", 1)) !=
 			\ (s:nrrw_rgn_lines[s:instn].end[1] -
 			\ s:nrrw_rgn_lines[s:instn].start[1] + 1)
 			" remove trailing "\n"
 			let @a=substitute(@a, '\n$', '', '')
-	endif
+		endif
 		let a = split(@a, "\n")
 	else
 		let first = a:firstline
