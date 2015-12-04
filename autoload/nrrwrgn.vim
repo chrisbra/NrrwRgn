@@ -448,7 +448,11 @@ fun! <sid>StoreLastNrrwRgn(instn) abort "{{{1
 endfu
 
 fun! <sid>RetVisRegionPos() abort "{{{1
-	return [ getpos("'<"), getpos("'>") ]
+	let a = getpos("'<")
+	let b = getpos("'>")
+	let a[2] = virtcol("'<")
+	let b[2] = virtcol("'>")
+	return [a, b]
 endfun
 
 fun! <sid>GeneratePattern(startl, endl, mode) abort "{{{1
@@ -459,11 +463,11 @@ fun! <sid>GeneratePattern(startl, endl, mode) abort "{{{1
 	"	   intermediate lines are shorter than block width)
 	if a:mode ==# '' && a:startl[0] > 0 && a:startl[1] > 0
 		return '\%>'. (a:startl[0]-1). 'l\&\%>'. (a:startl[1]-1).
-			\ 'c\&\%<'. (a:endl[0]+1). 'l\&\%<'. (a:endl[1]+1). 'c'
+			\ 'v\&\%<'. (a:endl[0]+1). 'l\&\%<'. (a:endl[1]+1). 'v'
 	elseif a:mode ==# 'v' && a:startl[0] > 0 && a:startl[1] > 0
 		" Easy way: match within a line
 		if a:startl[0] == a:endl[0]
-			return '\%'.a:startl[0]. 'l\%>'.(a:startl[1]-1).'c.*\%<'.(a:endl[1]+1).'c'
+			return '\%'.a:startl[0]. 'l\%>'.(a:startl[1]-1).'v.*\%<'.(a:endl[1]+1).'v'
 		else
 		" Need to generate concat 3 patterns:
 		"  1) from startline, startcolumn till end of line
@@ -472,9 +476,9 @@ fun! <sid>GeneratePattern(startl, endl, mode) abort "{{{1
 		"
 		" example: Start at line 1 col. 6 until line 3 column 12:
 		" \%(\%1l\%>6v.*\)\|\(\%>1l\%<3l.*\)\|\(\%3l.*\%<12v\)
-		return  '\%(\%'.  (a:startl[0]). 'l\%>'.   (a:startl[1]-1). 'c.*\)\|'.
+		return  '\%(\%'.  (a:startl[0]). 'l\%>'.   (a:startl[1]-1). 'v.*\)\|'.
 			\	'\%(\%>'. (a:startl[0]). 'l\%<'.   (a:endl[0]).     'l.*\)\|'.
-			\   '\%(\%'.  (a:endl[0]).   'l.*\%<'. (a:endl[1]+1).   'c\)'
+			\   '\%(\%'.  (a:endl[0]).   'l.*\%<'. (a:endl[1]+1).   'v\)'
 		endif
 	elseif a:startl[0] > 0
 		return '\%>'. (a:startl[0]-1). 'l\&\%<'. (a:endl[0]+1). 'l'
