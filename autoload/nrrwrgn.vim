@@ -15,6 +15,7 @@
 " Functions:
 
 let s:numeric_sort = v:version > 704 || v:version == 704 && has("patch341")
+let s:getcurpos    = exists('*getcurpos')
 let s:window_type = {"source": 0, "target": 1}
 
 fun! <sid>WarningMsg(msg) abort "{{{1
@@ -461,7 +462,12 @@ fun! <sid>GeneratePattern(startl, endl, mode) abort "{{{1
 	"	1) only highlight the block
 	"	2) highlighty from the beginnning until the end of lines (happens,
 	"	   intermediate lines are shorter than block width)
-	if a:mode ==# '' && a:startl[0] > 0 && a:startl[1] > 0
+	if exists("s:curswant") && s:curswant == 2147483647 &&
+			\ a:startl[0] > 0 && a:startl[1] > 0 && a:mode ==# ''
+		unlet! s:curswant
+		return '\%>'. (a:startl[0]-1). 'l\&\%>'. (a:startl[1]-1).
+			\ 'v\&\%<'. (a:endl[0]+1). 'l'
+	elseif a:mode ==# '' && a:startl[0] > 0 && a:startl[1] > 0
 		return '\%>'. (a:startl[0]-1). 'l\&\%>'. (a:startl[1]-1).
 			\ 'v\&\%<'. (a:endl[0]+1). 'l\&\%<'. (a:endl[1]+1). 'v'
 	elseif a:mode ==# 'v' && a:startl[0] > 0 && a:startl[1] > 0
@@ -1093,7 +1099,18 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  abort "{{{1
 	" This beeps, when called from command mode
 	" e.g. by using :NRV, so using :sil!
 	" else exiting visual mode
-		exe "sil! norm! \<ESC>"
+		if s:getcurpos && a:mode ==# ''
+			" This is an ugly hack, since there does not seem to be a
+			" possibility to find out, if we  are in block-wise '$' mode or
+			" not (try pressing '$' in block-wise mode)
+			if !hasmapto('let s:curswant', 'v')
+				xmap <expr> <Plug>NrrwrgnGetCurswant ":\<c-u>let s:curswant=".getcurpos()[4]."\n"
+			endif
+			" Reselect visual mode
+			exe ":norm gv\<Plug>NrrwrgnGetCurswant"
+		else
+			exe "sil! norm! \<ESC>"
+		endif
 	endif
 	let bang = (a:0 > 0 && !empty(a:1))
 	let o_lz = &lz
