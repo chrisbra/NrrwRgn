@@ -384,7 +384,7 @@ defined. Chances are, this will be quite annoying to you, so you can disable
 mappings those keys by defining the following variables in your |.vimr| >
 
   :let g:nrrw_rgn_nomap_nr = 1
-  :let g_nrrw_rgn_nomap_Nr = 1
+  :let g:nrrw_rgn_nomap_Nr = 1
 
 (default: 0)
 ----------------------------------------------------------------------------
