@@ -49,7 +49,7 @@ endfu
 
 " Define the Command aliases "{{{2
 com! -range -bang NRPrepare :<line1>,<line2>NRP<bang>
-com! -range NarrowRegion :<line1>,<line2>NR
+com! -bang -range NarrowRegion :<line1>,<line2>NR
 com! -bang NRMulti :NRM<bang>
 com! -bang NarrowWindow :NW
 com! -bang NRLast :NRL
