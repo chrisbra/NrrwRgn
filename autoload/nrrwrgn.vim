@@ -800,11 +800,11 @@ fun! <sid>NrrwSettings(on) abort "{{{1
 		setl noswapfile buftype=acwrite foldcolumn=0
 		setl nobuflisted
 		let instn = matchstr(bufname(''), '_\zs\d\+$')+0
-		if has_key(s:nrrw_rgn_lines, 'instn')
+		if has_key(s:nrrw_rgn_lines, s:instn)
 			if  !&hidden && !has_key(s:nrrw_rgn_lines[instn], "single")
 				setl bufhidden=wipe
 			else
-				setl bufhidden=hide
+				setl bufhidden=delete
 			endif
 		endif
 	else
