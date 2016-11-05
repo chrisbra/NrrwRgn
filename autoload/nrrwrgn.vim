@@ -1026,7 +1026,6 @@ fun! nrrwrgn#NrrwRgnDoMulti(...) abort "{{{1
 		return
 	endif
 	let o_lz = &lz
-	let s:o_s  = @/
 	set lz
 	let orig_buf=bufnr('')
 
@@ -1114,7 +1113,6 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  abort "{{{1
 	endif
 	let bang = (a:0 > 0 && !empty(a:1))
 	let o_lz = &lz
-	let s:o_s  = @/
 	set lz
 	call <sid>Init()
 	if visual
@@ -1385,7 +1383,6 @@ fun! nrrwrgn#WidenRegion(force)  abort "{{{1
 		"  become invalid, if CleanUp is executed)
 "	endif
 	call <sid>SaveRestoreRegister(_opts)
-	let  @/=s:o_s
 	" Execute "written" autocommands in the original buffer
 	if exists("b:nrrw_aucmd_written")
 		exe b:nrrw_aucmd_written
