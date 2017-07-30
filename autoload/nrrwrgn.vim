@@ -822,10 +822,9 @@ fun! <sid>SetupBufLocalMaps(bang) abort "{{{1
 	if !hasmapto('<Plug>NrrwrgnWinIncr', 'n')
 		nmap <buffer> <Leader><Space> <Plug>NrrwrgnWinIncr
 	endif
-	if !hasmapto('NrrwRgnIncr')
-		nmap <buffer><unique> <Plug>NrrwrgnWinIncr NrrwRgnIncr
+	if !hasmapto('<sid>ToggleWindowSize')
+		nnoremap <buffer><unique><script><silent><expr> <Plug>NrrwrgnWinIncr <sid>ToggleWindowSize()
 	endif
-	nnoremap <buffer><silent><script><expr> NrrwRgnIncr <sid>ToggleWindowSize()
 	if a:bang && winnr('$') == 1
 		" Map away :q and :q! in single window mode, so that :q won't
 		" accidently quit vim.
