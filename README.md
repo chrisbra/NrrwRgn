@@ -26,6 +26,9 @@ Here is a short overview of the functionality provided by the plugin:
     :NRS	 - Enable Syncing the buffer content back (default on)
     :NRN	 - Disable Syncing the buffer content back
     :NRL	 - Reselect the last selected region and open it again in a narrowed window
+
+You can append `!` to most commands to open the narrowed part in the current window instead of a new window.
+
 #### Visual mode commands:
     <Leader>nr		 - Open the current visual selection in a new narrowed window
 #### Scripting Functions:
