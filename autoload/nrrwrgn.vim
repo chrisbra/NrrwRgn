@@ -803,8 +803,6 @@ fun! <sid>NrrwSettings(on) abort "{{{1
 		if has_key(s:nrrw_rgn_lines, s:instn)
 			if  !&hidden && !has_key(s:nrrw_rgn_lines[instn], "single")
 				setl bufhidden=wipe
-			else
-				setl bufhidden=delete
 			endif
 		endif
 	else
