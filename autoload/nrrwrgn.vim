@@ -1144,7 +1144,7 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  abort "{{{1
 	call <sid>DeleteMatches(s:instn)
 	let local_options = <sid>GetOptions(s:opts)
 	let win=<sid>NrrwRgnWin(bang)
-	if bang
+	if bang && winnr('$') == 1
 		let s:nrrw_rgn_lines[s:instn].single = 1
 	else
 		" Set the highlighting
@@ -1387,6 +1387,9 @@ fun! nrrwrgn#WidenRegion(force)  abort "{{{1
 	call winrestview(wsv)
 	"if !close && has_key(s:nrrw_rgn_lines[instn], 'single')
 	if has_key(s:nrrw_rgn_lines[instn], 'single')
+		if &modified
+			noa w
+		endif
 		" move back to narrowed buffer
 		noa b #
 	"elseif close
