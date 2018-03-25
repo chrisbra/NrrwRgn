@@ -53,7 +53,9 @@ This plugin defines the following commands:
                             Whenever you are finished modifying that region
                             simply write the buffer.
                             If ! is given, open the narrowed buffer not in a
-                            split buffer but in the current window.
+                            split buffer but in the current window. However
+                            when 'hidden' is not set, will open a new split
+                            window. 
 
                                                         *:NarrowWindow* *:NW*
 :NW[!]
