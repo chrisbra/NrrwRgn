@@ -15,7 +15,7 @@ Use the plugin manager of your choice. Or download the [stable][] version of the
 
 ## Usage
 
-Once installed, take a look at the help at `:h NrrwRgn`
+Once installed, take a look at the help at `:h NarrowRegion`.
 
 Here is a short overview of the functionality provided by the plugin:
 
