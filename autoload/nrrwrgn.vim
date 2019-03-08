@@ -1414,6 +1414,10 @@ fun! nrrwrgn#UnifiedDiff() abort "{{{1
 	" close previous opened Narrowed buffers
 	silent! windo | if bufname('')=~'^NrrwRgn' &&
 			\ &diff |diffoff|q!|endif
+    " move back to original window (windo changes it)
+	if winnr() != orig_win
+		exe "noa" orig_win "wincmd w"
+	endif
 	" minimize Window
 	" this is disabled, because this might be useful, to see everything
 	"exe "vert resize -999999"
