@@ -86,9 +86,9 @@ This plugin defines the following commands:
 :NUD                        When viewing unified diffs, this command opens
                             the current chunk in 2 Narrowed Windows in
                             |diff-mode| The current chunk is determined as the
-                            one, that the cursor is at. This command does not
-                            make sense if editing a different file format (or
-                            even different diff format)
+                            one, that the cursor is at.
+                            For filetypes other than diffs, it will try to
+                            create a diff mode for a merge conflict.
 
                                                                   *:NRPrepare*
 :[range]NRPrepare[!]
@@ -522,6 +522,8 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
 - correctly highlight in block-wise visual mode, if '$' has been pressed.
 - do not set bufhidden=delete for single narrowed windows
   https://github.com/chrisbra/NrrwRgn/issues/62
+- Make :NUD able to handle git like merge conflicts
+  https://github.com/chrisbra/NrrwRgn/issues/68
 
 0.33: Jan 16, 2015 {{{1
 - set local options later, so that FileType autocommands don't trigger to

@@ -1409,6 +1409,10 @@ fun! nrrwrgn#WidenRegion(force)  abort "{{{1
 endfun
 
 fun! nrrwrgn#UnifiedDiff() abort "{{{1
+	" if the filetype is not of type diff, assume to create a diff for merge
+	" conflicts
+	let merge = &ft=~'diff' ? 0 : 1
+	let pat = merge ? ['^<\{7\}', '^=\{7\}', '^>\{7\}' ] : ['^@@','^@@']
 	let save_winposview=winsaveview()
 	let orig_win = winnr()
 	" close previous opened Narrowed buffers
@@ -1423,29 +1427,39 @@ fun! nrrwrgn#UnifiedDiff() abort "{{{1
 	"exe "vert resize -999999"
 	"setl winfixwidth
 	" move to current start of chunk of unified diff
-	if search('^@@', 'bcW') > 0
-		call search('^@@', 'bc')
+	if search(pat[0], 'bcW') > 0
+		call search(pat[0], 'bc')
 	else
-		call search('^@@', 'c')
+		call search(pat[0], 'c')
 	endif
 	let curpos=getpos('.')
 	for i in range(2)
-		if search('^@@', 'nW') > 0
-			.+,/@@/-NR
+		if merge
+			if i == 1
+				" move to start of other change below '=====' line
+				call search(pat[1], 'W')
+			endif
+			exe ".+,/".pat[i+1]."/-NR"
 		else
-			" Last chunk in file
-			.+,$NR
+			if search(pat[0], 'nW') > 0
+				exe ".+,/".pat[0]."/-NR"
+			else
+				" Last chunk in file
+				.+,$NR
+			endif
 		endif
 		" Split vertically
 		noa wincmd H
-		if i==0
-			silent! g/^-/d _
-		else
-			silent! g/^+/d _
+		if !merge
+			if i==0
+				silent! g/^-/d _
+			else
+				silent! g/^+/d _
+			endif
 		endif
 		diffthis
 		0
-		exe ":noa wincmd p"
+		noa wincmd p
 		call setpos('.', curpos)
 	endfor
 	call winrestview(save_winposview)
