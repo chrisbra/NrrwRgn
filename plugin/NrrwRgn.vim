@@ -58,6 +58,7 @@ com! -bang NRLast :NRL
 com! -range -bang NR	 :<line1>, <line2>call nrrwrgn#NrrwRgn('',<q-bang>)
 com! -range -bang NRP    :<line1>, <line2>call nrrwrgn#Prepare(<q-bang>)
 com! -bang -range NRV :call nrrwrgn#NrrwRgn(visualmode(), <q-bang>)
+com! -range NRUnprepare    :<line1>, <line2>call nrrwrgn#Unprepare()
 com! NUD :call nrrwrgn#UnifiedDiff()
 com! -bang NW	 :exe ":" . line('w0') . ',' . line('w$') . "call nrrwrgn#NrrwRgn(0,<q-bang>)"
 com! -bang NRM :call nrrwrgn#NrrwRgnDoMulti(<q-bang>)

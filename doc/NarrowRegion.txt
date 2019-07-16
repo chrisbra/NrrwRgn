@@ -97,6 +97,14 @@ This plugin defines the following commands:
                             using |:NRM|.
                             If the ! is used, all earlier selected lines will
                             be cleared first.
+                            Use |:NRUnprepare| to remove a line again.
+
+                                                                  *:NRUnprepare*
+:[range]NRUnprepare[!]
+                            This command will remove the current line and
+                            remove it from the lines marked for use with |:NRM|.
+                            If the current line was not previously selected
+                            for a multi narrowed window, it is ignored.
 
                                                                   *:NRMulti*
 :NRMulti
@@ -526,6 +534,8 @@ looking at my Amazon whishlist: http://www.amazon.de/wishlist/2BKAHE8J7Z6UW
   https://github.com/chrisbra/NrrwRgn/issues/68
 - Correctly jump to the original window when closing
   https://github.com/chrisbra/NrrwRgn/issues/70
+- Allow to Unremove lines from |:NRP| command
+  https://github.com/chrisbra/NrrwRgn/issues/72
 
 0.33: Jan 16, 2015 {{{1
 - set local options later, so that FileType autocommands don't trigger to

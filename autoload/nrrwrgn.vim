@@ -1216,6 +1216,19 @@ fun! nrrwrgn#Prepare(bang) abort "{{{1
 	call add(s:nrrw_rgn_line[bufnr('%')], line('.'))
 endfun
 
+fun! nrrwrgn#Unprepare() abort "{{{1
+	if !exists("s:nrrw_rgn_line")
+		let s:nrrw_rgn_line={}
+	endif
+	if !has_key(s:nrrw_rgn_line, bufnr('%'))
+		let s:nrrw_rgn_line[bufnr('%')] = []
+	endif
+	let indx = index(s:nrrw_rgn_line[bufnr('%')], line('.'))
+	if indx > -1
+		call remove(s:nrrw_rgn_line[bufnr('%')], indx)
+	endif
+endfun
+
 fun! nrrwrgn#WidenRegion(force)  abort "{{{1
 	" a:force: original narrowed window is going to be closed
 	" so, clean up, don't renew highlighting, etc.
