@@ -21,18 +21,18 @@ Here is a short overview of the functionality provided by the plugin:
 
 ### Ex commands:
 
-    :NR           - Open the selected region in a new narrowed window
-    :NW           - Open the current visual window in a new narrowed window
-    :WidenRegion  - (In the narrowed window) write the changes back to the original buffer.
-    :NRV          - Open the narrowed window for the region that was last visually selected.
-    :NUD          - (In a unified diff) open the selected diff in 2 Narrowed windows
-    :NRP          - Mark a region for a Multi narrowed window
-    :NRM          - Create a new Multi narrowed window (after :NRP) - experimental!
-    :NRS          - Enable Syncing the buffer content back (default on)
-    :NRN          - Disable Syncing the buffer content back
-    :NRL          - Reselect the last selected region and open it again in a narrowed window
+    :NR  - Open the selected region in a new narrowed window
+    :NW  - Open the current visual window in a new narrowed window
+    :WR  - (In the narrowed window) write the changes back to the original buffer.
+    :NRV - Open the narrowed window for the region that was last visually selected.
+    :NUD - (In a unified diff) open the selected diff in 2 Narrowed windows
+    :NRP - Mark a region for a Multi narrowed window
+    :NRM - Create a new Multi narrowed window (after :NRP) - experimental!
+    :NRS - Enable Syncing the buffer content back (default on)
+    :NRN - Disable Syncing the buffer content back
+    :NRL - Reselect the last selected region and open it again in a narrowed window
 
-You can append `!` to most commands to open the narrowed part in the current window instead of a new window.
+You can append `!` to most commands to open the narrowed part in the current window instead of a new window. In the case of `:WR`, appending `!` closes the narrowed window in addition to writing to the original buffer.
 
 ### Visual mode commands:
 

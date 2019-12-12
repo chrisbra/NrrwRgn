@@ -67,7 +67,8 @@ This plugin defines the following commands:
                             split buffer but in the current window (works best
                             with 'hidden' set).
 
-                                                                *:WidenRegion*
+                                                         *:WidenRegion* *:WR*
+:WR[!]
 :WidenRegion[!]             This command is only available in the narrowed
                             scratch window. If the buffer has been modified,
                             the contents will be put back on the original
