@@ -217,7 +217,7 @@ When you are finished, simply write your changes back.
 
 NarrowRegion can be customized by setting some global variables. If you'd
 like to open the narrowed window as a vertical split buffer, simply set the
-variable g:nrrw_rgn_vert to 1 in your |.vimrc| >
+variable *g:nrrw_rgn_vert* to 1 in your |.vimrc| >
 
     let g:nrrw_rgn_vert = 1
 <
@@ -225,7 +225,7 @@ variable g:nrrw_rgn_vert to 1 in your |.vimrc| >
 ------------------------------------------------------------------------------
 
 If you'd like to specify a certain width/height for you scratch buffer, then
-set the variable g:nrrw_rgn_wdth in your |.vimrc| . This variable defines the
+set the variable *g:nrrw_rgn_wdth* in your |.vimrc| . This variable defines the
 height or the nr of columns, if you have also set g:nrrw_rgn_vert. >
 
     let g:nrrw_rgn_wdth = 30
@@ -240,7 +240,7 @@ for single narrowed windows, e.g. when the '!' attribute was used).
 ------------------------------------------------------------------------------
 
 Resizing the narrowed window can happen either by some absolute values or by a
-relative percentage. The variable g:nrrw_rgn_resize_window determines what
+relative percentage. The variable *g:nrrw_rgn_resize_window* determines what
 kind of resize will occur. If it is set to "absolute", the resizing will be
 done by absolute lines or columns (depending on whether a horizontal or
 vertical split has been done). If it is set to "relative" the window will be
@@ -264,7 +264,7 @@ be increased. This is allows to easily toggle between the normal narrowed
 window size and an even increased size (think of zooming). 
 
 You can either specify a relative or absolute zooming value. An absolute
-resize will happen, if the variable g:nrrw_rgn_resize_window is set to
+resize will happen, if the variable *g:nrrw_rgn_resize_window* is set to
 "absolute" or it is unset (see above).
 
 If absolute resizing should happen you have to either specify columns, if the
@@ -284,7 +284,7 @@ happen
 ------------------------------------------------------------------------------
 
 If you'd like to change the key combination that toggles incrementing the
-Narrowed Window size, you can put this in your |.vimrc| >
+Narrowed Window size, map *<Plug>NrrwrgnWinIncr* by putting this in your |.vimrc| >
 
    nmap <F3> <Plug>NrrwrgnWinIncr
 <
@@ -294,8 +294,8 @@ This will let you use the <F3> key to toggle the window size of the Narrowed
 Window. Note: This mapping is only in the narrowed window active.
 
 The amount of how much to increase can be further refined by setting the
-g:nrrw_rgn_incr for an absolute increase of by setting the variables
-g:nrrw_rgn_rel_min and g:nrrw_rgn_rel_max
+*g:nrrw_rgn_incr* for an absolute increase of by setting the variables
+*g:nrrw_rgn_rel_min* and *g:nrrw_rgn_rel_max*
 
 Whether an absolute or relative increase will be performed, is determined by
 the g:nrrw_rgn_resize_window variable (see above).
@@ -305,14 +305,14 @@ By default, NarrowRegion highlights the region that has been selected
 using the WildMenu highlighting (see |hl-WildMenu|). If you'd like to use a
 different highlighting, set the variable g:nrrw_rgn_hl to your preferred
 highlighting Group. For example to have the region highlighted like a search
-result, you could put that in your |.vimrc| >
+result, you could set *g:nrrw_rgn_hl* in your |.vimrc| >
 
     let g:nrrw_rgn_hl = 'Search'
 <
 (default: WildMenu)
 
 If you want to turn off the highlighting (because this can be distracting), you
-can set the global variable g:nrrw_rgn_nohl to 1 in your |.vimrc| >
+can set the global variable *g:nrrw_rgn_nohl* to 1 in your |.vimrc| >
 
     let g:nrrw_rgn_nohl = 1
 <
@@ -320,7 +320,7 @@ can set the global variable g:nrrw_rgn_nohl to 1 in your |.vimrc| >
 ------------------------------------------------------------------------------
 
 If you'd like to change the key combination that starts the Narrowed Window
-for your selected range, you could put this in your |.vimrc| >
+for your selected range, you could map *<Plug>NrrwrgnDo* in your |.vimrc| >
 
    xmap <F3> <Plug>NrrwrgnDo
 <
@@ -332,7 +332,7 @@ mode, unless you want it to Narrow your last visually selected range.
 ------------------------------------------------------------------------------
 
 If you'd like to specify the options that you want to have set for the
-narrowed window, you can set the g:nrrw_custom_options setting, in your
+narrowed window, you can set the *g:nrrw_custom_options* setting, in your
 |.vimrc| e.g. >
 
    let g:nrrw_custom_options={}
@@ -344,7 +344,7 @@ care that all options you need will apply.
 ------------------------------------------------------------------------------
 
 If you don't like that your narrowed window opens above the current window,
-define the g:nrrw_topbot_leftright variable to your taste, e.g. >
+define the *g:nrrw_topbot_leftright* variable to your taste, e.g. >
 
   let g:nrrw_topbot_leftright = 'botright'
 <
@@ -356,7 +356,7 @@ specified, the narrowed window will appear above/left of the original window.
 
 If you want to use several independent narrowed regions of the same buffer
 that you want to write at the same time, protecting the original buffer is not
-really useful. Therefore, set the g:nrrw_rgn_protect variable, e.g. in your
+really useful. Therefore, set the *g:nrrw_rgn_protect* variable, e.g. in your
 |.vimrc| >
 
    let g:nrrw_rgn_protect = 'n'
@@ -377,7 +377,7 @@ might fail silently. Therefore, this feature is experimental!
 
 If you are using the |:NRMulti| command and want to have the original window
 update to the position of where the cursor is in the narrowed window, you can
-set the variable g:nrrw_rgn_update_orig_win, e.g. in your |.vimrc| >
+set the variable *g:nrrw_rgn_update_orig_win,* e.g. in your |.vimrc| >
 
    let g:nrrw_rgn_update_orig_win = 1
 <
@@ -392,7 +392,8 @@ By default, NarrowRegion plugin defines the two mappings <Leader>nr in visual
 mode and normal mode and <Leader>Nr only in visual mode. If you have your own
 mappings defined, than NarrowRegion will complain about the key already being
 defined. Chances are, this will be quite annoying to you, so you can disable
-mappings those keys by defining the following variables in your |.vimr| >
+mappings those keys by defining the variables *g:nrrw_rgn_nomap_nr* and
+*g:nrrw_rgn_nomap_Nr* in your |.vimr| >
 
   :let g:nrrw_rgn_nomap_nr = 1
   :let g:nrrw_rgn_nomap_Nr = 1
@@ -415,10 +416,11 @@ narrowed window.
 Therefore you want the command |:ArrangeColumn| to be executed in the new
 narrowed window upon entering it, and when writing the changes back, you want
 the command |:UnArrangeColumn| to be executed just before putting the
-changes back. So you set those two variables in your original buffer: >
+changes back. So you set the two variables *b:nrrw_aucmd_create* and
+*b:nrrw_aucmd_close* in your original buffer: >
 
-    let b:nrrw_aucmd_create = "set ft=csv|%ArrangeCol"
-    let b:nrrw_aucmd_close  = "%UnArrangeColumn"
+    let *b:nrrw_aucmd_create* = "set ft=csv|%ArrangeCol"
+    let *b:nrrw_aucmd_close*  = "%UnArrangeColumn"
 <
 This will execute the commands in the narrowed window: >
 
@@ -433,7 +435,7 @@ Note: These hooks are executed in the narrowed window (i.e. after creating the
 narrowed window and its content and before writing the changes back to the
 original buffer).
 
-A third hook 'b:nrrw_aucmd_written' is provided, when the data is written back
+A third hook *b:nrrw_aucmd_written* is provided, when the data is written back
 in the original window. This allows to execute scripts, whenever the data is
 written back in the original window. For example, consider you want to write
 the original buffer whenever the narrowed window is written back to the
