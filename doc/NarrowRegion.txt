@@ -419,8 +419,8 @@ the command |:UnArrangeColumn| to be executed just before putting the
 changes back. So you set the two variables *b:nrrw_aucmd_create* and
 *b:nrrw_aucmd_close* in your original buffer: >
 
-    let *b:nrrw_aucmd_create* = "set ft=csv|%ArrangeCol"
-    let *b:nrrw_aucmd_close*  = "%UnArrangeColumn"
+    let b:nrrw_aucmd_create = "set ft=csv|%ArrangeCol"
+    let b:nrrw_aucmd_close  = "%UnArrangeColumn"
 <
 This will execute the commands in the narrowed window: >
 
