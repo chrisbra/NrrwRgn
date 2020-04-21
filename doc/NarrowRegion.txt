@@ -264,7 +264,7 @@ be increased. This is allows to easily toggle between the normal narrowed
 window size and an even increased size (think of zooming). 
 
 You can either specify a relative or absolute zooming value. An absolute
-resize will happen, if the variable *g:nrrw_rgn_resize_window* is set to
+resize will happen, if the variable |g:nrrw_rgn_resize_window| is set to
 "absolute" or it is unset (see above).
 
 If absolute resizing should happen you have to either specify columns, if the
@@ -276,7 +276,7 @@ Example, to increase the narrowed window by 30 lines or columns if
 
     let g:nrrw_rgn_incr = 30
 <
-(default: 10, if g:nrrw_rgn_resize_window is "absolute")
+(default: 10, if |g:nrrw_rgn_resize_window| is "absolute")
 
 Note: When using the '!' attribute for narrowing (e.g. the selection will be
 opened in a new window that takes the complete screen size), no resizeing will
@@ -298,7 +298,7 @@ The amount of how much to increase can be further refined by setting the
 *g:nrrw_rgn_rel_min* and *g:nrrw_rgn_rel_max*
 
 Whether an absolute or relative increase will be performed, is determined by
-the g:nrrw_rgn_resize_window variable (see above).
+the |g:nrrw_rgn_resize_window| variable (see above).
 ------------------------------------------------------------------------------
 
 By default, NarrowRegion highlights the region that has been selected
