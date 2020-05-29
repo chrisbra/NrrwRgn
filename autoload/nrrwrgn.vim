@@ -831,7 +831,7 @@ endfun
 
 fun! <sid>SetupBufLocalCommands() abort "{{{1
 	com! -buffer -bang WidenRegion :call nrrwrgn#WidenRegion(<bang>0)
-	com! -buffer -bang WR :WidenRegion<bang><cr>
+	com! -buffer -bang WR :WidenRegion<bang>
 	com! -buffer NRSyncOnWrite  :call nrrwrgn#ToggleSyncWrite(1)
 	com! -buffer NRNoSyncOnWrite :call nrrwrgn#ToggleSyncWrite(0)
 endfun
