@@ -765,6 +765,10 @@ fun! <sid>BufInTab(bufnr) abort "{{{1
 		" no tabpages present
 		return 1
 	endif
+	" Do not leave tab if buffer exists there
+	if !empty(filter(tabpagebuflist(), 'v:val == a:bufnr'))
+		return tabpagenr()
+	endif
 	for tab in range(1,tabpagenr('$'))
 		if !empty(filter(tabpagebuflist(tab), 'v:val == a:bufnr'))
 			return tab
