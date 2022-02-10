@@ -77,6 +77,9 @@ fun! <sid>SetupHooks() abort "{{{1
 	if exists("b:nrrw_aucmd_create")
 		let s:nrrw_aucmd["create"] = b:nrrw_aucmd_create
 	endif
+	if exists("b:nrrw_aucmd_writepost")
+		let s:nrrw_aucmd["writepost"] = b:nrrw_aucmd_writepost
+	endif
 	if exists("b:nrrw_aucmd_close")
 		let s:nrrw_aucmd["close"] = b:nrrw_aucmd_close
 	endif
@@ -243,6 +246,10 @@ fun! <sid>WriteNrrwRgn(...) abort "{{{1
 		endif
 		" prevent E315
 		call winrestview(_wsv)
+		" Execute "writepost" autocommands in narrowed buffer
+		if exists("b:nrrw_aucmd_writepost")
+		        exe b:nrrw_aucmd_writepost
+		endif
 	else
 		call <sid>StoreLastNrrwRgn(nrrw_instn)
 		" b:orig_buf might not exists (see issue #2)
@@ -1199,6 +1206,9 @@ fun! nrrwrgn#NrrwRgn(mode, ...) range  abort "{{{1
 	call <sid>SetOptions(local_options)
 	if has_key(s:nrrw_aucmd, "create")
 		exe s:nrrw_aucmd["create"]
+	endif
+	if has_key(s:nrrw_aucmd, "writepost")
+		let b:nrrw_aucmd_writepost = s:nrrw_aucmd["writepost"]
 	endif
 	if has_key(s:nrrw_aucmd, "close")
 		let b:nrrw_aucmd_close = s:nrrw_aucmd["close"]
