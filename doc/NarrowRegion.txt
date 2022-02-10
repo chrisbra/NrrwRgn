@@ -435,16 +435,20 @@ Note: These hooks are executed in the narrowed window (i.e. after creating the
 narrowed window and its content and before writing the changes back to the
 original buffer).
 
-A third hook *b:nrrw_aucmd_written* is provided, when the data is written back
-in the original window. This allows to execute scripts, whenever the data is
-written back in the original window. For example, consider you want to write
-the original buffer whenever the narrowed window is written back to the
-original window. You can therefore set: >
+Additional hooks *b:nrrw_aucmd_writepost* and *b:nrrw_aucmd_written* are
+provided, when the data is written back in the original window: the first one
+is executed in the narrowed window, while the second one in the original one
+(the one where the narrowed region was created from).  For example, consider
+you want the execute the command |:make| in the narrowed window, and also write
+the original buffer, whenever the narrowed window is written back to the
+original window. You therefore set: >
     
+    :let b:nrrw_aucmd_writepost = ':make'
     :let b:nrrw_aucmd_written = ':update'
 <
-This will write the original buffer, whenever it was modified after writing
-the changes from the narrowed window back.
+This will run |:make| in the narrowed window and also |:update| the original
+buffer, whenever it was modified after writing the changes from the narrowed
+window back.
 
 2.4 NrrwRgn functions                                    *NrrwRgn-func*
 ---------------------
