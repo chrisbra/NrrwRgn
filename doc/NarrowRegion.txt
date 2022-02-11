@@ -132,8 +132,7 @@ This plugin defines the following commands:
 :NRN                        Disable synching the buffer content back to the
                             original buffer when writing. When set, the
                             narrowed buffer behaves like an ordinary buffer
-                            that you can write in the filesystem.
-                            (this is the default).
+                            that you can write in the filesystem.               
                             Note: You can still use |:WidenRegion| to write
                             the changes back to the original buffer.
 
